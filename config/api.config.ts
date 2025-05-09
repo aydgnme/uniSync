@@ -8,6 +8,8 @@ export const API_CONFIG = {
       REFRESH_TOKEN: '/auth/refresh-token',
       FORGOT_PASSWORD: '/auth/forgot-password',
       RESET_PASSWORD: '/auth/reset-password',
+      GENERATE_RESET_CODE: '/auth/generate-reset-code',
+      VERIFY_RESET_CODE: '/auth/verify-reset-code',
     },
     USER: {
       PROFILE: '/users',

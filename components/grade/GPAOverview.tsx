@@ -18,7 +18,7 @@ const GPAOverview: React.FC<GPAOverviewProps> = ({ gradesData }) => {
 
         gradesData.forEach((semester) => {
             semester.courses.forEach((course) => {
-                if (course.status === "Passed") {
+                if (course.status === "Promovat") {
                     totalCredits += course.credits;
                     weightedSum += course.credits * course.totalGrade;
                 }

@@ -6,7 +6,7 @@ export interface Course {
   midtermGrade: number;
   finalGrade: number;
   totalGrade: number;
-  status: "Passed" | "Failed";
+  status: "Promovat" | "Nepromovat";
 }
 
 export interface Semester {

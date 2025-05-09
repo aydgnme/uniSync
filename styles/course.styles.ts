@@ -15,6 +15,7 @@ export const styles = StyleSheet.create({
     },
     header: {
         padding: 20,
+        paddingBottom: 0,
         paddingTop: 40,
         backgroundColor: '#FFF',
         borderBottomWidth: 1,
@@ -29,6 +30,7 @@ export const styles = StyleSheet.create({
         marginBottom: 4,
     },
     headerTitle: {
+        marginTop: 20,
         fontSize: 32,
         fontWeight: '700',
         color: '#202124',
@@ -119,7 +121,7 @@ export const styles = StyleSheet.create({
     },
     listContainer: {
         padding: 16,
-        paddingTop: 0,
+        paddingTop: 10,
     },
     studentId: {
         fontSize: 18,

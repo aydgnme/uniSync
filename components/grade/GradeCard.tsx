@@ -15,10 +15,9 @@ interface GradeCardProps {
 
 const GradeCard: React.FC<GradeCardProps> = ({ course }) => {
     const getGradeColor = (grade: number) => {
-        if (grade >= 9) return '#4CAF50'; // Excellent
-        if (grade >= 7) return '#FFC107'; // Good
-        if (grade >= 5) return '#FF9800'; // Satisfactory
-        return '#F44336'; // Fail
+        if (grade >= 8) return '#4CAF50'; // Good (Green)
+        if (grade >= 5) return '#FF9800'; // Medium (Orange)
+        return '#F44336'; // Failed (Red)
     };
 
     const handlePress = () => {

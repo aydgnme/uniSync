@@ -70,6 +70,11 @@ export interface UpdateUserRequest {
   };
 }
 
+interface VerifyResetCodeResponse {
+  isValid: boolean;
+  message: string;
+}
+
 class AuthService {
   private static instance: AuthService;
   private readonly BASE_PATH = '/auth';
@@ -123,19 +128,30 @@ class AuthService {
 
   public async generateResetCode(cnp: string, matriculationNumber: string): Promise<void> {
     try {
-      await apiService.post(`${this.BASE_PATH}/pr/generate-reset-code`, {
+      console.log('Calling generate reset code API:', {
+        endpoint: API_CONFIG.ENDPOINTS.AUTH.GENERATE_RESET_CODE,
+        data: { cnp, matriculationNumber }
+      });
+
+      await apiService.post(API_CONFIG.ENDPOINTS.AUTH.GENERATE_RESET_CODE, {
         cnp,
         matriculationNumber,
       });
-    } catch (error) {
-      console.error('Generate reset code error:', error);
+
+      console.log('Generate reset code API call successful');
+    } catch (error: any) {
+      console.error('Generate reset code error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        error
+      });
       throw error;
     }
   }
 
   public async resetPassword(data: ResetPasswordRequest): Promise<void> {
     try {
-      await apiService.post(`${this.BASE_PATH}/pr/reset-password`, data);
+      await apiService.post(API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD, data);
     } catch (error) {
       console.error('Reset password error:', error);
       throw error;
@@ -167,6 +183,31 @@ class AuthService {
       return response;
     } catch (error) {
       console.error('Get user profile error:', error);
+      throw error;
+    }
+  }
+
+  public async verifyResetCode(cnp: string, matriculationNumber: string, code: string): Promise<VerifyResetCodeResponse> {
+    try {
+      console.log('Calling verify reset code API:', {
+        endpoint: API_CONFIG.ENDPOINTS.AUTH.VERIFY_RESET_CODE,
+        data: { cnp, matriculationNumber, code }
+      });
+
+      const response = await apiService.post<VerifyResetCodeResponse>(API_CONFIG.ENDPOINTS.AUTH.VERIFY_RESET_CODE, {
+        cnp,
+        matriculationNumber,
+        code,
+      });
+
+      console.log('Verify reset code API response:', response);
+      return response;
+    } catch (error: any) {
+      console.error('Verify reset code error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        error
+      });
       throw error;
     }
   }

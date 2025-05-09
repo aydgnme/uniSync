@@ -5,26 +5,26 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 const mockMessages = [
   {
     id: '1',
-    sender: 'Dr. Ahmet Yılmaz',
-    subject: 'CS101 - Ödev Teslim Tarihi',
-    message: 'Merhaba, CS101 dersi için ödev teslim tarihi 20 Mart 2024 olarak güncellenmiştir.',
+    sender: 'Lecturer PhD Eng. Ionela Rusu',
+    subject: 'CS101 - Assignment Deadline',
+    message: 'Hello, the assignment deadline for CS101 course has been updated to March 20, 2024.',
     time: '10:30',
     unread: true,
   },
   {
     id: '2',
-    sender: 'Öğrenci İşleri',
-    subject: 'Ders Kayıt Onayı',
-    message: 'Bahar dönemi ders kayıtlarınız danışmanınız tarafından onaylanmıştır.',
-    time: 'Dün',
+    sender: 'Student Affairs',
+    subject: 'Course Registration Approval',
+    message: 'Your spring semester course registrations have been approved by your advisor.',
+    time: 'Yesterday',
     unread: true,
   },
   {
     id: '3',
-    sender: 'Dr. Ayşe Demir',
-    subject: 'MATH101 - Sınav Yeri Değişikliği',
-    message: 'MATH101 dersi vize sınavı B-203 nolu sınıfta yapılacaktır.',
-    time: '2 gün önce',
+    sender: 'Phd. Satco Bianca-Renata',
+    subject: 'MATH101 - Exam Location Change',
+    message: 'The midterm exam for MATH101 course will be held in classroom B-203.',
+    time: '2 days ago',
     unread: false,
   },
 ];
@@ -54,7 +54,7 @@ export default function MessagesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Mesajlar</Text>
+        <Text style={styles.title}>Messages</Text>
         <TouchableOpacity style={styles.composeButton}>
           <Ionicons name="create-outline" size={24} color="#2196F3" />
         </TouchableOpacity>

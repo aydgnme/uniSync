@@ -16,6 +16,7 @@ export interface ResetPasswordData {
     matriculationNumber: string;
     resetCode: string;
     newPassword: string;
+    confirmPassword: string;
 }
 
 export interface UpdateUserData {

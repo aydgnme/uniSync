@@ -8,24 +8,24 @@
                     "semester": 1,
                     "courses": [
                         {
-                            "code": "CS101",
-                            "title": "Mathematics I",
-                            "instructor": "Dr. Popescu",
+                            "code": "M101",
+                            "title": "Matematică Discretă",
+                            "instructor": "Prof. Dr. Popescu",
                             "credits": 6,
-                            "midtermGrade": 35,
-                            "finalGrade": 45,
-                            "totalGrade": 41,
-                            "status": "Failed"
+                            "midtermGrade": 5,
+                            "finalGrade": 7,
+                            "totalGrade": 6,
+                            "status": "Promovat"
                         },
                         {
                             "code": "CS102",
-                            "title": "Introduction to Programming",
-                            "instructor": "Dr. Ionescu",
+                            "title": "Introducere în Programare",
+                            "instructor": "Prof. Dr. Ionescu",
                             "credits": 5,
-                            "midtermGrade": 85,
-                            "finalGrade": 90,
-                            "totalGrade": 88,
-                            "status": "Passed"
+                            "midtermGrade": 9,
+                            "finalGrade": 10,
+                            "totalGrade": 9.5,
+                            "status": "Promovat"
                         }
                     ]
                 },
@@ -33,24 +33,24 @@
                     "semester": 2,
                     "courses": [
                         {
-                            "code": "CS103",
-                            "title": "Mathematics II",
-                            "instructor": "Dr. Popescu",
+                            "code": "M102",
+                            "title": "Matematică Avansată",
+                            "instructor": "Prof. Dr. Popescu",
                             "credits": 6,
-                            "midtermGrade": 75,
-                            "finalGrade": 85,
-                            "totalGrade": 81,
-                            "status": "Passed"
+                            "midtermGrade": 8,
+                            "finalGrade": 9,
+                            "totalGrade": 8.5,
+                            "status": "Promovat"
                         },
                         {
                             "code": "CS104",
-                            "title": "Data Structures",
-                            "instructor": "Dr. Ionescu",
+                            "title": "Structuri de Date",
+                            "instructor": "Prof. Dr. Ionescu",
                             "credits": 5,
-                            "midtermGrade": 90,
-                            "finalGrade": 95,
-                            "totalGrade": 93,
-                            "status": "Passed"
+                            "midtermGrade": 10,
+                            "finalGrade": 10,
+                            "totalGrade": 10,
+                            "status": "Promovat"
                         }
                     ]
                 }
@@ -64,23 +64,23 @@
                     "courses": [
                         {
                             "code": "CS201",
-                            "title": "Database Systems",
-                            "instructor": "Dr. Smith",
+                            "title": "Baze de Date",
+                            "instructor": "Prof. Dr. Smith",
                             "credits": 6,
-                            "midtermGrade": 78,
-                            "finalGrade": 82,
-                            "totalGrade": 80,
-                            "status": "Passed"
+                            "midtermGrade": 8,
+                            "finalGrade": 9,
+                            "totalGrade": 8.5,
+                            "status": "Promovat"
                         },
                         {
                             "code": "CS202",
-                            "title": "Algorithms",
-                            "instructor": "Dr. Johnson",
+                            "title": "Algoritmi",
+                            "instructor": "Prof. Dr. Johnson",
                             "credits": 5,
-                            "midtermGrade": 88,
-                            "finalGrade": 92,
-                            "totalGrade": 90,
-                            "status": "Passed"
+                            "midtermGrade": 9,
+                            "finalGrade": 10,
+                            "totalGrade": 9.5,
+                            "status": "Promovat"
                         }
                     ]
                 },
@@ -89,27 +89,27 @@
                     "courses": [
                         {
                             "code": "CS203",
-                            "title": "Operating Systems",
-                            "instructor": "Dr. Brown",
+                            "title": "Sisteme de Operare",
+                            "instructor": "Prof. Dr. Brown",
                             "credits": 6,
-                            "midtermGrade": 82,
-                            "finalGrade": 88,
-                            "totalGrade": 86,
-                            "status": "Passed"
+                            "midtermGrade": 9,
+                            "finalGrade": 10,
+                            "totalGrade": 9.5,
+                            "status": "Promovat"
                         },
                         {
                             "code": "CS204",
-                            "title": "Computer Networks",
-                            "instructor": "Dr. Davis",
+                            "title": "Rețele de Calculatoare",
+                            "instructor": "Prof. Dr. Davis",
                             "credits": 5,
-                            "midtermGrade": 76,
-                            "finalGrade": 84,
-                            "totalGrade": 81,
-                            "status": "Passed"
+                            "midtermGrade": 8,
+                            "finalGrade": 9,
+                            "totalGrade": 8.5,
+                            "status": "Promovat"
                         }
                     ]
                 }
             ]
         }
     ]
-} 
+}

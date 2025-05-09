@@ -35,7 +35,7 @@ class ApiService {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || 'Bir hata oluştu';
+        const errorMessage = error.response?.data?.message || 'An error occurred';
         console.error(`API Error (${url}):`, errorMessage);
         throw new Error(errorMessage);
       }

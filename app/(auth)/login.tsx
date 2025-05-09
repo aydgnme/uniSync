@@ -1,9 +1,14 @@
 import { useAuth } from '@/context/AuthContext';
-import { LoginData } from '@/types/auth.type';
+import type { LoginRequest, LoginResponse } from '@/services/auth.service';
+import { authService } from '@/services/auth.service';
+import styles from '@/styles/auth.styles';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import React, { useState } from 'react';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -14,32 +19,47 @@ import {
   View
 } from 'react-native';
 
-const LoginScreen = () => {
+// Helper function for user data transformation
+const mapUserResponse = (userResponse: LoginResponse['user']) => {
+  return {
+    _id: userResponse._id,
+    name: userResponse.name,
+    email: userResponse.email,
+    role: 'Student' as const, // Default role for student login
+    academicInfo: {
+      program: '',
+      semester: 1,
+      studentId: '',
+      advisor: '',
+      group: '',
+      subgroup: '',
+      gpa: 0
+    }
+  };
+};
+
+export default function LoginScreen() {
   const { login } = useAuth();
-  const [formData, setFormData] = useState<LoginData>({
+  const [formData, setFormData] = useState<LoginRequest>({
     email: '',
     password: '',
   });
-  const [errors, setErrors] = useState<Partial<LoginData>>({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
-    console.log('Validating form data:', formData);
-    
     if (!formData.email || !formData.password) {
-      Alert.alert('Hata', 'E-posta ve şifre alanları zorunludur.');
+      Alert.alert('Error', 'Email and password fields are required.');
       return false;
     }
     
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      Alert.alert('Hata', 'Geçerli bir e-posta adresi giriniz.');
+      Alert.alert('Error', 'Please enter a valid email address.');
       return false;
     }
     
     if (formData.password.length < 6) {
-      Alert.alert('Hata', 'Şifre en az 6 karakter olmalıdır.');
+      Alert.alert('Error', 'Password must be at least 6 characters long.');
       return false;
     }
     
@@ -47,28 +67,36 @@ const LoginScreen = () => {
   };
 
   const handleLogin = async () => {
-    console.log('Login attempt started');
-    
-    if (!validateForm()) {
-      console.log('Form validation failed');
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
-    console.log('Setting loading state:', true);
 
     try {
-      console.log('Attempting to login with:', formData.email);
-      await login(formData.email, formData.password);
-      console.log('Login successful');
-    } catch (error) {
+     // console.log('Login attempt with:', { email: formData.email });
+      const response = await authService.login(formData);
+     // console.log('Login response received:', response);
+
+      if (response && response.token && response.user) {
+        // Store token and user data securely
+        await SecureStore.setItemAsync('token', response.token);
+        await SecureStore.setItemAsync('userId', response.user._id);
+        
+        // Map user data to expected format and update context
+        const mappedUser = mapUserResponse(response.user);
+        await login(mappedUser, response.token);
+        
+        console.log('Login successful, navigating to main screen');
+        router.replace('/(tabs)');
+      } else {
+        throw new Error('Invalid response from server');
+      }
+    } catch (error: any) {
       console.error('Login error:', error);
       Alert.alert(
-        'Giriş Hatası',
-        'Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol edip tekrar deneyiniz.'
+        'Login Error',
+        'An error occurred during login. Please check your credentials and try again.'
       );
     } finally {
-      console.log('Setting loading state:', false);
       setLoading(false);
     }
   };
@@ -76,74 +104,51 @@ const LoginScreen = () => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{
-        flex: 1,
-        backgroundColor: '#fff'
-      }}
+      style={styles.container}
     >
       <ScrollView 
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20 }}
+        style={styles.scrollView}
+        contentContainerStyle={{ paddingBottom: 20 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={{ alignItems: 'center', marginVertical: 20 }}>
-          <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 10 }}>
-            UniSync'e Hoş Geldiniz
-          </Text>
-          <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>
-            Lütfen hesabınıza giriş yapın
-          </Text>
+        <Image
+          source={require('@/assets/images/usv-campus.jpg')}
+          style={styles.headerImage}
+          resizeMode="cover"
+        />
+
+        <View style={styles.welcomeContainer}>
+          <Text style={styles.welcomeText}>Welcome</Text>
+          <Text style={styles.subtitleText}>uniSync</Text>
         </View>
 
-        <View style={{ marginBottom: 20 }}>
-          <Text style={{ marginBottom: 8, fontSize: 16, color: '#333' }}>
-            E-posta
-          </Text>
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: '#ddd',
-              borderRadius: 8,
-              padding: 12,
-              fontSize: 16,
-              marginBottom: 16
-            }}
-            value={formData.email}
-            onChangeText={(value) => {
-              setFormData(prev => ({ ...prev, email: value }));
-              setErrors(prev => ({ ...prev, email: '' }));
-            }}
-            placeholder="ornek@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-          />
-
-          <Text style={{ marginBottom: 8, fontSize: 16, color: '#333' }}>
-            Şifre
-          </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={styles.formContainer}>
+          <Text style={styles.labelText}>Email</Text>
+          <View style={styles.inputContainer}>
             <TextInput
-              style={{
-                flex: 1,
-                borderWidth: 1,
-                borderColor: '#ddd',
-                borderRadius: 8,
-                padding: 12,
-                fontSize: 16
-              }}
+              style={styles.input}
+              value={formData.email}
+              onChangeText={(value) => setFormData(prev => ({ ...prev, email: value }))}
+              placeholder="prenume.nume@student.usv.ro"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
+          </View>
+
+          <Text style={styles.labelText}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
               value={formData.password}
-              onChangeText={(value) => {
-                setFormData(prev => ({ ...prev, password: value }));
-                setErrors(prev => ({ ...prev, password: '' }));
-              }}
-              placeholder="Şifrenizi giriniz"
+              onChangeText={(value) => setFormData(prev => ({ ...prev, password: value }))}
+              placeholder="StudentXXXXXX"
               secureTextEntry={!showPassword}
               autoComplete="password"
             />
             <Pressable 
               onPress={() => setShowPassword(!showPassword)}
-              style={{ position: 'absolute', right: 12 }}
+              style={styles.eyeIcon}
             >
               <Ionicons 
                 name={showPassword ? 'eye-off' : 'eye'} 
@@ -152,34 +157,24 @@ const LoginScreen = () => {
               />
             </Pressable>
           </View>
+
+          <TouchableOpacity
+            style={[styles.loginButton, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            <Text style={styles.loginButtonText}>
+              Sign in
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={{ marginTop: 16, alignItems: 'flex-start' }}>
+            <Text style={styles.footerLink}>
+              Forgot Password
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#007AFF',
-            borderRadius: 8,
-            padding: 16,
-            alignItems: 'center',
-            opacity: loading ? 0.7 : 1
-          }}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>
-            {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{ marginTop: 16, alignItems: 'center' }}
-        >
-          <Text style={{ color: '#007AFF', fontSize: 16 }}>
-            Şifremi Unuttum
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
-};
-
-export default LoginScreen; 
+}

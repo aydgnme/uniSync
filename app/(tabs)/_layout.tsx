@@ -21,28 +21,28 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Ana Sayfa',
+          title: 'Home',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="home" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="schedule"
         options={{
-          title: 'Program',
+          title: 'Schedule',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="courses"
         options={{
-          title: 'Dersler',
+          title: 'Courses',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="book-education" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profil',
+          title: 'Profile',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={24} color={color} />,
         }}
       />

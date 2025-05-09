@@ -1,5 +1,5 @@
-export type CourseType = 'LECTURE' | 'LABORATORY' | 'SEMINAR';
-export type ParityType = 'EVEN' | 'ODD' | 'WEEKLY';
+export type CourseType = 'LECTURE' | 'LAB' | 'SEMINAR';
+export type ParityType = 'ALL' | 'EVEN' | 'ODD';
 
 export interface ScheduleEntry {
   id: string;
@@ -38,11 +38,11 @@ export interface Course {
 
 export interface ScheduleResponse {
   success: boolean;
-  courses: Course[];
   group: string;
   subgroup: string;
   weekNumber: number;
   parity: ParityType;
+  courses: Course[];
 }
 
 export interface ScheduleState {
@@ -56,11 +56,11 @@ export interface ScheduleState {
 export interface TodayScheduleResponse {
   success: boolean;
   data: {
-    courses: Course[];
     day: number;
     dayName: string;
     weekNumber: number;
     parity: string;
+    courses: Course[];
   };
 }
 

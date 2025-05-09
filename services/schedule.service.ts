@@ -1,5 +1,6 @@
+import axios from 'axios';
+import { API_CONFIG } from '../config/api.config';
 import { Course, CourseType, ParityType, ScheduleResponse, TodayScheduleResponse } from '../types/schedule.type';
-import { apiService } from './api.service';
 
 interface APICourseItem {
   id: string;
@@ -38,7 +39,8 @@ interface APITodayScheduleResponse {
 const mapCourseType = (type: string): CourseType => {
   switch (type.toUpperCase()) {
     case 'LABORATORY':
-      return 'LABORATORY';
+    case 'LAB':
+      return 'LAB';
     case 'SEMINAR':
       return 'SEMINAR';
     default:
@@ -47,29 +49,29 @@ const mapCourseType = (type: string): CourseType => {
 };
 
 class ScheduleService {
-  private readonly BASE_PATH = '/api/schedules';
+  private readonly BASE_URL = API_CONFIG.BASE_URL;
 
   async getFullSchedule(
     group: string,
     subgroup: string
   ): Promise<{ data: ScheduleResponse }> {
     try {
-      const response = await apiService.get<APIWeeklyScheduleResponse>(
-        `${this.BASE_PATH}/${group}/${subgroup}`
+      const response = await axios.get<APIWeeklyScheduleResponse>(
+        `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.WEEKLY}/${group}/${subgroup}`
       );
 
-      const courses: Course[] = response.courses.map((item: APICourseItem) => ({
+      const courses: Course[] = response.data.courses.map((item: APICourseItem) => ({
         ...item,
         type: mapCourseType(item.type)
       }));
 
       const transformed: ScheduleResponse = {
-        success: response.success,
+        success: response.data.success,
         courses,
         group,
         subgroup,
-        weekNumber: response.weekNumber,
-        parity: response.parity,
+        weekNumber: response.data.weekNumber,
+        parity: response.data.parity,
       };
 
       return { data: transformed };
@@ -78,16 +80,30 @@ class ScheduleService {
     }
   }
 
+  async getSchedule(
+    group: string,
+    subgroup: string,
+    _week?: number
+  ): Promise<{ data: ScheduleResponse }> {
+    return this.getFullSchedule(group, subgroup);
+  }
+
   async getTodaySchedule(
     group: string,
     subgroup: string
   ): Promise<{ data: TodayScheduleResponse }> {
     try {
-      const response = await apiService.get<APITodayScheduleResponse>(
-        `${this.BASE_PATH}/today/${group}/${subgroup}`
+      console.log('Fetching schedule for:', { group, subgroup });
+      const response = await axios.get<APITodayScheduleResponse>(
+        `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.TODAY}/${group}/${subgroup}`
       );
+      console.log('Schedule API Response:', response);
 
-      const todayData = response.data;
+      if (!response.data || !response.data.data || !response.data.data.courses) {
+        throw new Error('Invalid response format from schedule API');
+      }
+
+      const todayData = response.data.data;
       const courses: Course[] = todayData.courses.map((item: APICourseItem) => ({
         ...item,
         type: mapCourseType(item.type)
@@ -95,7 +111,7 @@ class ScheduleService {
 
       return {
         data: {
-          success: response.success,
+          success: true,
           data: {
             ...todayData,
             courses,
@@ -103,16 +119,18 @@ class ScheduleService {
         },
       };
     } catch (error) {
+      console.error('Schedule service error:', error);
       throw this.handleError(error);
     }
   }
 
   private handleError(error: any): Error {
+    console.error('Schedule service error details:', error);
     if (error.response) {
-      const message = error.response.data?.message || 'Bir hata oluştu';
+      const message = error.response.data?.message || 'An error occurred while fetching the schedule';
       return new Error(message);
     }
-    return new Error('Ağ hatası oluştu');
+    return new Error('Network error occurred while fetching the schedule');
   }
 }
 

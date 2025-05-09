@@ -4,21 +4,22 @@ export interface AcademicInfo {
     program: string;
     semester: number;
     studentId: string;
+    groupName: string;
+    subgroupIndex: string;
     advisor: string;
-    group: string;
-    subgroup: string;
     gpa: number;
 }
 
 export interface User {
     id: string;
     email: string;
+    passwordHash?: string;
+    cnp?: string;
+    matriculationNumber: string;
     name: string;
     role: UserRole;
-    phone?: string;
-    address?: string;
-    cnp?: string;
-    matriculationNumber?: string;
+    phone: string;
+    address: string;
     academicInfo?: AcademicInfo;
     profileImageUrl?: string;
 }
@@ -38,8 +39,8 @@ export interface UserProfileResponse {
         studentId?: string;
         advisor?: string;
         gpa?: number;
-        group?: string;
-        subgroup?: string;
+        groupName?: string;
+        subgroupIndex?: string;
     };
     profileImageUrl?: string;
 }

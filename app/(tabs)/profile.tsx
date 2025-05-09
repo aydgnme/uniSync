@@ -1,155 +1,174 @@
-import { Text } from '@/components/Themed';
-import { Colors } from '@/constants/Colors';
-import { useAuth } from '@/context/AuthContext';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Image, ScrollView, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { useProfile } from "@/hooks/useProfile";
+import { styles } from "@/styles/profile.styles";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React, { useEffect } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 
-type ProfileOptionProps = {
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  title: string;
-  onPress: () => void;
+type RootStackParamList = {
+  Chat: undefined;
+  Grades: undefined;
+  Calendar: undefined;
+  Settings: undefined;
+  Profile: undefined;
 };
 
-export default function ProfileScreen() {
-  const { user, logout } = useAuth();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'light'];
+type ProfileScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-  const ProfileOption = ({ icon, title, onPress }: ProfileOptionProps) => (
-    <TouchableOpacity style={styles.optionButton} onPress={onPress}>
-      <MaterialCommunityIcons name={icon} size={24} color={theme.primary} />
-      <Text style={styles.optionText}>{title}</Text>
-      <MaterialCommunityIcons name="chevron-right" size={24} color={theme.grey} />
+const ProfileScreen = () => {
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
+  const { user, loading, error, fetchUserProfile, handleLogout } = useProfile();
+
+  useEffect(() => {
+    if (user?.academicInfo) {
+      console.log('Group Info:', {
+        groupName: user.academicInfo.groupName,
+        subgroupIndex: user.academicInfo.subgroupIndex,
+        combinedValue: `${user.academicInfo.groupName || ''}${user.academicInfo.subgroupIndex || ''}`
+      });
+    }
+  }, [user?.academicInfo]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="rgb(40, 110, 190)" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchUserProfile}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  const InfoRow = ({ label, value }: { label: string; value: string | number | undefined }) => (
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value?.toString() || 'N/A'}</Text>
+    </View>
+  );
+
+  const ActionButton = ({ 
+    icon, 
+    label, 
+    onPress,
+    color = 'rgb(40, 110, 190)'
+  }: { 
+    icon: keyof typeof Ionicons.glyphMap; 
+    label: string; 
+    onPress: () => void;
+    color?: string;
+  }) => (
+    <TouchableOpacity style={[styles.actionButton, { backgroundColor: color }]} onPress={onPress}>
+      <Ionicons name={icon} size={24} color="#fff" />
+      <Text style={styles.actionButtonText}>{label}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <View style={styles.profileInfo}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/100' }}
-            style={styles.profileImage}
-          />
-          <View style={styles.nameContainer}>
-            <Text style={styles.name}>{user?.fullName}</Text>
-            <Text style={styles.email}>{user?.email}</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        {/* Profile Header */}
+        <View style={styles.header}>
+          <View style={styles.profileImageContainer}>
+            <Image
+              source={user.profileImageUrl ? { uri: user.profileImageUrl } : require("@/assets/images/default-avatar.png")}
+              style={styles.profileImage}
+              defaultSource={require("@/assets/images/default-avatar.png")}
+            />
+            <TouchableOpacity style={styles.editImageButton}>
+              <Ionicons name="camera" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.role}>{user.role}</Text>
+        </View>
+
+        {/* Personal Information */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="person-outline" size={24} color="rgb(0, 122, 255)" />
+            <Text style={styles.sectionTitle}>Personal Information</Text>
+          </View>
+          <InfoRow label="E-mail" value={user.email} />
+          <InfoRow label="Phone Number" value={user.phone || ''} />
+          <InfoRow label="Address" value={user.address || ''} />
+          <InfoRow label="CNP" value={user.cnp} />
+          <InfoRow label="Matriculation Number" value={user.matriculationNumber} />
+        </View>
+
+        {/* Academic Information */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="school-outline" size={24} color="rgb(0, 122, 255)" />
+            <Text style={styles.sectionTitle}>Academic Information</Text>
+          </View>
+          <InfoRow label="Program" value={user.academicInfo?.program} />
+          <InfoRow label="Semester" value={user.academicInfo?.semester} />
+          <InfoRow label="Group" value={`${user.academicInfo?.groupName || ''}${user.academicInfo?.subgroupIndex || ''}`} />
+          <InfoRow label="Student ID" value={user.academicInfo?.studentId} />
+          <InfoRow label="Advisor" value={user.academicInfo?.advisor} />
+          <InfoRow label="GPA" value={user.academicInfo?.gpa} />
+        </View>
+
+        {/* Quick Access */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="apps-outline" size={24} color="rgb(0, 122, 255)" />
+            <Text style={styles.sectionTitle}>Quick Access</Text>
+          </View>
+          <View style={styles.actionButtonsContainer}>
+            <ActionButton 
+              icon="chatbubbles-outline" 
+              label="Secretary AI" 
+              onPress={() => navigation.navigate('Chat' as never)}
+            />
+            <ActionButton 
+              icon="document-text-outline" 
+              label="Transcript" 
+              onPress={() => navigation.navigate('Grades' as never)}
+            />
+            <ActionButton 
+              icon="calendar-outline" 
+              label="Calendar" 
+              onPress={() => navigation.navigate('Calendar' as never)}
+            />
+            <ActionButton 
+              icon="settings-outline" 
+              label="Settings" 
+              onPress={() => navigation.navigate('Settings' as never)}
+            />
           </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Hesap</Text>
-        <ProfileOption
-          icon="account-edit"
-          title="Profili Düzenle"
-          onPress={() => {}}
-        />
-        <ProfileOption
-          icon="lock-reset"
-          title="Şifre Değiştir"
-          onPress={() => {}}
-        />
-        <ProfileOption
-          icon="bell-outline"
-          title="Bildirim Ayarları"
-          onPress={() => {}}
-        />
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Uygulama</Text>
-        <ProfileOption
-          icon="translate"
-          title="Dil"
-          onPress={() => {}}
-        />
-        <ProfileOption
-          icon="theme-light-dark"
-          title="Tema"
-          onPress={() => {}}
-        />
-        <ProfileOption
-          icon="help-circle-outline"
-          title="Yardım"
-          onPress={() => {}}
-        />
-      </View>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-        <MaterialCommunityIcons name="logout" size={24} color={Colors.light.error} />
-        <Text style={styles.logoutText}>Çıkış Yap</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Sign Out */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
+          <Text style={styles.logoutButtonText}>Sign Out</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    padding: 20,
-    backgroundColor: Colors.light.primary,
-  },
-  profileInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 16,
-  },
-  nameContainer: {
-    flex: 1,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 16,
-    color: '#fff',
-    opacity: 0.8,
-  },
-  section: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  optionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  optionText: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 16,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    margin: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-  },
-  logoutText: {
-    fontSize: 16,
-    color: Colors.light.error,
-    marginLeft: 8,
-    fontWeight: '600',
-  },
-}); 
+export default ProfileScreen;

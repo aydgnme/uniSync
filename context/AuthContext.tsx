@@ -1,82 +1,102 @@
-import { authService, LoginResponse } from '@/services/auth.service';
-import { storageService } from '@/services/storage.service';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import { authService, UserProfile } from '@/services/auth.service';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-type AuthContextType = {
+export interface User extends UserProfile {
+  token: string;
+}
+
+interface AuthContextType {
+  user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  loading: boolean;
+  login: (userData: UserProfile, token: string) => Promise<void>;
   logout: () => Promise<void>;
-  isLoading: boolean;
-  user: LoginResponse['user'] | null;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const STORAGE_KEYS = {
+  TOKEN: 'token',
+  USER_ID: 'userId'
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<LoginResponse['user'] | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthState();
+    loadUser();
   }, []);
 
-  const checkAuthState = async () => {
+  const loadUser = async () => {
     try {
-      const [token, userData] = await Promise.all([
-        storageService.getAuthToken(),
-        storageService.getUserData<LoginResponse['user']>(),
+      const [token, userId] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEYS.TOKEN),
+        AsyncStorage.getItem(STORAGE_KEYS.USER_ID)
       ]);
 
-      if (token && userData) {
-        setIsAuthenticated(true);
-        setUser(userData);
+      //console.log('Stored credentials:', { token, userId });
+
+      if (token && userId) {
+        try {
+          // Fetch user data using userId
+          const response = await authService.getUserProfile(userId);
+          console.log('User profile response:', response);
+          
+          const userWithToken = { ...response, token };
+          setUser(userWithToken);
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          // If there's an error fetching the profile, clear the stored credentials
+          await AsyncStorage.multiRemove([STORAGE_KEYS.TOKEN, STORAGE_KEYS.USER_ID]);
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error('Auth state check error:', error);
-      Alert.alert('Hata', 'Oturum durumu kontrol edilirken bir hata oluştu.');
+      console.error('Error loading user:', error);
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (userData: UserProfile, token: string) => {
     try {
-      const response = await authService.login({ email, password });
-      
-      await Promise.all([
-        storageService.setAuthToken(response.token),
-        storageService.setUserData(response.user),
-      ]);
-
-      setUser(response.user);
+      console.log('Login data:', { userData, token });
+      const userWithToken = { ...userData, token };
+      await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      await AsyncStorage.setItem(STORAGE_KEYS.USER_ID, userData._id);
+      setUser(userWithToken);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert(
-        'Giriş Hatası',
-        'Giriş yapılırken bir hata oluştu. Lütfen bilgilerinizi kontrol ediniz.'
-      );
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await authService.logout();
-      await storageService.clearAuth();
+      await AsyncStorage.multiRemove([STORAGE_KEYS.TOKEN, STORAGE_KEYS.USER_ID]);
       setUser(null);
       setIsAuthenticated(false);
+      router.replace('/(auth)/login');
     } catch (error) {
       console.error('Logout error:', error);
-      Alert.alert('Hata', 'Çıkış yapılırken bir hata oluştu.');
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, isLoading, user }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -88,4 +108,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}

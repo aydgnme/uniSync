@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://127.0.0.1:3000/api', // Örnek API URL'si
+  BASE_URL: 'http://localhost:3000/api',  // Update this with your actual API URL
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/auth/login',
@@ -10,9 +10,13 @@ export const API_CONFIG = {
       RESET_PASSWORD: '/auth/reset-password',
     },
     USER: {
-      PROFILE: '/user/profile',
-      UPDATE_PROFILE: '/user/profile/update',
-      CHANGE_PASSWORD: '/user/change-password',
+      PROFILE: '/users',
+      UPDATE_PROFILE: '/users/update',
+      CHANGE_PASSWORD: '/users/change-password',
+    },
+    SCHEDULE: {
+      TODAY: '/schedules/today',
+      WEEKLY: '/schedules',
     },
     COURSES: {
       LIST: '/courses',
@@ -25,5 +29,5 @@ export const API_CONFIG = {
       DETAILS: (id: string) => `/announcements/${id}`,
     },
   },
-  TIMEOUT: 10000, // 10 saniye
+  TIMEOUT: 10000, // 10 seconds
 }; 

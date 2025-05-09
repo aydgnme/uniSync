@@ -1,5 +1,5 @@
 export const config = {
-  API_URL: 'http://localhost:3000/api', // Geliştirme ortamı için örnek URL
+  API_URL: 'http://localhost:3000/api', // Example URL for development environment
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',

@@ -1,76 +1,59 @@
-import { useAuth } from '@/context/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { scheduleService } from '@/services/schedule.service';
-import { Course } from '@/types/schedule.type';
+import { Course as ScheduleCourse } from '@/types/schedule.type';
 import { useEffect, useState } from 'react';
 
+
 interface UseScheduleReturn {
-  courses: Course[];
+  courses: ScheduleCourse[];
   currentWeek: number;
   isLoading: boolean;
   error: string | null;
   refreshSchedule: () => Promise<void>;
 }
 
-interface AcademicInfo {
-  group: string;
-  subgroup: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  academicInfo: AcademicInfo;
-}
-
 export const useSchedule = (): UseScheduleReturn => {
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<ScheduleCourse[]>([]);
   const [currentWeek, setCurrentWeek] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { user } = useAuth() as { user: User | null };
+  const { user, loading: profileLoading } = useProfile();
 
   const fetchSchedule = async () => {
-    if (!user?.academicInfo?.group || !user?.academicInfo?.subgroup) {
-      setError('Kullanıcı grup bilgisi eksik');
-      setIsLoading(false);
-      return;
-    }
+    if (!user?.academicInfo?.groupName || !user?.academicInfo?.subgroupIndex) return;
 
     try {
       setIsLoading(true);
-      setError(null);
-      
       const response = await scheduleService.getFullSchedule(
-        user.academicInfo.group,
-        user.academicInfo.subgroup
+        user.academicInfo.groupName,
+        user.academicInfo.subgroupIndex
       );
 
       if (response.data?.success) {
         setCourses(response.data.courses);
         setCurrentWeek(response.data.weekNumber);
+        setError(null);
       } else {
-        setError('Program bilgisi alınamadı');
+        setError("Failed to fetch schedule.");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Program yüklenirken bir hata oluştu');
-      setCourses([]);
+      setError("An error occurred while fetching schedule.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user?.academicInfo) {
+    if (!profileLoading && user) {
       fetchSchedule();
     }
-  }, [user]);
+  }, [user, profileLoading]);
 
   return {
     courses,
     currentWeek,
-    isLoading,
+    isLoading: isLoading || profileLoading,
     error,
     refreshSchedule: fetchSchedule,
   };

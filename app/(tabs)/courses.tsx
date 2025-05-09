@@ -23,7 +23,7 @@ export default function CoursesScreen() {
       <Text style={styles.instructorName}>{instructor}</Text>
       <View style={styles.progressContainer}>
         <View style={[styles.progressBar, { width: `${progress}%` }]} />
-        <Text style={styles.progressText}>{progress}% Tamamlandı</Text>
+        <Text style={styles.progressText}>{progress}% Completed</Text>
       </View>
     </TouchableOpacity>
   );
@@ -31,7 +31,7 @@ export default function CoursesScreen() {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Derslerim</Text>
+        <Text style={styles.headerTitle}>My Courses</Text>
         <TouchableOpacity style={styles.filterButton}>
           <MaterialCommunityIcons name="filter-variant" size={24} color="#fff" />
         </TouchableOpacity>
@@ -39,18 +39,18 @@ export default function CoursesScreen() {
 
       <View style={styles.coursesContainer}>
         <CourseCard
-          title="Veri Yapıları ve Algoritmalar"
+          title="Data Structures and Algorithms"
           code="BLM2001"
-          instructor="Dr. Ahmet Yılmaz"
+          instructor="Dr. John Smith"
           progress={75}
         />
         <CourseCard
-          title="Veritabanı Yönetim Sistemleri"
+          title="Database Management Systems"
           code="BLM2003"
-          instructor="Prof. Dr. Ayşe Kaya"
+          instructor="Prof. Dr. Sarah Johnson"
           progress={60}
         />
-        {/* Diğer ders kartları buraya eklenecek */}
+        {/* Additional course cards will be added here */}
       </View>
     </ScrollView>
   );

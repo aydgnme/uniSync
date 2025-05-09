@@ -28,33 +28,33 @@ interface UserProfileResponse {
 }
 
 const mapResponseToUser = (response: UserProfileResponse): User => {
-  // Rol kontrolü
+  // Role validation
   let userRole: UserRole;
   if (response.role === 'Student' || response.role === 'Professor' || response.role === 'Admin') {
     userRole = response.role;
   } else {
-    console.warn(`Geçersiz rol "${response.role}" alındı, varsayılan olarak "Student" atandı`);
+    console.warn(`Invalid role "${response.role}" received, defaulting to "Student"`);
     userRole = 'Student';
   }
 
-  // API yanıtından kullanıcı nesnesi oluştur
+  // Create user object from API response
   return {
     id: response._id,
     email: response.email,
     name: response.name,
     role: userRole,
-    phone: response.phone,
-    address: response.address,
-    cnp: response.cnp,
-    matriculationNumber: response.matriculationNumber,
+    phone: response.phone || '',
+    address: response.address || '',
+    cnp: response.cnp || '',
+    matriculationNumber: response.matriculationNumber || '',
     profileImageUrl: response.profileImageUrl,
     academicInfo: response.academicInfo ? {
       program: response.academicInfo.program || '',
       semester: response.academicInfo.semester || 1,
       studentId: response.academicInfo.studentId || '',
       advisor: response.academicInfo.advisor || '',
-      group: response.academicInfo.groupName || '',
-      subgroup: response.academicInfo.subgroupIndex || '',
+      groupName: response.academicInfo.groupName || '',
+      subgroupIndex: response.academicInfo.subgroupIndex || '',
       gpa: response.academicInfo.gpa || 0,
     } : undefined
   };
@@ -76,22 +76,22 @@ export const useProfile = () => {
       const token = await AsyncStorage.getItem('token');
 
       if (!userId || !token) {
-        throw new Error('Kullanıcı kimliği doğrulanmadı');
+        throw new Error('User not authenticated');
       }
 
-      console.log('Profil getiriliyor, userId:', userId);
+      console.log('Fetching profile, userId:', userId);
       const response = await authService.getUserProfile(userId);
-      console.log('Profil yanıtı:', response);
+      console.log('Profile response:', response);
       
       const mappedUser = mapResponseToUser(response);
       setUser(mappedUser);
       setError(null);
     } catch (err: any) {
-      console.error('Profil getirme hatası:', err);
-      setError(err.message || 'Profil yüklenemedi');
+      console.error('Error fetching profile:', err);
+      setError(err.message || 'Could not load profile');
       
       if (err.response?.status === 401) {
-        // Token geçersiz veya süresi dolmuş
+        // Token invalid or expired
         await handleLogout();
       }
     } finally {
@@ -101,22 +101,22 @@ export const useProfile = () => {
 
   const handleLogout = async () => {
     Alert.alert(
-      'Çıkış Yap',
-      'Çıkış yapmak istediğinizden emin misiniz?',
+      'Logout',
+      'Are you sure you want to logout?',
       [
         {
-          text: 'İptal',
+          text: 'Cancel',
           style: 'cancel'
         },
         {
-          text: 'Çıkış Yap',
+          text: 'Logout',
           onPress: async () => {
             try {
               await AsyncStorage.multiRemove(['token', 'userId']);
               router.replace('/(auth)/login');
             } catch (err) {
-              console.error('Çıkış hatası:', err);
-              Alert.alert('Hata', 'Çıkış yapılamadı');
+              console.error('Logout error:', err);
+              Alert.alert('Error', 'Could not complete logout');
             }
           },
           style: 'destructive'

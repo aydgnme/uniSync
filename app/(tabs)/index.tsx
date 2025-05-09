@@ -1,5 +1,5 @@
-import { useAuth } from "@/context/AuthContext";
 import { scheduleService } from "@/services/schedule.service";
+import styles from "@/styles/main.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
@@ -13,18 +13,16 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { styles } from "../styles/main.styles";
+import { useProfile } from "../../hooks/useProfile";
 
 interface AcademicInfo {
-  group: string;
-  subgroup: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  academicInfo: AcademicInfo;
+  program?: string;
+  semester?: number;
+  group?: string;
+  subgroup?: string;
+  advisor?: string;
+  gpa?: number;
+  studentId?: string;
 }
 
 type MainTabParamList = {
@@ -67,11 +65,20 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
 
 export default function MainScreen() {
   const navigation = useNavigation<MainScreenNavigationProp>();
-  const { user } = useAuth() as { user: User | null };
+  const { user, loading, fetchUserProfile } = useProfile();
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [scheduleLoading, setScheduleLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  useEffect(() => {
+    console.log('User data:', user);
+    console.log('Loading state:', loading);
+  }, [user, loading]);
 
   const transformToScheduleItem = (entry: any): ScheduleItem => ({
     time: `${entry.startTime} - ${entry.endTime}`,
@@ -81,8 +88,11 @@ export default function MainScreen() {
   });
   
   const fetchTodaySchedule = async () => {
-    if (!user?.academicInfo?.group || !user?.academicInfo?.subgroup) {
-      setError("Kullanıcı grup bilgisi eksik!");
+    console.log('Fetching schedule with academicInfo:', user?.academicInfo);
+    if (!user?.academicInfo?.groupName || !user?.academicInfo?.subgroupIndex) {
+      const errorMsg = "Group and subgroup information is missing. Please update your profile.";
+      console.error(errorMsg, { academicInfo: user?.academicInfo });
+      setError(errorMsg);
       setSchedule([]);
       setScheduleLoading(false);
       return;
@@ -90,24 +100,32 @@ export default function MainScreen() {
     setScheduleLoading(true);
     setError(null);
     try {
+      console.log('Calling schedule service with:', {
+        group: user.academicInfo.groupName,
+        subgroup: user.academicInfo.subgroupIndex
+      });
+      
       const response = await scheduleService.getTodaySchedule(
-        user.academicInfo.group,
-        user.academicInfo.subgroup
+        user.academicInfo.groupName,
+        user.academicInfo.subgroupIndex
       );
       
       if (!response?.data?.data?.courses) {
-        console.log('Debug - Invalid schedule response:', response);
-        setError("Geçersiz program verisi.");
+        const errorMsg = "No schedule found for today.";
+        console.error('Invalid schedule response:', { response });
+        setError(errorMsg);
         setSchedule([]);
         return;
       }
 
       console.log('Today schedule response:', response.data);
       const transformedSchedule = response.data.data.courses.map(transformToScheduleItem);
+      console.log('Transformed schedule:', transformedSchedule);
       setSchedule(transformedSchedule);
     } catch (err: any) {
+      const errorMsg = "An error occurred while loading the schedule. Please try again later.";
       console.error('Today schedule error:', err);
-      setError("Program yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+      setError(errorMsg);
       setSchedule([]);
     } finally {
       setScheduleLoading(false);
@@ -115,7 +133,9 @@ export default function MainScreen() {
   };
 
   useEffect(() => {
-    fetchTodaySchedule();
+    if (user) {
+      fetchTodaySchedule();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -160,7 +180,7 @@ export default function MainScreen() {
         <View style={styles.header}>
           <View style={styles.greetingContainer}>
             <Text style={styles.greeting}>Hello, </Text>
-            <Text style={styles.userName}>{user?.name}</Text>
+            <Text style={styles.userName}>{user?.name || 'Guest'}</Text>
             <Text style={styles.welcomeText}>Welcome!</Text>
           </View>
           <TouchableOpacity
@@ -202,7 +222,7 @@ export default function MainScreen() {
         {/* Today's Schedule */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Today's Schedule</Text>
-          {scheduleLoading ? (
+          {loading || scheduleLoading ? (
             <Text>Loading...</Text>
           ) : error ? (
             <Text>{error}</Text>

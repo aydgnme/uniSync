@@ -25,25 +25,25 @@ const ResetPasswordScreen = () => {
 
     switch (step) {
       case 'identification':
-        if (!formData.cnp) {
-          newErrors.cnp = 'CNP gerekli';
+        if (!formData.cnp || formData.cnp.length !== 13) {
+          newErrors.cnp = 'CNP must be 13 digits';
         }
         if (!formData.matriculationNumber) {
-          newErrors.matriculationNumber = 'Öğrenci numarası gerekli';
+          newErrors.matriculationNumber = 'Matriculation number is required';
         }
         break;
 
       case 'verification':
         if (!formData.resetCode) {
-          newErrors.resetCode = 'Doğrulama kodu gerekli';
+          newErrors.resetCode = 'Verification code is required';
         }
         break;
 
       case 'newPassword':
         if (!formData.newPassword) {
-          newErrors.newPassword = 'Yeni şifre gerekli';
+          newErrors.newPassword = 'New password is required';
         } else if (formData.newPassword.length < 6) {
-          newErrors.newPassword = 'Şifre en az 6 karakter olmalı';
+          newErrors.newPassword = 'Password must be at least 6 characters';
         }
         break;
     }
@@ -62,7 +62,23 @@ const ResetPasswordScreen = () => {
       await authService.generateResetCode(formData.cnp, formData.matriculationNumber);
       setStep('verification');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kod gönderilirken bir hata oluştu');
+      setError(err instanceof Error ? err.message : 'Error generating reset code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!validateStep()) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Placeholder for code verification, typically a backend call
+      setStep('newPassword');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error verifying code');
     } finally {
       setLoading(false);
     }
@@ -76,9 +92,9 @@ const ResetPasswordScreen = () => {
 
     try {
       await authService.resetPassword(formData);
-      router.replace('/login');
+      router.replace('/(auth)/login');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Şifre sıfırlanırken bir hata oluştu');
+      setError(err instanceof Error ? err.message : 'Error resetting password');
     } finally {
       setLoading(false);
     }
@@ -97,22 +113,24 @@ const ResetPasswordScreen = () => {
                 setErrors(prev => ({ ...prev, cnp: '' }));
               }}
               error={errors.cnp}
-              placeholder="CNP numaranız"
+              placeholder="Enter your CNP (13 digits)"
+              keyboardType="numeric"
+              maxLength={13}
             />
 
             <Input
-              label="Öğrenci Numarası"
+              label="Matriculation Number"
               value={formData.matriculationNumber}
               onChangeText={(value) => {
                 setFormData(prev => ({ ...prev, matriculationNumber: value }));
                 setErrors(prev => ({ ...prev, matriculationNumber: '' }));
               }}
               error={errors.matriculationNumber}
-              placeholder="Öğrenci numaranız"
+              placeholder="Enter your matriculation number"
             />
 
             <Button
-              title="Kod Gönder"
+              title="Send Code"
               onPress={handleGenerateCode}
               loading={loading}
               disabled={loading}
@@ -125,20 +143,20 @@ const ResetPasswordScreen = () => {
         return (
           <>
             <Input
-              label="Doğrulama Kodu"
+              label="Verification Code"
               value={formData.resetCode}
               onChangeText={(value) => {
                 setFormData(prev => ({ ...prev, resetCode: value }));
                 setErrors(prev => ({ ...prev, resetCode: '' }));
               }}
               error={errors.resetCode}
-              placeholder="Size gönderilen kod"
+              placeholder="Enter the code sent to you"
               keyboardType="number-pad"
             />
 
             <Button
-              title="Doğrula"
-              onPress={() => setStep('newPassword')}
+              title="Verify"
+              onPress={handleVerifyCode}
               disabled={!formData.resetCode}
               style={styles.button}
             />
@@ -149,7 +167,7 @@ const ResetPasswordScreen = () => {
         return (
           <>
             <Input
-              label="Yeni Şifre"
+              label="New Password"
               value={formData.newPassword}
               onChangeText={(value) => {
                 setFormData(prev => ({ ...prev, newPassword: value }));
@@ -157,11 +175,11 @@ const ResetPasswordScreen = () => {
               }}
               error={errors.newPassword}
               secureTextEntry
-              placeholder="Yeni şifreniz"
+              placeholder="Enter your new password"
             />
 
             <Button
-              title="Şifreyi Sıfırla"
+              title="Reset Password"
               onPress={handleResetPassword}
               loading={loading}
               disabled={loading}
@@ -175,11 +193,11 @@ const ResetPasswordScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.formContainer}>
-        <Text style={styles.title}>Şifre Sıfırlama</Text>
+        <Text style={styles.title}>Password Reset</Text>
         <Text style={styles.subtitle}>
-          {step === 'identification' && 'Kimlik bilgilerinizi girin'}
-          {step === 'verification' && 'Size gönderilen kodu girin'}
-          {step === 'newPassword' && 'Yeni şifrenizi belirleyin'}
+          {step === 'identification' && 'Enter your identification details'}
+          {step === 'verification' && 'Enter the verification code'}
+          {step === 'newPassword' && 'Set a new password'}
         </Text>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -187,7 +205,7 @@ const ResetPasswordScreen = () => {
         {renderStep()}
 
         <Button
-          title="Giriş Sayfasına Dön"
+          title="Back to Login"
           onPress={() => router.back()}
           style={styles.backButton}
         />
@@ -201,7 +219,7 @@ export default ResetPasswordScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
     justifyContent: 'center',
     padding: 20,
   },
@@ -238,4 +256,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
   },
-}); 
+});

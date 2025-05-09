@@ -9,13 +9,13 @@ export default function ScheduleScreen() {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Haftalık Program</Text>
+        <Text style={styles.headerTitle}>Weekly Schedule</Text>
       </View>
 
-      {/* Buraya haftalık program içeriği gelecek */}
+      {/* Weekly schedule content will be added here */}
       <View style={styles.scheduleContainer}>
-        <Text style={styles.dayTitle}>Pazartesi</Text>
-        {/* Ders kartları buraya gelecek */}
+        <Text style={styles.dayTitle}>Monday</Text>
+        {/* Course cards will be added here */}
       </View>
     </ScrollView>
   );

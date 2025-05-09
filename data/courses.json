@@ -1,0 +1,32 @@
+[
+    {
+        "id": "1",
+        "code": "CSI.lab",
+        "title": "Information",
+        "instructor": "Prof. Bărîlă A.",
+        "room": "Room C203",
+        "time": "Tuesday 08:00",
+        "color": "#4285F4",
+        "banner": "https://gstatic.com/classroom/themes/img_code.jpg"
+    },
+    {
+        "id": "2",
+        "code": "AP.lab",
+        "title": "Arhitecturi si Prelucrari Paralele",
+        "instructor": "Prof. Tanase C.",
+        "room": "Room D205",
+        "time": "Monday 08:00",
+        "color": "#1E8E3E",
+        "banner": "https://gstatic.com/classroom/themes/img_code.jpg"
+    },
+    {
+        "id": "3",
+        "code": "CirVLSI.lecture",
+        "title": "VLSI Circuits",
+        "instructor": "Prof. Chiuchisan I.",
+        "room": "DH Amphitheater",
+        "time": "Wednesday 17:00",
+        "color": "#C5462E",
+        "banner": "https://gstatic.com/classroom/themes/img_code.jpg"
+    }
+]

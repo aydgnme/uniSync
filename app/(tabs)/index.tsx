@@ -1,3 +1,4 @@
+import { useProfile } from "@/hooks/useProfile";
 import { scheduleService } from "@/services/schedule.service";
 import styles from "@/styles/main.styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -13,17 +14,6 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { useProfile } from "../../hooks/useProfile";
-
-interface AcademicInfo {
-  program?: string;
-  semester?: number;
-  group?: string;
-  subgroup?: string;
-  advisor?: string;
-  gpa?: number;
-  studentId?: string;
-}
 
 type MainTabParamList = {
   Home: undefined;

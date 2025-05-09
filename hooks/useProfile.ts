@@ -127,22 +127,22 @@ export const useProfile = () => {
 
   // Helper getter functions to access additional properties that are not in the type
   const getGroup = (): string => {
-    if (user?.academicInfo && '_groupName' in user.academicInfo) {
-      return (user.academicInfo as any)._groupName || '';
+    if (user?.academicInfo?.groupName) {
+      return user.academicInfo.groupName;
     }
     return '';
   };
 
   const getSubgroup = (): string => {
-    if (user?.academicInfo && '_subgroupIndex' in user.academicInfo) {
-      return (user.academicInfo as any)._subgroupIndex || '';
+    if (user?.academicInfo?.subgroupIndex) {
+      return user.academicInfo.subgroupIndex;
     }
     return '';
   };
 
   const getProfileImageUrl = (): string => {
-    if (user && '_profileImageUrl' in user) {
-      return (user as any)._profileImageUrl || '';
+    if (user?.profileImageUrl) {
+      return user.profileImageUrl || '';
     }
     return '';
   };

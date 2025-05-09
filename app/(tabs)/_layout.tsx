@@ -1,5 +1,5 @@
 import Colors from '@/constants/Colors';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
@@ -17,33 +17,38 @@ export default function TabLayout() {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
         },
         headerTintColor: Colors[colorScheme ?? 'light'].text,
+        headerShown: false,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="home" size={24} color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="schedule"
         options={{
-          title: 'Calendar',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="calendar" size={24} color={color} />,
+          title: 'Schedule',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Ionicons name="calendar-outline" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="courses"
         options={{
           title: 'Courses',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="book-education" size={24} color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Ionicons name="book-outline" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="account" size={24} color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Ionicons name="person-outline" size={24} color={color} />,
         }}
       />
     </Tabs>

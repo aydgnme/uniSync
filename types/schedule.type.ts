@@ -8,7 +8,7 @@ export interface ScheduleEntry {
   type: "LECTURE" | "LAB" | "SEMINAR";
   startTime: string; // "HH:mm"
   endTime: string;   // "HH:mm"
-  duration: number;  // dakika
+  duration: number;  // minutes
   room: string;
   teacher: string;
   group: string;

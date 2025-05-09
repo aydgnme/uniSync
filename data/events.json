@@ -1,0 +1,904 @@
+{
+  "events": [
+    {
+      "id": "7",
+      "date": "2025-10-30",
+      "title": "Campus Clean-up Day",
+      "time": "10:30",
+      "location": "FIESC Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "8",
+      "date": "2025-01-01",
+      "title": "Community Outreach Program",
+      "time": "15:30",
+      "location": "Gymnasium",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "International Students Office"
+    },
+    {
+      "id": "9",
+      "date": "2025-06-27",
+      "title": "Virtual Reality Game Jam",
+      "time": "17:00",
+      "location": "Main Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "10",
+      "date": "2025-08-14",
+      "title": "3D Printing Workshop",
+      "time": "18:30",
+      "location": "Global Learning Center",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Health Services"
+    },
+    {
+      "id": "11",
+      "date": "2025-10-11",
+      "title": "Photography Exhibition",
+      "time": "12:30",
+      "location": "Tech Hub",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "12",
+      "date": "2025-08-16",
+      "title": "Data Science Symposium",
+      "time": "14:00",
+      "location": "Main Courtyard",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Council"
+    },
+    {
+      "id": "13",
+      "date": "2025-12-06",
+      "title": "Art and Technology Fusion",
+      "time": "10:00",
+      "location": "Computer Science Department",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Innovation Hub"
+    },
+    {
+      "id": "14",
+      "date": "2025-11-04",
+      "title": "Space Exploration Panel",
+      "time": "12:00",
+      "location": "Cafeteria",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Center"
+    },
+    {
+      "id": "15",
+      "date": "2025-06-03",
+      "title": "Networking Night",
+      "time": "12:30",
+      "location": "Digital Media Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Development Center"
+    },
+    {
+      "id": "16",
+      "date": "2025-05-22",
+      "title": "AI Ethics Debate",
+      "time": "11:00",
+      "location": "Computer Science Department",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Women in STEM Society"
+    },
+    {
+      "id": "17",
+      "date": "2025-03-07",
+      "title": "Eco-Friendly Campus Drive",
+      "time": "17:30",
+      "location": "Innovation Center",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "18",
+      "date": "2025-09-05",
+      "title": "Art and Technology Fusion",
+      "time": "15:30",
+      "location": "Seminar Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Development Center"
+    },
+    {
+      "id": "19",
+      "date": "2025-05-14",
+      "title": "Leadership and Team Building Workshop",
+      "time": "13:30",
+      "location": "Physics Observatory",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "20",
+      "date": "2025-08-05",
+      "title": "Drone Racing Championship",
+      "time": "11:00",
+      "location": "Physics Observatory",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "AI Research Lab"
+    },
+    {
+      "id": "21",
+      "date": "2025-04-03",
+      "title": "GitHub for Beginners",
+      "time": "18:30",
+      "location": "Design Studio",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Sports Committee"
+    },
+    {
+      "id": "22",
+      "date": "2025-08-06",
+      "title": "Space Exploration Panel",
+      "time": "10:30",
+      "location": "Business School Lounge",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Business Incubator"
+    },
+    {
+      "id": "23",
+      "date": "2025-05-24",
+      "title": "Digital Marketing Training",
+      "time": "16:00",
+      "location": "Physics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Tech Enthusiasts Club"
+    },
+    {
+      "id": "24",
+      "date": "2025-10-11",
+      "title": "Resume Building Session",
+      "time": "9:30",
+      "location": "Tech Hub",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "25",
+      "date": "2025-06-09",
+      "title": "Music Production Workshop",
+      "time": "15:00",
+      "location": "Seminar Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Relations Department"
+    },
+    {
+      "id": "26",
+      "date": "2025-12-30",
+      "title": "Leadership and Team Building Workshop",
+      "time": "13:00",
+      "location": "Tech Hub",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Digital Media Group"
+    },
+    {
+      "id": "27",
+      "date": "2025-04-23",
+      "title": "Cryptocurrency and Web3 Panel",
+      "time": "10:30",
+      "location": "Student Union",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Cultural Exchange Program"
+    },
+    {
+      "id": "28",
+      "date": "2025-02-24",
+      "title": "Startup Pitch Day",
+      "time": "10:30",
+      "location": "Main Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "International Students Office"
+    },
+    {
+      "id": "29",
+      "date": "2025-06-22",
+      "title": "Drone Racing Championship",
+      "time": "17:30",
+      "location": "Cafeteria",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Cultural Exchange Program"
+    },
+    {
+      "id": "30",
+      "date": "2025-08-08",
+      "title": "Startup Pitch Day",
+      "time": "10:00",
+      "location": "Global Learning Center",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Health Services"
+    },
+    {
+      "id": "31",
+      "date": "2025-04-10",
+      "title": "Debate Night",
+      "time": "10:30",
+      "location": "Library",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Administration"
+    },
+    {
+      "id": "32",
+      "date": "2025-07-31",
+      "title": "Virtual Hackathon",
+      "time": "12:30",
+      "location": "Main Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Cultural Exchange Program"
+    },
+    {
+      "id": "33",
+      "date": "2025-09-12",
+      "title": "Personal Branding Seminar",
+      "time": "17:00",
+      "location": "Digital Media Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "34",
+      "date": "2025-06-10",
+      "title": "Fundraising Gala",
+      "time": "17:00",
+      "location": "Innovation Garage",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Council"
+    },
+    {
+      "id": "35",
+      "date": "2025-03-10",
+      "title": "Hackathon: Code Marathon",
+      "time": "18:30",
+      "location": "Robotics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Women in STEM Society"
+    },
+    {
+      "id": "36",
+      "date": "2025-07-09",
+      "title": "Career Panel: Life After Graduation",
+      "time": "15:00",
+      "location": "Computer Science Department",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "37",
+      "date": "2025-03-16",
+      "title": "Robotics Design Challenge",
+      "time": "15:00",
+      "location": "Alumni Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "AI Research Lab"
+    },
+    {
+      "id": "38",
+      "date": "2025-02-07",
+      "title": "Virtual Reality Experience",
+      "time": "17:30",
+      "location": "Central Auditorium",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Leadership Academy"
+    },
+    {
+      "id": "39",
+      "date": "2025-12-26",
+      "title": "AR/VR Hackathon",
+      "time": "14:00",
+      "location": "Digital Media Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Development Center"
+    },
+    {
+      "id": "40",
+      "date": "2025-02-03",
+      "title": "Blockchain 101",
+      "time": "18:00",
+      "location": "Robotics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "41",
+      "date": "2025-03-07",
+      "title": "Open Source Contributions Workshop",
+      "time": "9:30",
+      "location": "Conference Room A",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Leadership Academy"
+    },
+    {
+      "id": "42",
+      "date": "2025-11-16",
+      "title": "Cryptocurrency and Web3 Panel",
+      "time": "12:30",
+      "location": "Conference Room A",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Leadership Academy"
+    },
+    {
+      "id": "43",
+      "date": "2025-02-12",
+      "title": "Cryptocurrency and Web3 Panel",
+      "time": "17:00",
+      "location": "Main Courtyard",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "EcoFuture Student Association"
+    },
+    {
+      "id": "44",
+      "date": "2025-10-22",
+      "title": "Chess Tournament",
+      "time": "13:30",
+      "location": "Innovation Garage",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Relations Department"
+    },
+    {
+      "id": "45",
+      "date": "2025-11-05",
+      "title": "Green Energy Day",
+      "time": "17:30",
+      "location": "Outdoor Sports Ground",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Health Services"
+    },
+    {
+      "id": "46",
+      "date": "2025-09-24",
+      "title": "Speed Networking Event",
+      "time": "15:00",
+      "location": "Tech Hub",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "47",
+      "date": "2025-06-25",
+      "title": "Augmented Reality Workshop",
+      "time": "12:00",
+      "location": "Computer Science Department",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Women in STEM Society"
+    },
+    {
+      "id": "48",
+      "date": "2025-10-06",
+      "title": "Startup Pitch Day",
+      "time": "15:30",
+      "location": "Event Pavilion",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Development Center"
+    },
+    {
+      "id": "49",
+      "date": "2025-04-11",
+      "title": "Leadership and Team Building Workshop",
+      "time": "15:00",
+      "location": "Conference Room A",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Administration"
+    },
+    {
+      "id": "50",
+      "date": "2025-06-28",
+      "title": "Mental Health Support Circle",
+      "time": "17:30",
+      "location": "Design Studio",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "51",
+      "date": "2025-11-28",
+      "title": "Quantum Computing Talk",
+      "time": "9:30",
+      "location": "Library Basement",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Administration"
+    },
+    {
+      "id": "52",
+      "date": "2025-02-09",
+      "title": "Environmental Awareness Campaign",
+      "time": "16:30",
+      "location": "Library Basement",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Research Institute"
+    },
+    {
+      "id": "53",
+      "date": "2025-10-20",
+      "title": "Music Production Workshop",
+      "time": "18:30",
+      "location": "Eco Garden",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "54",
+      "date": "2025-01-12",
+      "title": "Cloud Computing Basics",
+      "time": "16:30",
+      "location": "Physics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Sports Committee"
+    },
+    {
+      "id": "55",
+      "date": "2025-09-26",
+      "title": "Science Fair",
+      "time": "15:30",
+      "location": "Innovation Garage",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Research Institute"
+    },
+    {
+      "id": "56",
+      "date": "2025-11-13",
+      "title": "Mobile Game Design Challenge",
+      "time": "15:30",
+      "location": "FIESC Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Digital Media Group"
+    },
+    {
+      "id": "57",
+      "date": "2025-11-05",
+      "title": "Speed Networking Event",
+      "time": "14:00",
+      "location": "Central Auditorium",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "58",
+      "date": "2025-10-04",
+      "title": "Guest Lecture: Industry 4.0",
+      "time": "11:30",
+      "location": "Robotics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Leadership Academy"
+    },
+    {
+      "id": "59",
+      "date": "2025-12-17",
+      "title": "Debate Night",
+      "time": "10:00",
+      "location": "Conference Room A",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Computer Science Club"
+    },
+    {
+      "id": "60",
+      "date": "2025-01-21",
+      "title": "Resume Building Session",
+      "time": "13:30",
+      "location": "Online (Zoom)",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Volunteer Organization"
+    },
+    {
+      "id": "61",
+      "date": "2025-11-03",
+      "title": "AI for Social Good",
+      "time": "16:00",
+      "location": "Eco Garden",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Relations Department"
+    },
+    {
+      "id": "62",
+      "date": "2025-01-05",
+      "title": "Cloud Computing Basics",
+      "time": "18:00",
+      "location": "Robotics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "63",
+      "date": "2025-12-31",
+      "title": "Art & Design Expo",
+      "time": "14:30",
+      "location": "Eco Garden",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "64",
+      "date": "2025-01-30",
+      "title": "Cloud Computing Basics",
+      "time": "13:30",
+      "location": "Main Courtyard",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Art and Design Society"
+    },
+    {
+      "id": "65",
+      "date": "2025-10-15",
+      "title": "Sports Fest",
+      "time": "15:30",
+      "location": "Art Gallery",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Innovation Hub"
+    },
+    {
+      "id": "66",
+      "date": "2025-01-25",
+      "title": "AR/VR Hackathon",
+      "time": "16:30",
+      "location": "Library Basement",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Leadership Academy"
+    },
+    {
+      "id": "67",
+      "date": "2025-02-28",
+      "title": "Workshop: Machine Learning",
+      "time": "17:30",
+      "location": "Main Courtyard",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "EcoFuture Student Association"
+    },
+    {
+      "id": "68",
+      "date": "2025-07-07",
+      "title": "Physics of Space Travel",
+      "time": "17:00",
+      "location": "Music Room",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Computer Science Club"
+    },
+    {
+      "id": "69",
+      "date": "2025-07-29",
+      "title": "Tech Leadership Panel",
+      "time": "14:30",
+      "location": "Physics Observatory",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Art and Design Society"
+    },
+    {
+      "id": "70",
+      "date": "2025-11-07",
+      "title": "Community Outreach Program",
+      "time": "12:00",
+      "location": "Digital Media Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "71",
+      "date": "2025-06-18",
+      "title": "Environmental Awareness Campaign",
+      "time": "17:30",
+      "location": "Main Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Relations Department"
+    },
+    {
+      "id": "72",
+      "date": "2025-10-04",
+      "title": "Sustainable Energy Forum",
+      "time": "14:00",
+      "location": "Physics Observatory",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Health Services"
+    },
+    {
+      "id": "73",
+      "date": "2025-02-21",
+      "title": "AI Chatbot Development Workshop",
+      "time": "16:00",
+      "location": "Gymnasium",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Relations Department"
+    },
+    {
+      "id": "74",
+      "date": "2025-10-25",
+      "title": "Sustainable Energy Forum",
+      "time": "9:30",
+      "location": "Library",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "75",
+      "date": "2025-04-15",
+      "title": "Job Fair",
+      "time": "17:30",
+      "location": "Global Learning Center",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Health Services"
+    },
+    {
+      "id": "76",
+      "date": "2025-04-13",
+      "title": "Debate Competition",
+      "time": "11:30",
+      "location": "FIESC Hall",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "77",
+      "date": "2025-07-26",
+      "title": "Ethical AI Forum",
+      "time": "17:30",
+      "location": "VR Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Sports Committee"
+    },
+    {
+      "id": "78",
+      "date": "2025-10-16",
+      "title": "Science Fair",
+      "time": "10:00",
+      "location": "Digital Media Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Volunteer Organization"
+    },
+    {
+      "id": "79",
+      "date": "2025-06-16",
+      "title": "Student Idea Pitch",
+      "time": "18:00",
+      "location": "Library",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "80",
+      "date": "2025-05-29",
+      "title": "Data Science Symposium",
+      "time": "15:00",
+      "location": "Business School Lounge",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "International Students Office"
+    },
+    {
+      "id": "81",
+      "date": "2025-10-10",
+      "title": "Smart Cities Symposium",
+      "time": "9:00",
+      "location": "Open Air Theater",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Sports Committee"
+    },
+    {
+      "id": "82",
+      "date": "2025-06-08",
+      "title": "Virtual Reality Game Jam",
+      "time": "17:00",
+      "location": "Physics Observatory",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "83",
+      "date": "2025-08-22",
+      "title": "Alumni Meet",
+      "time": "13:30",
+      "location": "Open Air Theater",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "84",
+      "date": "2025-03-18",
+      "title": "AI for Social Good",
+      "time": "17:00",
+      "location": "Student Commons",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Computer Science Club"
+    },
+    {
+      "id": "85",
+      "date": "2025-03-02",
+      "title": "Art and Technology Fusion",
+      "time": "17:00",
+      "location": "Innovation Garage",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Volunteer Organization"
+    },
+    {
+      "id": "86",
+      "date": "2025-05-15",
+      "title": "Cybersecurity Seminar",
+      "time": "16:00",
+      "location": "Online (Zoom)",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "87",
+      "date": "2025-09-14",
+      "title": "Chess Tournament",
+      "time": "13:00",
+      "location": "Outdoor Sports Ground",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Administration"
+    },
+    {
+      "id": "88",
+      "date": "2025-06-01",
+      "title": "Ethical Hacking Workshop",
+      "time": "10:00",
+      "location": "Physics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Career Services Office"
+    },
+    {
+      "id": "89",
+      "date": "2025-12-27",
+      "title": "Space Tech Day",
+      "time": "17:00",
+      "location": "Conference Room A",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Sports Committee"
+    },
+    {
+      "id": "90",
+      "date": "2025-09-22",
+      "title": "Student Research Presentations",
+      "time": "11:00",
+      "location": "Outdoor Sports Ground",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Tech Enthusiasts Club"
+    },
+    {
+      "id": "91",
+      "date": "2025-09-30",
+      "title": "Virtual Hackathon",
+      "time": "10:00",
+      "location": "Main Courtyard",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Digital Media Group"
+    },
+    {
+      "id": "92",
+      "date": "2025-05-01",
+      "title": "Hackathon: Code Marathon",
+      "time": "9:30",
+      "location": "Online (Zoom)",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Cultural Exchange Program"
+    },
+    {
+      "id": "93",
+      "date": "2025-04-26",
+      "title": "Chess Tournament",
+      "time": "18:30",
+      "location": "Physics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Innovation Hub"
+    },
+    {
+      "id": "94",
+      "date": "2025-06-09",
+      "title": "Global Village",
+      "time": "13:00",
+      "location": "Student Commons",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "AI Research Lab"
+    },
+    {
+      "id": "95",
+      "date": "2025-07-18",
+      "title": "Mental Health Support Circle",
+      "time": "17:30",
+      "location": "Global Learning Center",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Research Institute"
+    },
+    {
+      "id": "96",
+      "date": "2025-06-06",
+      "title": "Space Technology Seminar",
+      "time": "18:30",
+      "location": "Central Auditorium",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Business Incubator"
+    },
+    {
+      "id": "97",
+      "date": "2025-10-06",
+      "title": "Student Film Festival",
+      "time": "14:30",
+      "location": "Gymnasium",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Tech Enthusiasts Club"
+    },
+    {
+      "id": "98",
+      "date": "2025-01-13",
+      "title": "AI Model Deployment Workshop",
+      "time": "14:00",
+      "location": "Central Auditorium",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Alumni Network"
+    },
+    {
+      "id": "99",
+      "date": "2025-06-11",
+      "title": "Student Talent Show",
+      "time": "11:00",
+      "location": "Physics Lab",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "AI Research Lab"
+    },
+    {
+      "id": "100",
+      "date": "2025-09-13",
+      "title": "AI and Society Debate",
+      "time": "16:30",
+      "location": "Student Union",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "EcoFuture Student Association"
+    },
+    {
+      "id": "101",
+      "date": "2025-07-30",
+      "title": "Science Fair",
+      "time": "16:30",
+      "location": "Computer Science Department",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Digital Media Group"
+    },
+    {
+      "id": "102",
+      "date": "2025-08-22",
+      "title": "Game Development Jam",
+      "time": "11:30",
+      "location": "Main Courtyard",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Entrepreneurship Society"
+    },
+    {
+      "id": "103",
+      "date": "2025-02-02",
+      "title": "Physics of Space Travel",
+      "time": "9:30",
+      "location": "Student Commons",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Student Council"
+    },
+    {
+      "id": "104",
+      "date": "2025-10-08",
+      "title": "Global Village",
+      "time": "15:00",
+      "location": "Business School Lounge",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Computer Science Club"
+    },
+    {
+      "id": "105",
+      "date": "2025-10-16",
+      "title": "Film Screening",
+      "time": "13:30",
+      "location": "Open Air Theater",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "Business Incubator"
+    },
+    {
+      "id": "106",
+      "date": "2025-08-05",
+      "title": "AI in Healthcare Panel",
+      "time": "15:30",
+      "location": "Art Gallery",
+      "description": "An engaging event focused on learning, networking, and collaboration.",
+      "organizer": "University Administration"
+    }
+  ]
+}

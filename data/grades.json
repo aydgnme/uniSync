@@ -1,0 +1,115 @@
+{
+    "matriculationNumber": "68159",
+    "years": [
+        {
+            "year": 1,
+            "semesters": [
+                {
+                    "semester": 1,
+                    "courses": [
+                        {
+                            "code": "CS101",
+                            "title": "Mathematics I",
+                            "instructor": "Dr. Popescu",
+                            "credits": 6,
+                            "midtermGrade": 35,
+                            "finalGrade": 45,
+                            "totalGrade": 41,
+                            "status": "Failed"
+                        },
+                        {
+                            "code": "CS102",
+                            "title": "Introduction to Programming",
+                            "instructor": "Dr. Ionescu",
+                            "credits": 5,
+                            "midtermGrade": 85,
+                            "finalGrade": 90,
+                            "totalGrade": 88,
+                            "status": "Passed"
+                        }
+                    ]
+                },
+                {
+                    "semester": 2,
+                    "courses": [
+                        {
+                            "code": "CS103",
+                            "title": "Mathematics II",
+                            "instructor": "Dr. Popescu",
+                            "credits": 6,
+                            "midtermGrade": 75,
+                            "finalGrade": 85,
+                            "totalGrade": 81,
+                            "status": "Passed"
+                        },
+                        {
+                            "code": "CS104",
+                            "title": "Data Structures",
+                            "instructor": "Dr. Ionescu",
+                            "credits": 5,
+                            "midtermGrade": 90,
+                            "finalGrade": 95,
+                            "totalGrade": 93,
+                            "status": "Passed"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "year": 2,
+            "semesters": [
+                {
+                    "semester": 1,
+                    "courses": [
+                        {
+                            "code": "CS201",
+                            "title": "Database Systems",
+                            "instructor": "Dr. Smith",
+                            "credits": 6,
+                            "midtermGrade": 78,
+                            "finalGrade": 82,
+                            "totalGrade": 80,
+                            "status": "Passed"
+                        },
+                        {
+                            "code": "CS202",
+                            "title": "Algorithms",
+                            "instructor": "Dr. Johnson",
+                            "credits": 5,
+                            "midtermGrade": 88,
+                            "finalGrade": 92,
+                            "totalGrade": 90,
+                            "status": "Passed"
+                        }
+                    ]
+                },
+                {
+                    "semester": 2,
+                    "courses": [
+                        {
+                            "code": "CS203",
+                            "title": "Operating Systems",
+                            "instructor": "Dr. Brown",
+                            "credits": 6,
+                            "midtermGrade": 82,
+                            "finalGrade": 88,
+                            "totalGrade": 86,
+                            "status": "Passed"
+                        },
+                        {
+                            "code": "CS204",
+                            "title": "Computer Networks",
+                            "instructor": "Dr. Davis",
+                            "credits": 5,
+                            "midtermGrade": 76,
+                            "finalGrade": 84,
+                            "totalGrade": 81,
+                            "status": "Passed"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+} 

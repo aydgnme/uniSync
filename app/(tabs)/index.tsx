@@ -4,6 +4,7 @@ import styles from "@/styles/main.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AppState,
@@ -12,16 +13,14 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 type MainTabParamList = {
   Home: undefined;
   Profile: undefined;
   Calendar: undefined;
-  Grades: undefined;
   Courses: undefined;
-  Messages: undefined;
   Announcements: undefined;
 };
 
@@ -60,14 +59,15 @@ export default function MainScreen() {
   const [scheduleLoading, setScheduleLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const appState = useRef(AppState.currentState);
+  const router = useRouter();
 
   useEffect(() => {
     fetchUserProfile();
   }, []);
 
   useEffect(() => {
-    console.log('User data:', user);
-    console.log('Loading state:', loading);
+    console.log("User data:", user);
+    console.log("Loading state:", loading);
   }, [user, loading]);
 
   const transformToScheduleItem = (entry: any): ScheduleItem => ({
@@ -76,11 +76,12 @@ export default function MainScreen() {
     location: entry.room,
     professor: entry.teacher,
   });
-  
+
   const fetchTodaySchedule = async () => {
-    console.log('Fetching schedule with academicInfo:', user?.academicInfo);
+    console.log("Fetching schedule with academicInfo:", user?.academicInfo);
     if (!user?.academicInfo?.groupName || !user?.academicInfo?.subgroupIndex) {
-      const errorMsg = "Group and subgroup information is missing. Please update your profile.";
+      const errorMsg =
+        "Group and subgroup information is missing. Please update your profile.";
       console.error(errorMsg, { academicInfo: user?.academicInfo });
       setError(errorMsg);
       setSchedule([]);
@@ -90,31 +91,34 @@ export default function MainScreen() {
     setScheduleLoading(true);
     setError(null);
     try {
-      console.log('Calling schedule service with:', {
+      console.log("Calling schedule service with:", {
         group: user.academicInfo.groupName,
-        subgroup: user.academicInfo.subgroupIndex
+        subgroup: user.academicInfo.subgroupIndex,
       });
-      
+
       const response = await scheduleService.getTodaySchedule(
         user.academicInfo.groupName,
         user.academicInfo.subgroupIndex
       );
-      
+
       if (!response?.data?.data?.courses) {
         const errorMsg = "No schedule found for today.";
-        console.error('Invalid schedule response:', { response });
+        console.error("Invalid schedule response:", { response });
         setError(errorMsg);
         setSchedule([]);
         return;
       }
 
-      console.log('Today schedule response:', response.data);
-      const transformedSchedule = response.data.data.courses.map(transformToScheduleItem);
-      console.log('Transformed schedule:', transformedSchedule);
+      console.log("Today schedule response:", response.data);
+      const transformedSchedule = response.data.data.courses.map(
+        transformToScheduleItem
+      );
+      console.log("Transformed schedule:", transformedSchedule);
       setSchedule(transformedSchedule);
     } catch (err: any) {
-      const errorMsg = "An error occurred while loading the schedule. Please try again later.";
-      console.error('Today schedule error:', err);
+      const errorMsg =
+        "An error occurred while loading the schedule. Please try again later.";
+      console.error("Today schedule error:", err);
       setError(errorMsg);
       setSchedule([]);
     } finally {
@@ -170,7 +174,7 @@ export default function MainScreen() {
         <View style={styles.header}>
           <View style={styles.greetingContainer}>
             <Text style={styles.greeting}>Hello, </Text>
-            <Text style={styles.userName}>{user?.name || 'Guest'}</Text>
+            <Text style={styles.userName}>{user?.name || "Guest"}</Text>
             <Text style={styles.welcomeText}>Welcome!</Text>
           </View>
           <TouchableOpacity
@@ -190,22 +194,22 @@ export default function MainScreen() {
           <QuickActionButton
             icon="calendar-outline"
             label="Calendar"
-            onPress={() => navigation.navigate("Calendar")}
+            onPress={() => router.push("/schedule")}
           />
           <QuickActionButton
             icon="library-outline"
             label="Grades"
-            onPress={() => navigation.navigate("Grades")}
+            onPress={() => router.push("/(screens)/grades")}
           />
           <QuickActionButton
             icon="document-text-outline"
             label="Courses"
-            onPress={() => navigation.navigate("Courses")}
+            onPress={() => router.push("/courses")}
           />
           <QuickActionButton
             icon="mail-outline"
             label="Messages"
-            onPress={() => navigation.navigate("Messages")}
+            onPress={() => router.push("/(screens)/messages")}
           />
         </View>
 
@@ -249,21 +253,14 @@ export default function MainScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Announcements</Text>
           {announcements.map((announcement, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.announcementCard}
-            >
+            <TouchableOpacity key={index} style={styles.announcementCard}>
               <View style={styles.announcementHeader}>
                 <Text style={styles.announcementTitle}>
                   {announcement.title}
                 </Text>
-                <Text style={styles.announcementType}>
-                  {announcement.type}
-                </Text>
+                <Text style={styles.announcementType}>{announcement.type}</Text>
               </View>
-              <Text style={styles.announcementDate}>
-                {announcement.date}
-              </Text>
+              <Text style={styles.announcementDate}>{announcement.date}</Text>
             </TouchableOpacity>
           ))}
         </View>

@@ -19,7 +19,7 @@ export default function CoursesLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Courses",
+          title: "Grades",
           headerStyle: {
             backgroundColor: Colors[colorScheme ?? "light"].background,
           },
@@ -29,7 +29,7 @@ export default function CoursesLayout() {
       <Stack.Screen
         name="[id]/index"
         options={{
-          title: "Course Details",
+          title: "Grade Details",
           headerStyle: {
             backgroundColor: "#f5f5f5",
           },

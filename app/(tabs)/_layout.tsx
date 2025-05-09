@@ -23,7 +23,6 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          headerShown: false,
           tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={24} color={color} />,
         }}
       />
@@ -31,7 +30,6 @@ export default function TabLayout() {
         name="schedule"
         options={{
           title: 'Schedule',
-          headerShown: false,
           tabBarIcon: ({ color }) => <Ionicons name="calendar-outline" size={24} color={color} />,
         }}
       />
@@ -39,7 +37,6 @@ export default function TabLayout() {
         name="courses"
         options={{
           title: 'Courses',
-          headerShown: false,
           tabBarIcon: ({ color }) => <Ionicons name="book-outline" size={24} color={color} />,
         }}
       />
@@ -47,10 +44,10 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          headerShown: false,
           tabBarIcon: ({ color }) => <Ionicons name="person-outline" size={24} color={color} />,
         }}
       />
+      
     </Tabs>
   );
 }

@@ -1,5 +1,5 @@
 import { styles } from '@/styles/calendar.styles';
-import { Event, MarkedDates } from '@/types/calendar.type';
+import { Class, Event, MarkedDates } from '@/types/calendar.type';
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
@@ -10,9 +10,23 @@ interface MonthViewProps {
     markedDates: MarkedDates;
     onDateChange: (date: string) => void;
     events: Event[];
+    classes: Class[];
 }
 
-const MonthView: React.FC<MonthViewProps> = ({ selectedDate, markedDates, onDateChange, events }) => {
+const MonthView: React.FC<MonthViewProps> = ({ 
+    selectedDate, 
+    markedDates, 
+    onDateChange, 
+    events,
+    classes = [] 
+}) => {
+    // Seçili günün derslerini filtreleme
+    const getClassesForDate = (date: string) => {
+        const dayOfWeek = new Date(date).getDay();
+        const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        return classes.filter(cls => cls.day.toLowerCase() === daysOfWeek[dayOfWeek]);
+    };
+
     return (
         <View style={styles.monthContainer}>
             <Calendar
@@ -34,11 +48,26 @@ const MonthView: React.FC<MonthViewProps> = ({ selectedDate, markedDates, onDate
             />
 
             <ScrollView style={styles.eventList}>
+                {/* Dersler */}
+                {getClassesForDate(selectedDate).map(cls => (
+                    <View key={cls.id} style={styles.classCard}>
+                        <Text style={styles.classTitle}>{cls.title}</Text>
+                        <Text style={styles.classTime}>
+                            {cls.startTime} - {cls.endTime}
+                        </Text>
+                        <Text style={styles.classRoom}>Room: {cls.room}</Text>
+                    </View>
+                ))}
+
+                {/* Etkinlikler */}
                 {events.filter(event => event.date === selectedDate).map(event => (
                     <EventCard key={event.id} event={event} />
                 ))}
-                {events.filter(event => event.date === selectedDate).length === 0 && (
-                    <Text style={styles.noEventsText}>No events on this date</Text>
+
+                {/* Ders ve etkinlik yoksa */}
+                {getClassesForDate(selectedDate).length === 0 && 
+                 events.filter(event => event.date === selectedDate).length === 0 && (
+                    <Text style={styles.noEventsText}>No classes or events on this date</Text>
                 )}
             </ScrollView>
         </View>

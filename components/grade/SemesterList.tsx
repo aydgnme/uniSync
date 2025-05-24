@@ -18,13 +18,13 @@ const SemesterList: React.FC<SemesterListProps> = ({ semesterData }) => {
             <Text style={styles.semesterTitle}>Semester {semesterData.semester}</Text>
             {semesterData.courses.map((course) => (
                 <GradeCard 
-                    key={course.code} 
+                    key={course.id} 
                     course={{
-                        id: course.code,
-                        name: course.title,
+                        id: course.id,
+                        name: course.name,
                         code: course.code,
-                        credits: course.credits,
-                        grade: course.totalGrade
+                        credits: 3,
+                        grade: course.grade
                     }} 
                 />
             ))}

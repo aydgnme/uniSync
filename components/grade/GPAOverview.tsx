@@ -18,20 +18,20 @@ const GPAOverview: React.FC<GPAOverviewProps> = ({ gradesData }) => {
 
         gradesData.forEach((semester) => {
             semester.courses.forEach((course) => {
-                if (course.status === "Promovat") {
+                if (course.status === "PASSED") {
                     totalCredits += course.credits;
-                    weightedSum += course.credits * course.totalGrade;
+                    weightedSum += course.credits * course.grade;
                 }
             });
         });
 
-        return totalCredits > 0 ? (weightedSum / totalCredits).toFixed(2) : '0.00';
+        return totalCredits > 0 ? (weightedSum / totalCredits) : 0;
     }, [gradesData]);
 
     return (
         <View style={styles.container}>
             <Text style={styles.gpaTitle}>Overall GPA</Text>
-            <Text style={styles.gpaValue}>{gpa}</Text>
+            <Text style={styles.gpaValue}>{gpa.toFixed(2)}</Text>
         </View>
     );
 };

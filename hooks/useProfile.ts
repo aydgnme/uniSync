@@ -1,33 +1,39 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { authService } from "../services/auth.service";
 import { User, UserRole } from '../types/user.type';
 
-
 interface UserProfileResponse {
   _id: string;
-  name: string;
   email: string;
+  password?: string;
+  cnp?: string;
+  matriculationNumber?: string;
+  name: string;
   role: string;
   phone?: string;
   address?: string;
-  cnp?: string;
-  matriculationNumber?: string;
   academicInfo?: {
     program?: string;
     semester?: number;
+    groupName?: string;
+    subgroupIndex?: string;
     studentId?: string;
     advisor?: string;
     gpa?: number;
-    groupName?: string;
-    subgroupIndex?: string;
+    specializationShortName?: string;
+    facultyId?: string;
+    _id?: string;
+    studyYear?: number;
   };
-  profileImageUrl?: string;
+  enrolledLectures?: string[];
+  __v?: number;
 }
 
 const mapResponseToUser = (response: UserProfileResponse): User => {
+  console.log('Mapping user profile response:', JSON.stringify(response, null, 2));
+  
   // Role validation
   let userRole: UserRole;
   if (response.role === 'Student' || response.role === 'Professor' || response.role === 'Admin') {
@@ -38,7 +44,7 @@ const mapResponseToUser = (response: UserProfileResponse): User => {
   }
 
   // Create user object from API response
-  return {
+  const user = {
     id: response._id,
     email: response.email,
     name: response.name,
@@ -47,17 +53,24 @@ const mapResponseToUser = (response: UserProfileResponse): User => {
     address: response.address || '',
     cnp: response.cnp || '',
     matriculationNumber: response.matriculationNumber || '',
-    profileImageUrl: response.profileImageUrl,
+    enrolledLectures: response.enrolledLectures || [],
     academicInfo: response.academicInfo ? {
       program: response.academicInfo.program || '',
       semester: response.academicInfo.semester || 1,
+      studyYear: response.academicInfo.studyYear || 1,
       studentId: response.academicInfo.studentId || '',
       advisor: response.academicInfo.advisor || '',
       groupName: response.academicInfo.groupName || '',
       subgroupIndex: response.academicInfo.subgroupIndex || '',
       gpa: response.academicInfo.gpa || 0,
+      facultyId: response.academicInfo.facultyId || '',
+      specializationShortName: response.academicInfo.specializationShortName || '',
+      _id: response.academicInfo._id || ''
     } : undefined
   };
+
+  console.log('Mapped user object:', JSON.stringify(user, null, 2));
+  return user;
 };
 
 export const useProfile = () => {
@@ -72,18 +85,25 @@ export const useProfile = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const userId = await AsyncStorage.getItem('userId');
-      const token = await AsyncStorage.getItem('token');
+      const storedUser = await authService.getUser();
+      const token = await authService.getToken();
 
-      if (!userId || !token) {
+      if (!storedUser || !token) {
+        console.log('No stored user or token found');
         throw new Error('User not authenticated');
       }
 
-      console.log('Fetching profile, userId:', userId);
-      const response = await authService.getUserProfile(userId);
-      console.log('Profile response:', response);
+      console.log('Fetching profile, userId:', storedUser._id);
+      const response = await authService.getUserProfile(storedUser._id);
+      console.log('Profile response:', JSON.stringify(response, null, 2));
       
+      if (!response) {
+        throw new Error('No response from profile API');
+      }
+
       const mappedUser = mapResponseToUser(response);
+      console.log('User data:', JSON.stringify(mappedUser, null, 2));
+      
       setUser(mappedUser);
       setError(null);
     } catch (err: any) {
@@ -112,7 +132,7 @@ export const useProfile = () => {
           text: 'Logout',
           onPress: async () => {
             try {
-              await AsyncStorage.multiRemove(['token', 'userId']);
+              await authService.logout();
               router.replace('/(auth)/login');
             } catch (err) {
               console.error('Logout error:', err);
@@ -147,6 +167,14 @@ export const useProfile = () => {
     return '';
   };
 
+  const getAcademicInfo = () => {
+    if (user?.academicInfo) {
+      console.log('Academic Info:', JSON.stringify(user.academicInfo, null, 2));
+      return user.academicInfo;
+    }
+    return null;
+  };
+
   return {
     user,
     loading,
@@ -155,6 +183,7 @@ export const useProfile = () => {
     handleLogout,
     getGroup,
     getSubgroup,
-    getProfileImageUrl
+    getProfileImageUrl,
+    getAcademicInfo
   };
 }; 

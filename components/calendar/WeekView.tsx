@@ -1,16 +1,32 @@
 import { styles } from '@/styles/calendar.styles';
-import { Event } from '@/types/calendar.type';
+import { Course as CalendarCourse } from '@/types/calendar.type';
+import { Course } from '@/types/course.type';
 import moment from 'moment';
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import EventCard from './EventCard';
+import WeekCourseCard from './WeekCourseCard';
 
 interface WeekViewProps {
     selectedDate: string;
-    events: Event[];
+    events: CalendarCourse[];
 }
 
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+const convertToCourse = (event: CalendarCourse): Course => {
+    const [startTime, endTime] = event.time.split(' - ');
+    return {
+        code: event.group,
+        title: event.title,
+        type: event.type === 'lecture' ? 'LECTURE' : event.type === 'course' ? 'LAB' : 'SEMINAR',
+        startTime,
+        endTime,
+        duration: event.duration,
+        room: event.location,
+        teacher: event.teacher,
+        weekDay: moment(event.date).isoWeekday(),
+    };
+};
 
 const WeekView: React.FC<WeekViewProps> = ({ selectedDate, events }) => {
     const weekStart = moment(selectedDate).startOf("isoWeek");
@@ -29,7 +45,7 @@ const WeekView: React.FC<WeekViewProps> = ({ selectedDate, events }) => {
                             <Text style={styles.weekDayDate}>{day.format("DD MMMM")}</Text>
                         </View>
                         {dayEvents.map(event => (
-                            <EventCard key={event.id} event={event} />
+                            <WeekCourseCard key={event.id} course={convertToCourse(event)} />
                         ))}
                         {dayEvents.length === 0 && (
                             <Text style={styles.noEventsText}>No events</Text>

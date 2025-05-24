@@ -1,96 +1,105 @@
+import { useGrades } from '@/hooks/useGrades';
 import { styles } from '@/styles/gradeDetails.styles';
-import { Course, getCourseByCode } from '@/utils/courseUtils';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 
 const GradeDetails = () => {
     const { id } = useLocalSearchParams();
-    const [course, setCourse] = useState<Course | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { grades } = useGrades();
 
-    useEffect(() => {
-        const fetchCourseDetails = async () => {
-            setLoading(true);
-            try {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                const courseDetails = getCourseByCode(id as string);
-                setCourse(courseDetails);
-            } catch (error) {
-                console.error('Error fetching course details:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (id) {
-            fetchCourseDetails();
-        }
-    }, [id]);
-
-    const calculateWeightedAverage = (course: Course): string => {
-        // Assuming midterm is 40% and final is 60% of the total grade
-        const midtermWeight = 0.4;
-        const finalWeight = 0.6;
-        const weightedAverage = (course.midtermGrade * midtermWeight) + (course.finalGrade * finalWeight);
-        return weightedAverage.toFixed(2);
-    };
-
-    if (loading) {
-        return (
-            <View style={[styles.container, styles.centerContent]}>
-                <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-        );
-    }
+    const course = useMemo(() => {
+        return grades.find(grade => grade._id === id);
+    }, [grades, id]);
 
     if (!course) {
         return (
             <View style={[styles.container, styles.centerContent]}>
-                <Text style={styles.errorText}>Course not found</Text>
+                <Text style={styles.errorText}>Course information not found.</Text>
             </View>
         );
     }
 
+    const getGradeColor = (grade: number) => {
+        if (grade >= 8) return '#4CAF50'; // Good (Green)
+        if (grade >= 5) return '#FF9800'; // Medium (Orange)
+        return '#F44336'; // Failed (Red)
+    };
+
     return (
         <ScrollView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.courseName}>{course.title}</Text>
-                <Text style={styles.courseCode}>{course.code}</Text>
+                <Text style={styles.courseName}>{course.lecture.title}</Text>
+                <Text style={styles.courseCode}>Course Code: {course.lecture.code}</Text>
             </View>
             
             <View style={styles.infoContainer}>
                 <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Credits</Text>
-                    <Text style={styles.infoValue}>{course.credits}</Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Final Grade</Text>
-                    <Text style={styles.infoValue}>{course.totalGrade}</Text>
+                    <Text style={styles.infoLabel}>Total Grade</Text>
+                    <Text style={[styles.infoValue, { color: getGradeColor(course.totalGrade) }]}> 
+                        {course.totalGrade.toFixed(1)}
+                    </Text>
                 </View>
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Status</Text>
-                    <Text style={styles.infoValue}>{course.status}</Text>
+                    <Text style={[styles.infoValue, { 
+                        color: course.status === 'PASSED' ? '#4CAF50' : '#F44336' 
+                    }]}> 
+                        {course.status === 'PASSED' ? 'Passed' : 'Failed'}
+                    </Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoLabel}>Retake Count</Text>
+                    <Text style={styles.infoValue}>{course.retakeCount}</Text>
                 </View>
             </View>
 
             <View style={styles.examsContainer}>
-                <Text style={styles.sectionTitle}>Grades</Text>
+                <Text style={styles.sectionTitle}>Grade Details</Text>
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Midterm</Text>
                     <View style={styles.examDetails}>
-                        <Text style={styles.examScore}>{course.midtermGrade}</Text>
-                        <Text style={styles.examWeight}>40%</Text>
+                        <Text style={[styles.examScore, { color: getGradeColor(course.midtermGrade) }]}> 
+                            {course.midtermGrade}
+                        </Text>
+                        <Text style={styles.examWeight}>30%</Text>
                     </View>
                 </View>
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Final</Text>
                     <View style={styles.examDetails}>
-                        <Text style={styles.examScore}>{course.finalGrade}</Text>
-                        <Text style={styles.examWeight}>60%</Text>
+                        <Text style={[styles.examScore, { color: getGradeColor(course.finalGrade) }]}> 
+                            {course.finalGrade}
+                        </Text>
+                        <Text style={styles.examWeight}>40%</Text>
                     </View>
+                </View>
+                <View style={styles.examRow}>
+                    <Text style={styles.examType}>Homework</Text>
+                    <View style={styles.examDetails}>
+                        <Text style={[styles.examScore, { color: getGradeColor(course.homeworkGrade) }]}> 
+                            {course.homeworkGrade}
+                        </Text>
+                        <Text style={styles.examWeight}>20%</Text>
+                    </View>
+                </View>
+                <View style={styles.examRow}>
+                    <Text style={styles.examType}>Attendance</Text>
+                    <View style={styles.examDetails}>
+                        <Text style={[styles.examScore, { color: getGradeColor(course.attendanceGrade) }]}> 
+                            {course.attendanceGrade}
+                        </Text>
+                        <Text style={styles.examWeight}>10%</Text>
+                    </View>
+                </View>
+            </View>
+
+            <View style={styles.infoContainer}>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoLabel}>Last Updated</Text>
+                    <Text style={styles.infoValue}>
+                        {new Date(course.lastUpdated).toLocaleDateString('en-US')}
+                    </Text>
                 </View>
             </View>
         </ScrollView>

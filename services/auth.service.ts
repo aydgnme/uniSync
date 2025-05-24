@@ -1,4 +1,5 @@
 import { API_CONFIG } from '@/config/api.config';
+import * as SecureStore from 'expo-secure-store';
 import { apiService } from './api.service';
 
 export interface LoginRequest {
@@ -18,8 +19,12 @@ export interface UserProfile {
     semester?: number;
     groupName?: string;
     subgroupIndex?: string;
+    studentId?: string;
     advisor?: string;
     gpa?: number;
+    facultyId?: string;
+    specializationShortName?: string;
+    _id?: string;
   };
 }
 
@@ -78,6 +83,8 @@ interface VerifyResetCodeResponse {
 class AuthService {
   private static instance: AuthService;
   private readonly BASE_PATH = '/auth';
+  private readonly TOKEN_KEY = 'auth_token';
+  private readonly USER_KEY = 'auth_user';
 
   private constructor() {}
 
@@ -88,10 +95,83 @@ class AuthService {
     return AuthService.instance;
   }
 
+  private async storeToken(token: string): Promise<void> {
+    try {
+      await SecureStore.setItemAsync(this.TOKEN_KEY, token);
+    } catch (error) {
+      console.error('Error storing token:', error);
+      throw error;
+    }
+  }
+
+  private async storeUser(user: UserProfile): Promise<void> {
+    try {
+      await SecureStore.setItemAsync(this.USER_KEY, JSON.stringify(user));
+    } catch (error) {
+      console.error('Error storing user:', error);
+      throw error;
+    }
+  }
+
+  public async getToken(): Promise<string | null> {
+    try {
+      return await SecureStore.getItemAsync(this.TOKEN_KEY);
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
+  }
+
+  public async getUser(): Promise<UserProfile | null> {
+    try {
+      const userStr = await SecureStore.getItemAsync(this.USER_KEY);
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return null;
+    }
+  }
+
   public async login(data: LoginRequest): Promise<LoginResponse> {
     try {
+      console.log('Attempting login with:', { email: data.email });
       const response = await apiService.post<LoginResponse>(`${this.BASE_PATH}/login`, data);
-      return response;
+      console.log('Login response received:', { token: response.token ? 'present' : 'missing' });
+      
+      if (!response.token || !response.user?._id) {
+        throw new Error('Invalid login response: missing token or user ID');
+      }
+      
+      // Store token and user data
+      await this.storeToken(response.token);
+      
+      // Set token in API service for future requests
+      apiService.setAuthToken(response.token);
+      
+      try {
+        // Fetch complete user profile
+        console.log('Fetching user profile after login');
+        const userProfile = await this.getUserProfile(response.user._id);
+        console.log('User profile fetched:', { 
+          id: userProfile._id,
+          hasAcademicInfo: !!userProfile.academicInfo 
+        });
+        
+        await this.storeUser(userProfile);
+        
+        return {
+          token: response.token,
+          user: userProfile
+        };
+      } catch (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        // If profile fetch fails, still return the initial login response
+        // but log the error for debugging
+        return {
+          token: response.token,
+          user: response.user
+        };
+      }
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -111,6 +191,11 @@ class AuthService {
   public async logout(): Promise<void> {
     try {
       await apiService.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
+      // Clear stored data
+      await SecureStore.deleteItemAsync(this.TOKEN_KEY);
+      await SecureStore.deleteItemAsync(this.USER_KEY);
+      // Clear token from API service
+      apiService.setAuthToken(null);
     } catch (error) {
       console.error('Logout error:', error);
       throw new Error('An error occurred during logout.');
@@ -179,13 +264,35 @@ class AuthService {
 
   public async getUserProfile(userId: string): Promise<UserProfile> {
     try {
+      console.log('Fetching user profile for ID:', userId);
+  
+      const token = await this.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+  
+      // Set token in API service
+      apiService.setAuthToken(token);
+  
+      // Düzgün ID ile çağırıyoruz, ekstra query param yok
       const response = await apiService.get<UserProfile>(`/users/${userId}`);
+      console.log('User profile response:', JSON.stringify(response, null, 2));
+  
+      if (!response) {
+        throw new Error('No response from profile API');
+      }
+  
       return response;
-    } catch (error) {
-      console.error('Get user profile error:', error);
+    } catch (error: any) {
+      console.error('Get user profile error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        error
+      });
       throw error;
     }
   }
+  
 
   public async verifyResetCode(cnp: string, matriculationNumber: string, code: string): Promise<VerifyResetCodeResponse> {
     try {

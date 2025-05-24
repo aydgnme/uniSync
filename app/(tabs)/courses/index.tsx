@@ -4,26 +4,34 @@ import { useProfile } from '@/hooks/useProfile';
 import { styles } from '@/styles/course.styles';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, FlatList, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, SafeAreaView, Text, View } from 'react-native';
 
 const CoursesScreen = () => {
     const router = useRouter();
-    const { user, loading, getGroup, getSubgroup } = useProfile();
+    const { user, loading } = useProfile();
     
-    const group = getGroup();
-    const subgroup = getSubgroup();
-    const groupIndex = group && subgroup ? `${group}${subgroup}` : 'N/A';
+    const groupIndex = user?.academicInfo?.groupName 
+      ? user.academicInfo.subgroupIndex 
+        ? `${user.academicInfo.groupName}${user.academicInfo.subgroupIndex}`
+        : user.academicInfo.groupName
+      : 'N/A';
 
     if (loading) {
         return (
-            <View style={[styles.container, styles.loadingContainer]}>
-                <ActivityIndicator size="large" color="#1a73e8" />
-            </View>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>Courses</Text>
+                    <Text style={styles.headerSubtitle}>{groupIndex}</Text>
+                </View>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#1a73e8" />
+                </View>
+            </SafeAreaView>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Courses</Text>
                 <Text style={styles.headerSubtitle}>{groupIndex}</Text>
@@ -40,7 +48,7 @@ const CoursesScreen = () => {
                 contentContainerStyle={styles.listContainer}
                 showsVerticalScrollIndicator={false}
             />
-        </View>
+        </SafeAreaView>
     );
 };
 

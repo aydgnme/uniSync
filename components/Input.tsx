@@ -22,7 +22,7 @@ const Input: React.FC<InputProps> = ({
       <TextInput
         style={[
           styles.input,
-          error && styles.inputError,
+          error ? styles.inputError : null,
           style
         ]}
         value={value}

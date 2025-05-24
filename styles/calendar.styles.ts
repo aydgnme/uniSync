@@ -461,4 +461,31 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
+  classCard: {
+    backgroundColor: '#E3F2FD',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 4,
+    marginHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 2,
+  },
+  classTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976D2',
+  },
+  classTime: {
+    fontSize: 14,
+    color: '#424242',
+    marginTop: 4,
+  },
+  classRoom: {
+    fontSize: 14,
+    color: '#616161',
+    marginTop: 2,
+  },
 });

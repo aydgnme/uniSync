@@ -1,12 +1,14 @@
 export interface Course {
-  code: string;
-  title: string;
-  instructor: string;
-  credits: number;
-  midtermGrade: number;
-  finalGrade: number;
-  totalGrade: number;
-  status: "Promovat" | "Nepromovat";
+  id: string;
+  name: string;
+  grade: number;
+  status: "PASSED" | "FAILED";
+  components: {
+    midterm: number;
+    final: number;
+    homework: number;
+    attendance: number;
+  };
 }
 
 export interface Semester {

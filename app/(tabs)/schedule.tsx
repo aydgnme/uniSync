@@ -1,6 +1,7 @@
 import DayView from "@/components/calendar/DayView";
 import MonthView from "@/components/calendar/MonthView";
 import WeekView from "@/components/calendar/WeekView";
+import { useProfile } from "@/hooks/useProfile";
 import { useSchedule } from "@/hooks/useSchedule";
 import { Course as CalendarCourse } from "@/types/calendar.type";
 import { Course } from "@/types/schedule.type";
@@ -19,15 +20,33 @@ import {
 const TABS = ["Day", "Week", "Month"];
 
 const scheduleCourseToCalendarCourse = (course: Course): CalendarCourse => {
+  console.log('Converting schedule course to calendar course:', course);
+  
+  // Calculate the date for the current week and course's weekDay
+  let date = course.date;
+  if (!date) {
+    // Find the current week's first day (Monday)
+    const today = moment();
+    const currentWeekDay = today.isoWeekday(); // 1 (Monday) - 7 (Sunday)
+    // course.weekDay: 1 (Monday) - 7 (Sunday)
+    date = today.clone().add(course.weekDay - currentWeekDay, 'days').format('YYYY-MM-DD');
+    console.log('Generated date for course:', { 
+      courseTitle: course.title, 
+      weekDay: course.weekDay, 
+      currentWeekDay, 
+      generatedDate: date 
+    });
+  }
+  
   const typeMapping = {
     LAB: "lecture",
     LECTURE: "course",
     SEMINAR: "seminar",
   } as const;
 
-  return {
+  const calendarCourse = {
     id: course.id,
-    date: course.date || moment().day(course.weekDay).format("YYYY-MM-DD"),
+    date,
     title: course.title,
     time: `${course.startTime} - ${course.endTime}`,
     location: course.room,
@@ -35,7 +54,15 @@ const scheduleCourseToCalendarCourse = (course: Course): CalendarCourse => {
     teacher: course.teacher,
     group: course.group,
     duration: course.duration,
+    style: {
+      backgroundColor: course.type === 'LAB' ? '#eaf4fb' : '#FFE0B2',
+      borderLeftWidth: 3,
+      borderLeftColor: course.type === 'LAB' ? '#2196F3' : '#FB8C00',
+    }
   };
+  
+  console.log('Converted calendar course:', calendarCourse);
+  return calendarCourse;
 };
 
 const ScheduleScreen: React.FC = () => {
@@ -44,27 +71,51 @@ const ScheduleScreen: React.FC = () => {
     moment().format("YYYY-MM-DD")
   );
   const [markedDates, setMarkedDates] = useState({});
-  const { courses, isLoading, error, refreshSchedule } = useSchedule();
+  const { courses, todayCourses, isLoading, error, refreshSchedule } = useSchedule();
   const [calendarCourses, setCalendarCourses] = useState<CalendarCourse[]>([]);
+  const { getGroup, getSubgroup, user } = useProfile();
+  
+  const groupIndex = user?.academicInfo?.groupName 
+    ? user.academicInfo.subgroupIndex 
+      ? `${user.academicInfo.groupName}${user.academicInfo.subgroupIndex}`
+      : user.academicInfo.groupName
+    : 'N/A';
 
   useEffect(() => {
-    const convertedCourses = courses.map(scheduleCourseToCalendarCourse);
+    console.log('Schedule Screen - User Academic Info:', {
+      facultyId: user?.academicInfo?.facultyId,
+      specializationShortName: user?.academicInfo?.specializationShortName,
+      groupName: user?.academicInfo?.groupName,
+      subgroupIndex: user?.academicInfo?.subgroupIndex,
+      groupIndex
+    });
+  }, [user]);
+
+  useEffect(() => {
+    console.log('Schedule Screen - Courses from API:', courses);
+    const coursesToConvert = selectedTab === "Day" ? todayCourses : courses;
+    const convertedCourses = coursesToConvert.map(scheduleCourseToCalendarCourse);
+    console.log('Schedule Screen - Converted Calendar Courses:', convertedCourses);
     setCalendarCourses(convertedCourses);
-  }, [courses]);
+  }, [courses, todayCourses, selectedTab]);
 
   useEffect(() => {
+    console.log('Schedule Screen - Generating marked dates for courses:', calendarCourses);
     const marks: any = {};
     calendarCourses.forEach((course) => {
       marks[course.date] = { marked: true, dotColor: "#1a73e8" };
     });
+    console.log('Schedule Screen - Generated marked dates:', marks);
     setMarkedDates(marks);
   }, [calendarCourses]);
 
   if (isLoading) {
+    console.log('Schedule Screen - Loading state');
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Schedule</Text>
+          <Text style={styles.headerSubtitle}>{groupIndex}</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#1a73e8" />
@@ -74,15 +125,20 @@ const ScheduleScreen: React.FC = () => {
   }
 
   if (error) {
+    console.log('Schedule Screen - Error state:', error);
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Schedule</Text>
+          <Text style={styles.headerSubtitle}>{groupIndex}</Text>
         </View>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
-            onPress={refreshSchedule}
+            onPress={() => {
+              console.log('Schedule Screen - Retrying schedule fetch');
+              refreshSchedule();
+            }}
             style={styles.retryButton}
           >
             <Text style={styles.retryButtonText}>Try Again</Text>
@@ -113,6 +169,14 @@ const ScheduleScreen: React.FC = () => {
             markedDates={markedDates}
             onDateChange={setSelectedDate}
             events={calendarCourses}
+            classes={calendarCourses.map(course => ({
+              id: course.id,
+              title: course.title,
+              startTime: course.time.split(" - ")[0],
+              endTime: course.time.split(" - ")[1],
+              day: moment(course.date).isoWeekday().toString(),
+              room: course.location,
+            }))}
           />
         );
       default:
@@ -124,6 +188,7 @@ const ScheduleScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Schedule</Text>
+        <Text style={styles.headerSubtitle}>{groupIndex}</Text>
       </View>
 
       <View style={styles.tabContainer}>
@@ -153,20 +218,14 @@ const ScheduleScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Platform.select({
-      ios: '#F2F2F7',
-      android: '#F0F0F0',
-    }),
-    marginTop: -100,
-  },
-  content: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-    padding: 16,
+    backgroundColor: '#FFF',
   },
   header: {
     padding: 20,
-    paddingTop: 100,
+    paddingTop: Platform.select({
+      ios: 20,
+      android: 60,
+    }),
     backgroundColor: '#FFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
@@ -176,57 +235,62 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#202124',
   },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
+  },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   errorText: {
     fontSize: 16,
-    color: "#dc3545",
-    textAlign: "center",
+    color: '#dc3545',
+    textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: "#1a73e8",
+    backgroundColor: '#1a73e8',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '500',
   },
   tabContainer: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
+    flexDirection: 'row',
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: '#e0e0e0',
     marginBottom: 1,
   },
   tab: {
     flex: 1,
     paddingVertical: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: "#1a73e8",
+    borderBottomColor: '#1a73e8',
   },
   tabText: {
     fontSize: 14,
-    color: "#666",
-    fontWeight: "500",
+    color: '#666',
+    fontWeight: '500',
   },
   activeTabText: {
-    color: "#1a73e8",
+    color: '#1a73e8',
   },
 });
 

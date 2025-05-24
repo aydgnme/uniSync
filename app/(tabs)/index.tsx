@@ -1,11 +1,11 @@
 import { useProfile } from "@/hooks/useProfile";
-import { scheduleService } from "@/services/schedule.service";
+import { useSchedule } from "@/hooks/useSchedule";
 import styles from "@/styles/main.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   AppState,
   AppStateStatus,
@@ -54,83 +54,15 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
 
 export default function MainScreen() {
   const navigation = useNavigation<MainScreenNavigationProp>();
-  const { user, loading, fetchUserProfile } = useProfile();
-  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
-  const [scheduleLoading, setScheduleLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user, loading } = useProfile();
+  const { todayCourses, isLoading: scheduleLoading, error: scheduleError, refreshSchedule } = useSchedule();
   const appState = useRef(AppState.currentState);
   const router = useRouter();
-
-  useEffect(() => {
-    fetchUserProfile();
-  }, []);
 
   useEffect(() => {
     console.log("User data:", user);
     console.log("Loading state:", loading);
   }, [user, loading]);
-
-  const transformToScheduleItem = (entry: any): ScheduleItem => ({
-    time: `${entry.startTime} - ${entry.endTime}`,
-    subject: entry.title,
-    location: entry.room,
-    professor: entry.teacher,
-  });
-
-  const fetchTodaySchedule = async () => {
-    console.log("Fetching schedule with academicInfo:", user?.academicInfo);
-    if (!user?.academicInfo?.groupName || !user?.academicInfo?.subgroupIndex) {
-      const errorMsg =
-        "Group and subgroup information is missing. Please update your profile.";
-      console.error(errorMsg, { academicInfo: user?.academicInfo });
-      setError(errorMsg);
-      setSchedule([]);
-      setScheduleLoading(false);
-      return;
-    }
-    setScheduleLoading(true);
-    setError(null);
-    try {
-      console.log("Calling schedule service with:", {
-        group: user.academicInfo.groupName,
-        subgroup: user.academicInfo.subgroupIndex,
-      });
-
-      const response = await scheduleService.getTodaySchedule(
-        user.academicInfo.groupName,
-        user.academicInfo.subgroupIndex
-      );
-
-      if (!response?.data?.data?.courses) {
-        const errorMsg = "No schedule found for today.";
-        console.error("Invalid schedule response:", { response });
-        setError(errorMsg);
-        setSchedule([]);
-        return;
-      }
-
-      console.log("Today schedule response:", response.data);
-      const transformedSchedule = response.data.data.courses.map(
-        transformToScheduleItem
-      );
-      console.log("Transformed schedule:", transformedSchedule);
-      setSchedule(transformedSchedule);
-    } catch (err: any) {
-      const errorMsg =
-        "An error occurred while loading the schedule. Please try again later.";
-      console.error("Today schedule error:", err);
-      setError(errorMsg);
-      setSchedule([]);
-    } finally {
-      setScheduleLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchTodaySchedule();
-    }
-  }, [user]);
 
   useEffect(() => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
@@ -138,7 +70,7 @@ export default function MainScreen() {
         appState.current.match(/inactive|background/) &&
         nextAppState === "active"
       ) {
-        fetchTodaySchedule();
+        refreshSchedule();
       }
       appState.current = nextAppState;
     };
@@ -218,10 +150,10 @@ export default function MainScreen() {
           <Text style={styles.sectionTitle}>Today's Schedule</Text>
           {loading || scheduleLoading ? (
             <Text>Loading...</Text>
-          ) : error ? (
-            <Text>{error}</Text>
-          ) : schedule.length > 0 ? (
-            schedule.map((item, index) => (
+          ) : scheduleError ? (
+            <Text>{scheduleError}</Text>
+          ) : todayCourses.length > 0 ? (
+            todayCourses.map((course, index) => (
               <View key={index} style={styles.classCard}>
                 <View style={styles.classTime}>
                   <Ionicons
@@ -229,17 +161,17 @@ export default function MainScreen() {
                     size={20}
                     color="rgb(0, 122, 255)"
                   />
-                  <Text style={styles.classTimeText}>{item.time}</Text>
+                  <Text style={styles.classTimeText}>{`${course.startTime} - ${course.endTime}`}</Text>
                 </View>
-                <Text style={styles.className}>{item.subject}</Text>
+                <Text style={styles.className}>{course.title}</Text>
                 <View style={styles.classDetails}>
                   <Text style={styles.classLocation}>
                     <Ionicons name="location-outline" size={16} color="#666" />{" "}
-                    {item.location}
+                    {course.room}
                   </Text>
                   <Text style={styles.classProfessor}>
                     <Ionicons name="person-outline" size={16} color="#666" />{" "}
-                    {item.professor}
+                    {course.teacher}
                   </Text>
                 </View>
               </View>

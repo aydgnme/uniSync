@@ -1,6 +1,12 @@
 import axios from 'axios';
 import { API_CONFIG } from '../config/api.config';
-import { Course, CourseType, ParityType, ScheduleResponse, TodayScheduleResponse } from '../types/schedule.type';
+import {
+  Course,
+  CourseType,
+  ParityType,
+  ScheduleResponse,
+  TodayScheduleResponse
+} from '../types/schedule.type';
 
 interface APICourseItem {
   id: string;
@@ -20,9 +26,11 @@ interface APICourseItem {
 
 interface APIWeeklyScheduleResponse {
   success: boolean;
-  courses: APICourseItem[];
-  weekNumber: number;
-  parity: ParityType;
+  data: {
+    courses: APICourseItem[];
+    weekNumber: number;
+    parity: ParityType;
+  };
 }
 
 interface APITodayScheduleResponse {
@@ -52,15 +60,34 @@ class ScheduleService {
   private readonly BASE_URL = API_CONFIG.BASE_URL;
 
   async getFullSchedule(
-    group: string,
-    subgroup: string
+    facultyId: string,
+    specializationShortName: string,
+    studyYear: number,
+    groupName: string,
+    subgroupIndex?: string,
+    week?: number
   ): Promise<{ data: ScheduleResponse }> {
     try {
-      const response = await axios.get<APIWeeklyScheduleResponse>(
-        `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.WEEKLY}/${group}/${subgroup}`
-      );
+      console.log('Fetching full schedule for:', { facultyId, specializationShortName, studyYear, groupName, subgroupIndex, week });
 
-      const courses: Course[] = response.data.courses.map((item: APICourseItem) => ({
+      let path = `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.WEEKLY}/${facultyId}/${specializationShortName}/${studyYear}/${groupName}`;
+      if (subgroupIndex && subgroupIndex.trim() !== '') {
+        path += `/${subgroupIndex}`;
+      }
+      if (week) {
+        path += `?week=${week}`;
+      }
+
+      console.log('API URL:', path);
+
+      const response = await axios.get<APIWeeklyScheduleResponse>(path);
+      
+      if (!response.data || !response.data.data || !response.data.data.courses) {
+        console.error('Invalid response data:', response.data);
+        throw new Error('Invalid schedule data received from server');
+      }
+
+      const courses: Course[] = response.data.data.courses.map((item: APICourseItem) => ({
         ...item,
         type: mapCourseType(item.type)
       }));
@@ -68,42 +95,51 @@ class ScheduleService {
       const transformed: ScheduleResponse = {
         success: response.data.success,
         courses,
-        group,
-        subgroup,
-        weekNumber: response.data.weekNumber,
-        parity: response.data.parity,
+        group: groupName,
+        subgroup: subgroupIndex || '',
+        weekNumber: response.data.data.weekNumber || 1,
+        parity: response.data.data.parity || 'BOTH',
       };
 
+      console.log('Transformed schedule data:', transformed);
       return { data: transformed };
     } catch (error) {
+      console.error('Full schedule service error:', error);
       throw this.handleError(error);
     }
   }
 
   async getSchedule(
-    group: string,
-    subgroup: string,
-    _week?: number
+    facultyId: string,
+    specializationShortName: string,
+    studyYear: number,
+    groupName: string,
+    subgroupIndex?: string,
+    week?: number
   ): Promise<{ data: ScheduleResponse }> {
-    return this.getFullSchedule(group, subgroup);
+    return this.getFullSchedule(facultyId, specializationShortName, studyYear, groupName, subgroupIndex, week);
   }
 
   async getTodaySchedule(
-    group: string,
-    subgroup: string
+    facultyId: string,
+    specializationShortName: string,
+    studyYear: number,
+    groupName: string,
+    subgroupIndex?: string
   ): Promise<{ data: TodayScheduleResponse }> {
     try {
-      console.log('Fetching schedule for:', { group, subgroup });
-      const response = await axios.get<APITodayScheduleResponse>(
-        `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.TODAY}/${group}/${subgroup}`
-      );
-      console.log('Schedule API Response:', response);
+      console.log('Fetching today schedule for:', { facultyId, specializationShortName, studyYear, groupName, subgroupIndex });
 
-      if (!response.data || !response.data.data || !response.data.data.courses) {
-        throw new Error('Invalid response format from schedule API');
+      let path = `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.TODAY}/${facultyId}/${specializationShortName}/${studyYear}/${groupName}`;
+      if (subgroupIndex && subgroupIndex.trim() !== '') {
+        path += `/${subgroupIndex}`;
       }
 
+      console.log('API URL:', path);
+
+      const response = await axios.get<APITodayScheduleResponse>(path);
       const todayData = response.data.data;
+
       const courses: Course[] = todayData.courses.map((item: APICourseItem) => ({
         ...item,
         type: mapCourseType(item.type)
@@ -119,7 +155,7 @@ class ScheduleService {
         },
       };
     } catch (error) {
-      console.error('Schedule service error:', error);
+      console.error('Today schedule service error:', error);
       throw this.handleError(error);
     }
   }

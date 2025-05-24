@@ -9,15 +9,15 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import React, { useState } from "react";
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 // Helper function for user data transformation
@@ -26,16 +26,19 @@ const mapUserResponse = (userResponse: LoginResponse["user"]) => {
     _id: userResponse._id,
     name: userResponse.name,
     email: userResponse.email,
-    role: "Student" as const, 
-    academicInfo: {
-      program: "",
-      semester: 1,
-      studentId: "",
-      advisor: "",
-      group: "",
-      subgroup: "",
-      gpa: 0,
-    },
+    role: userResponse.role || "Student",
+    academicInfo: userResponse.academicInfo ? {
+      program: userResponse.academicInfo.program || "",
+      semester: userResponse.academicInfo.semester || 1,
+      studentId: userResponse.academicInfo.studentId || "",
+      advisor: userResponse.academicInfo.advisor || "",
+      groupName: userResponse.academicInfo.groupName || "",
+      subgroupIndex: userResponse.academicInfo.subgroupIndex || "",
+      gpa: userResponse.academicInfo.gpa || 0,
+      facultyId: userResponse.academicInfo.facultyId || "",
+      specializationShortName: userResponse.academicInfo.specializationShortName || "",
+      _id: userResponse.academicInfo._id
+    } : undefined
   };
 };
 

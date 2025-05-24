@@ -3,10 +3,7 @@ import { Platform, StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Platform.select({
-          ios: '#F2F2F7',
-          android: '#F0F0F0',
-        }),
+        backgroundColor: '#FFF',
     },
     content: {
         flex: 1,
@@ -15,8 +12,10 @@ export const styles = StyleSheet.create({
     },
     header: {
         padding: 20,
-        paddingBottom: 0,
-        paddingTop: 40,
+        paddingTop: Platform.select({
+            ios: 20,
+            android: 60,
+        }),
         backgroundColor: '#FFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E0E0E0',
@@ -25,12 +24,11 @@ export const styles = StyleSheet.create({
         marginTop: 8,
     },
     headerSubtitle: {
-        fontSize: 14,
-        color: '#5F6368',
-        marginBottom: 4,
+        fontSize: 16,
+        color: '#666',
+        marginTop: 4,
     },
     headerTitle: {
-        marginTop: 20,
         fontSize: 32,
         fontWeight: '700',
         color: '#202124',
@@ -45,9 +43,8 @@ export const styles = StyleSheet.create({
     },
     loadingContainer: {
         flex: 1,
-        alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#F5F5F5',
+        alignItems: 'center',
     },
     loadingText: {
         fontSize: 18,
@@ -121,7 +118,6 @@ export const styles = StyleSheet.create({
     },
     listContainer: {
         padding: 16,
-        paddingTop: 10,
     },
     studentId: {
         fontSize: 18,

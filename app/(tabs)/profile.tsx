@@ -7,6 +7,7 @@ import React, { useEffect } from "react";
 import {
   ActivityIndicator,
   Image,
+  Platform,
   SafeAreaView,
   ScrollView,
   Text,
@@ -64,7 +65,7 @@ const ProfileScreen = () => {
   const InfoRow = ({ label, value }: { label: string; value: string | number | undefined }) => (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value?.toString() || 'N/A'}</Text>
+      <Text style={[styles.infoValue, { fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif', fontWeight: '300', fontSize: 14 }]}>{value?.toString() || 'N/A'}</Text>
     </View>
   );
 
@@ -126,7 +127,7 @@ const ProfileScreen = () => {
           <InfoRow label="Program" value={user.academicInfo?.program} />
           <InfoRow label="Semester" value={user.academicInfo?.semester} />
           <InfoRow label="Group" value={`${user.academicInfo?.groupName || ''}${user.academicInfo?.subgroupIndex || ''}`} />
-          <InfoRow label="Student ID" value={user.academicInfo?.studentId} />
+          <InfoRow label="Matriculation Number" value={user.matriculationNumber} />
           <InfoRow label="Advisor" value={user.academicInfo?.advisor} />
           <InfoRow label="GPA" value={user.academicInfo?.gpa} />
         </View>

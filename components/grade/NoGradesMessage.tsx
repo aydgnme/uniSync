@@ -2,10 +2,14 @@ import { styles } from '@/styles/noGradesMessage.styles';
 import React from 'react';
 import { Text, View } from 'react-native';
 
-const NoGradesMessage = () => {
+interface NoGradesMessageProps {
+    message?: string;
+}
+
+const NoGradesMessage: React.FC<NoGradesMessageProps> = ({ message = 'No grades available for this year.' }) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.message}>No grades available for this year.</Text>
+            <Text style={styles.message}>{message}</Text>
         </View>
     );
 };

@@ -8,6 +8,10 @@ export interface AcademicInfo {
     subgroupIndex: string;
     advisor: string;
     gpa: number;
+    facultyId: string;
+    specializationShortName: string;
+    studyYear: number;
+    _id?: string;
 }
 
 export interface User {
@@ -22,25 +26,36 @@ export interface User {
     address: string;
     academicInfo?: AcademicInfo;
     profileImageUrl?: string;
+    enrolledLectures?: string[];
 }
 
 export interface UserProfileResponse {
-    _id: string;
-    name: string;
-    email: string;
-    role: string;
-    phone?: string;
-    address?: string;
-    cnp?: string;
-    matriculationNumber?: string;
-    academicInfo?: {
-        program?: string;
-        semester?: number;
-        studentId?: string;
-        advisor?: string;
-        gpa?: number;
-        groupName?: string;
-        subgroupIndex?: string;
+    _id: {
+        $oid: string;
     };
-    profileImageUrl?: string;
+    email: string;
+    password?: string;
+    cnp: string;
+    matriculationNumber: string;
+    name: string;
+    role: string;
+    phone: string;
+    address: string;
+    academicInfo?: {
+        program: string;
+        semester: number;
+        studyYear: number;
+        groupName: string;
+        subgroupIndex: string;
+        studentId: string;
+        advisor: string;
+        gpa: number;
+        specializationShortName: string;
+        facultyId: string;
+        _id: {
+            $oid: string;
+        };
+    };
+    enrolledLectures?: string[];
+    __v: number;
 }

@@ -57,22 +57,48 @@ const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
                                 {
                                     top,
                                     height,
+                                    ...course.style
                                 },
                             ]}
                         >
                             <View style={stylesDay.courseTimeLocation}>
                                 <View style={stylesDay.courseTime}>
-                                    <Icon name="time-outline" size={16} color="#007AFF" />
-                                    <Text style={[styles.courseTimeText, { color: "#007AFF", marginLeft: 4 }]}> {course.time} </Text>
+                                    <Icon 
+                                        name="time-outline" 
+                                        size={16} 
+                                        color={course.type === 'lecture' ? '#2196F3' : '#FB8C00'} 
+                                    />
+                                    <Text style={[
+                                        styles.courseTimeText, 
+                                        { 
+                                            color: course.type === 'lecture' ? '#2196F3' : '#FB8C00',
+                                            marginLeft: 4 
+                                        }
+                                    ]}> {course.time} </Text>
                                 </View>
                                 <View style={stylesDay.courseLocation}>
-                                    <Icon name="location-outline" size={16} color="#007AFF" />
-                                    <Text style={[styles.courseLocationText, { color: "#007AFF", marginLeft: 4 }]}> {course.location} </Text>
+                                    <Icon 
+                                        name="location-outline" 
+                                        size={16} 
+                                        color={course.type === 'lecture' ? '#2196F3' : '#FB8C00'} 
+                                    />
+                                    <Text style={[
+                                        styles.courseLocationText, 
+                                        { 
+                                            color: course.type === 'lecture' ? '#2196F3' : '#FB8C00',
+                                            marginLeft: 4 
+                                        }
+                                    ]}> {course.location} </Text>
                                 </View>
                             </View>
-                            <Text style={stylesDay.courseTitle}>{course.title}</Text>
-                            <Text style={stylesDay.courseTeacher}>{course.teacher}</Text>
-                            <Text style={stylesDay.courseGroup}>{course.group}</Text>
+                            <Text style={[
+                                stylesDay.courseTitle,
+                                { color:  '#020202' }
+                            ]}>{course.title}</Text>
+                            <Text style={[
+                                stylesDay.courseTeacher,
+                                { color: '#010101' }
+                            ]}>{course.teacher}</Text>
                         </View>
                     );
                 })}
@@ -93,7 +119,7 @@ const stylesDay = StyleSheet.create({
     timelineContainer: {
         position: "relative",
         flex: 1,
-        minHeight: (21 - 8 + 1) * 60, // Saat 8:00 - 21:00
+        minHeight: (21 - 8 + 1) * 60,
         paddingHorizontal: 16,
         marginVertical: 8,
     },

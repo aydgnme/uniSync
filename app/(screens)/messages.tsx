@@ -29,7 +29,16 @@ const mockMessages = [
   },
 ];
 
-const MessageItem = ({ item }) => (
+interface Message {
+  id: string;
+  sender: string;
+  subject: string;
+  message: string;
+  time: string;
+  unread: boolean;
+}
+
+const MessageItem = ({ item }: { item: Message }) => (
   <TouchableOpacity style={styles.messageCard}>
     <View style={styles.messageHeader}>
       <View style={styles.senderInfo}>

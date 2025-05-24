@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:3000/api',  // Update this with your actual API URL
+  BASE_URL: 'http://localhost:3000/api',  // Local development
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/auth/login',
@@ -15,10 +15,11 @@ export const API_CONFIG = {
       PROFILE: '/users',
       UPDATE_PROFILE: '/users/update',
       CHANGE_PASSWORD: '/users/change-password',
+      GET_BY_MATRICULATION: (matriculationNumber: string) => `/users/by-matriculation?matriculationNumber=${matriculationNumber}`,
     },
     SCHEDULE: {
-      TODAY: '/schedules/today',
-      WEEKLY: '/schedules',
+      TODAY: '/schedule/today',
+      WEEKLY: '/schedule',
     },
     COURSES: {
       LIST: '/courses',

@@ -23,6 +23,16 @@ type RootStackParamList = {
   Profile: undefined;
 };
 
+const abbreviateProgramName = (program?: string): string => {
+  if (!program) return 'N/A';
+  return program.length > 15
+    ? program
+        .split(' ')
+        .map(word => word[0]?.toUpperCase() ?? '')
+        .join('')
+    : program;
+};
+
 type ProfileScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ProfileScreen = () => {
@@ -124,7 +134,7 @@ const ProfileScreen = () => {
             <Ionicons name="school-outline" size={24} color="rgb(0, 122, 255)" />
             <Text style={styles.sectionTitle}>Academic Information</Text>
           </View>
-          <InfoRow label="Program" value={user.academicInfo?.program} />
+          <InfoRow label="Program" value={abbreviateProgramName(user.academicInfo?.program)} />
           <InfoRow label="Semester" value={user.academicInfo?.semester} />
           <InfoRow label="Group" value={`${user.academicInfo?.groupName || ''}${user.academicInfo?.subgroupIndex || ''}`} />
           <InfoRow label="Matriculation Number" value={user.matriculationNumber} />

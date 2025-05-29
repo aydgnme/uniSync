@@ -10,7 +10,7 @@ interface WeekCourseCardProps {
 const WeekCourseCard: React.FC<WeekCourseCardProps> = ({ course }) => {
   const formatTime = (time: string | undefined) => {
     if (!time) return '--:--';
-    // Eğer time "HH:mm" formatında değilse, dönüştür
+    // If time is not in "HH:mm" format, convert it
     const [hours, minutes] = time.split(':').map(Number);
     if (isNaN(hours) || isNaN(minutes)) return '--:--';
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;

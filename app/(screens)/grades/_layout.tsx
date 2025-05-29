@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
-import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router, Stack } from "expo-router";
+import { TouchableOpacity, useColorScheme } from "react-native";
 
 export default function CoursesLayout() {
   const colorScheme = useColorScheme();
@@ -24,6 +25,11 @@ export default function CoursesLayout() {
             backgroundColor: Colors[colorScheme ?? "light"].background,
           },
           headerShown: false,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={{ paddingHorizontal: 8 }}>
+              <Ionicons name="arrow-back" size={24} color={Colors[colorScheme ?? 'light'].text} />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
@@ -33,6 +39,12 @@ export default function CoursesLayout() {
           headerStyle: {
             backgroundColor: "#f5f5f5",
           },
+          headerShown: false,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={{ paddingHorizontal: 8 }}>
+              <Ionicons name="arrow-back" size={24} color={Colors[colorScheme ?? 'light'].text} />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Stack>

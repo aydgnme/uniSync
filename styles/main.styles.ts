@@ -1,7 +1,7 @@
 import { Platform, StyleSheet } from 'react-native';
 
 // Tailwind CSS color palette
-const colors = {
+export const colors = {
   primary: '#3B82F6', // blue-500
   secondary: '#6B7280', // gray-500
   background: '#F9FAFB', // gray-50
@@ -185,6 +185,106 @@ export const styles = StyleSheet.create({
   announcementDate: {
     fontSize: 14,
     color: colors.text.secondary,
+  },
+  announcementContent: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: spacing[2],
+    lineHeight: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    padding: 10,
+  },
+  emptyText: {
+    color: '#666',
+    textAlign: 'center',
+    padding: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderRadius: spacing[3],
+    width: '90%',
+    maxHeight: '80%',
+    padding: spacing[4],
+    shadowColor: colors.text.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text.primary,
+    flex: 1,
+    marginRight: spacing[2],
+  },
+  modalCloseButton: {
+    padding: spacing[1],
+  },
+  modalTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[3],
+  },
+  modalType: {
+    fontSize: 14,
+    color: colors.primary,
+    backgroundColor: colors.accent,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    borderRadius: spacing[3],
+  },
+  modalDate: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  modalScrollView: {
+    maxHeight: '70%',
+  },
+  modalContentText: {
+    fontSize: 16,
+    color: colors.text.primary,
+    lineHeight: 24,
+    marginBottom: spacing[4],
+  },
+  modalAttachments: {
+    marginTop: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: colors.accent,
+    paddingTop: spacing[3],
+  },
+  modalAttachmentsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: spacing[2],
+  },
+  modalAttachmentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing[2],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.accent,
+  },
+  modalAttachmentText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginLeft: spacing[2],
   },
 });
 

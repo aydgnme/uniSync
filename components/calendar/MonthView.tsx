@@ -20,7 +20,7 @@ const MonthView: React.FC<MonthViewProps> = ({
     events,
     classes = [] 
 }) => {
-    // Seçili günün derslerini filtreleme
+    // Filter classes for the selected day
     const getClassesForDate = (date: string) => {
         const dayOfWeek = new Date(date).getDay();
         const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -48,7 +48,7 @@ const MonthView: React.FC<MonthViewProps> = ({
             />
 
             <ScrollView style={styles.eventList}>
-                {/* Dersler */}
+                {/* Classes */}
                 {getClassesForDate(selectedDate).map(cls => (
                     <View key={cls.id} style={styles.classCard}>
                         <Text style={styles.classTitle}>{cls.title}</Text>
@@ -59,12 +59,12 @@ const MonthView: React.FC<MonthViewProps> = ({
                     </View>
                 ))}
 
-                {/* Etkinlikler */}
+                {/* Events */}
                 {events.filter(event => event.date === selectedDate).map(event => (
                     <EventCard key={event.id} event={event} />
                 ))}
 
-                {/* Ders ve etkinlik yoksa */}
+                {/* No classes or events */}
                 {getClassesForDate(selectedDate).length === 0 && 
                  events.filter(event => event.date === selectedDate).length === 0 && (
                     <Text style={styles.noEventsText}>No classes or events on this date</Text>

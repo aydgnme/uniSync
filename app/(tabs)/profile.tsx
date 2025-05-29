@@ -3,6 +3,7 @@ import { styles } from "@/styles/profile.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
   ActivityIndicator,
@@ -37,6 +38,7 @@ type ProfileScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>
 
 const ProfileScreen = () => {
   const navigation = useNavigation<ProfileScreenNavigationProp>();
+  const router = useRouter();
   const { user, loading, error, fetchUserProfile, handleLogout } = useProfile();
 
   useEffect(() => {
@@ -167,7 +169,7 @@ const ProfileScreen = () => {
             <ActionButton 
               icon="settings-outline" 
               label="Settings" 
-              onPress={() => navigation.navigate('Settings' as never)}
+              onPress={() => router.push('/(screens)/settings')}
             />
           </View>
         </View>

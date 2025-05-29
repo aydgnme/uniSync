@@ -50,7 +50,8 @@ export const useAuth = () => {
         throw new Error('Invalid response from server');
       }
 
-      await contextLogin(response.user, response.token);
+      await contextLogin(response.token, response.user._id);
+
       console.log('Login successful, navigating to main screen');
       router.replace('/(tabs)');
     } catch (error: any) {
@@ -75,6 +76,6 @@ export const useAuth = () => {
     loading,
     showPassword,
     setShowPassword,
-    handleLogin
+    handleLogin,
   };
-}; 
+};

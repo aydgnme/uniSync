@@ -274,7 +274,7 @@ class AuthService {
       // Set token in API service
       apiService.setAuthToken(token);
   
-      // Düzgün ID ile çağırıyoruz, ekstra query param yok
+      // Call with proper ID, no extra query params
       const response = await apiService.get<UserProfile>(`/users/${userId}`);
       console.log('User profile response:', JSON.stringify(response, null, 2));
   

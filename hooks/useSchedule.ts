@@ -60,18 +60,10 @@ export const useSchedule = (): UseScheduleReturn => {
     const { facultyId, specializationShortName, groupName, subgroupIndex, studyYear } = user.academicInfo;
 
     try {
-      console.log('useSchedule - Fetching schedule with params:', {
-        facultyId,
-        specializationShortName,
-        studyYear,
-        groupName,
-        subgroupIndex,
-        currentWeek
-      });
-
       setIsLoading(true);
       setError(null);
 
+      // First fetch weekly schedule
       const response = await scheduleService.getFullSchedule(
         facultyId,
         specializationShortName,
@@ -81,27 +73,53 @@ export const useSchedule = (): UseScheduleReturn => {
         currentWeek
       );
 
-      console.log('useSchedule - API Response:', response);
-
       if (!response.data) {
-        throw new Error('No data received from server');
+        setError("Could not fetch data from server. Please try again later.");
+        setCourses([]);
+        setTodayCourses([]);
+        return;
       }
 
       if (response.data?.success) {
-        console.log('useSchedule - Setting courses:', response.data.courses);
-        setCourses(response.data.courses || []);
-        const todayCourses = filterTodayCourses(response.data.courses || []);
-        console.log('useSchedule - Today courses:', todayCourses);
-        setTodayCourses(todayCourses);
+        const weeklyCourses = response.data.courses || [];
+        setCourses(weeklyCourses);
         setCurrentWeek(response.data.weekNumber || 1);
         setError(null);
+
+        // Filter today's classes from weekly schedule (for fallback)
+        const today = moment().isoWeekday();
+        console.log('weeklyCourses:', weeklyCourses);
+        console.log('today:', today);
+        let todayCoursesFallback = weeklyCourses.filter(course => course.weekDay === today);
+        console.log('todayCoursesFallback:', todayCoursesFallback);
+
+        // If today API fails, use fallback
+        try {
+          const todayResponse = await scheduleService.getTodaySchedule(
+            facultyId,
+            specializationShortName,
+            studyYear,
+            groupName,
+            subgroupIndex
+          );
+
+          if (todayResponse.data?.success && todayResponse.data.data.courses.length > 0) {
+            setTodayCourses(todayResponse.data.data.courses);
+          } else {
+            setTodayCourses(todayCoursesFallback);
+          }
+        } catch (err) {
+          // If today API fails, use fallback
+          setTodayCourses(todayCoursesFallback);
+        }
       } else {
-        console.error('useSchedule - API returned unsuccessful response:', response);
-        setError("Failed to fetch schedule. Please try again later.");
+        setError("Could not fetch schedule. Please try again later.");
+        setCourses([]);
+        setTodayCourses([]);
       }
     } catch (err) {
-      console.error('useSchedule - Error fetching schedule:', err);
-      setError(err instanceof Error ? err.message : "An error occurred while fetching schedule.");
+      const errorMessage = err instanceof Error ? err.message : "An error occurred while fetching the schedule.";
+      setError(errorMessage);
       setCourses([]);
       setTodayCourses([]);
     } finally {

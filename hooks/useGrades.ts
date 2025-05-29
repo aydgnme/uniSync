@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Configure axios base URL
-axios.defaults.baseURL = 'http://localhost:3000'; // API'nin çalıştığı port
+axios.defaults.baseURL = 'http://localhost:3000'; // Port where the API is running
 
 interface UseGradesReturn {
     grades: GradeResponse[];
@@ -91,7 +91,7 @@ export const useGrades = (): UseGradesReturn => {
         const fetchGrades = async () => {
             if (!user?._id) {
                 console.log('No user ID available');
-                setError('Kullanıcı bilgisi bulunamadı.');
+                setError('User information not found.');
                 setLoading(false);
                 return;
             }
@@ -105,7 +105,7 @@ export const useGrades = (): UseGradesReturn => {
                 const response = await axios.get(url, {
                     params: {
                         academicYear: selectedYear,
-                        semester: 2 // Şu an için 2. dönem notlarını alıyoruz
+                        semester: 2 // Currently getting grades for semester 2
                     },
                     headers: {
                         'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ export const useGrades = (): UseGradesReturn => {
                 
                 if (response.data.length === 0) {
                     console.log('API returned empty array');
-                    setError('Bu dönem için not bulunamadı.');
+                    setError('No grades found for this semester.');
                 } else {
                     console.log('Setting grades:', response.data);
                     setGrades(response.data);
@@ -143,14 +143,14 @@ export const useGrades = (): UseGradesReturn => {
                     console.error('Axios error message:', err.message);
                     
                     if (err.code === 'ECONNABORTED') {
-                        setError('API yanıt vermedi. Lütfen daha sonra tekrar deneyin.');
+                        setError('API did not respond. Please try again later.');
                     } else if (err.code === 'ERR_NETWORK') {
-                        setError('API\'ye bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.');
+                        setError('Could not connect to API. Please check your internet connection.');
                     } else {
-                        setError(`Notlar yüklenirken bir hata oluştu: ${err.message}`);
+                        setError(`An error occurred while loading grades: ${err.message}`);
                     }
                 } else {
-                    setError('Notlar yüklenirken bir hata oluştu.');
+                    setError('An error occurred while loading grades.');
                 }
             } finally {
                 setLoading(false);

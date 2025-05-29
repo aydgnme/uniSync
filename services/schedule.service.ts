@@ -1,11 +1,12 @@
 import axios from 'axios';
+import moment from 'moment';
 import { API_CONFIG } from '../config/api.config';
 import {
-  Course,
-  CourseType,
-  ParityType,
-  ScheduleResponse,
-  TodayScheduleResponse
+    Course,
+    CourseType,
+    ParityType,
+    ScheduleResponse,
+    TodayScheduleResponse
 } from '../types/schedule.type';
 
 interface APICourseItem {
@@ -128,22 +129,49 @@ class ScheduleService {
     subgroupIndex?: string
   ): Promise<{ data: TodayScheduleResponse }> {
     try {
-      console.log('Fetching today schedule for:', { facultyId, specializationShortName, studyYear, groupName, subgroupIndex });
+      console.log('getTodaySchedule - Request params:', { 
+        facultyId, 
+        specializationShortName, 
+        studyYear, 
+        groupName, 
+        subgroupIndex 
+      });
 
       let path = `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.TODAY}/${facultyId}/${specializationShortName}/${studyYear}/${groupName}`;
       if (subgroupIndex && subgroupIndex.trim() !== '') {
         path += `/${subgroupIndex}`;
       }
+      path += '?today=true';
 
-      console.log('API URL:', path);
+      console.log('getTodaySchedule - API URL:', path);
 
       const response = await axios.get<APITodayScheduleResponse>(path);
-      const todayData = response.data.data;
+      
+      console.log('getTodaySchedule - Raw API response:', response.data);
+      
+      if (!response.data || !response.data.data) {
+        console.error('getTodaySchedule - Invalid response:', response.data);
+        return {
+          data: {
+            success: true,
+            data: {
+              day: moment().day(),
+              dayName: moment().format('dddd'),
+              weekNumber: moment().isoWeek(),
+              parity: 'BOTH',
+              courses: []
+            }
+          }
+        };
+      }
 
+      const todayData = response.data.data;
       const courses: Course[] = todayData.courses.map((item: APICourseItem) => ({
         ...item,
         type: mapCourseType(item.type)
       }));
+
+      console.log('getTodaySchedule - Transformed courses:', courses);
 
       return {
         data: {
@@ -155,18 +183,39 @@ class ScheduleService {
         },
       };
     } catch (error) {
-      console.error('Today schedule service error:', error);
-      throw this.handleError(error);
+      console.error('getTodaySchedule - Error:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('getTodaySchedule - Axios error details:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      return {
+        data: {
+          success: true,
+          data: {
+            day: moment().day(),
+            dayName: moment().format('dddd'),
+            weekNumber: moment().isoWeek(),
+            parity: 'BOTH',
+            courses: []
+          }
+        }
+      };
     }
   }
 
   private handleError(error: any): Error {
     console.error('Schedule service error details:', error);
     if (error.response) {
+      if (error.response.status === 500) {
+        return new Error('Server error. Please try again later.');
+      }
       const message = error.response.data?.message || 'An error occurred while fetching the schedule';
       return new Error(message);
     }
-    return new Error('Network error occurred while fetching the schedule');
+    return new Error('A network error occurred while fetching the schedule');
   }
 }
 

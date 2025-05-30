@@ -1,251 +1,169 @@
-import courses from '@/data/courses.json';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useCourses } from '@/hooks/useCourses';
+import { useLectureAnnouncements } from '@/hooks/useLectureAnnouncements';
+import { useLectureAssignments } from '@/hooks/useLectureAssignments';
+import { useLecturePeople } from '@/hooks/useLecturePeople';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+    ImageBackground,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
-type Tab = 'stream' | 'classwork' | 'people';
+const CourseDetailScreen = () => {
+  const { id } = useLocalSearchParams();
+  const [activeTab, setActiveTab] = useState<'stream' | 'classwork' | 'people'>('stream');
+  const [announcement, setAnnouncement] = useState('');
 
-interface Announcement {
+  const { courses } = useCourses();
+  const course = courses.find((c) => c.id === id);
+
+  const { announcements } = useLectureAnnouncements(id as string);
+  const { assignments } = useLectureAssignments(id as string);
+  const { people } = useLecturePeople(id as string);
+
+  if (!course) return null;
+
+  const renderAnnouncementCard = (item: {
     id: string;
     text: string;
     date: string;
     author: string;
     comments: number;
     attachments: number;
-}
+  }) => (
+    <View key={item.id} style={styles.announcementCard}>
+      <View style={styles.announcementHeader}>
+        <View style={styles.authorAvatar}>
+          <Text style={styles.avatarText}>{item.author[0]}</Text>
+        </View>
+        <View style={styles.announcementHeaderText}>
+          <Text style={styles.authorName}>{item.author}</Text>
+          <Text style={styles.announcementDate}>{item.date}</Text>
+        </View>
+      </View>
+      <Text style={styles.announcementText}>{item.text}</Text>
+    </View>
+  );
 
-interface Assignment {
+  const renderAssignmentCard = (item: {
     id: string;
     title: string;
     dueDate: string;
     points: number;
     topic: string;
-}
+  }) => (
+    <TouchableOpacity key={item.id} style={styles.assignmentCard}>
+      <View style={styles.assignmentIcon}>
+        <MaterialIcons name="assignment" size={24} color={course.color} />
+      </View>
+      <View style={styles.assignmentContent}>
+        <Text style={styles.assignmentTitle}>{item.title}</Text>
+        <Text style={styles.assignmentDue}>Due {item.dueDate}</Text>
+      </View>
+      <Text style={styles.assignmentPoints}>{item.points} pts</Text>
+    </TouchableOpacity>
+  );
 
-const SAMPLE_ANNOUNCEMENTS: Announcement[] = [
-    {
-        id: '1',
-        text: 'Welcome to the course! Here you will find all course materials and announcements.',
-        date: '2024-03-20',
-        author: 'Dr. Smith',
-        comments: 3,
-        attachments: 2,
-    },
-    {
-        id: '2',
-        text: 'Please review the course syllabus and upcoming assignment deadlines.',
-        date: '2024-03-19',
-        author: 'Dr. Smith',
-        comments: 1,
-        attachments: 1,
-    },
-];
-
-const SAMPLE_ASSIGNMENTS: Assignment[] = [
-    {
-        id: '1',
-        title: 'Midterm Project',
-        dueDate: '2024-04-15',
-        points: 100,
-        topic: 'Projects',
-    },
-    {
-        id: '2',
-        title: 'Week 1 Quiz',
-        dueDate: '2024-03-25',
-        points: 20,
-        topic: 'Quizzes',
-    },
-];
-
-const CourseDetailScreen = () => {
-    const { id } = useLocalSearchParams();
-    const [activeTab, setActiveTab] = useState<Tab>('stream');
-    const [announcement, setAnnouncement] = useState('');
-    
-    const course = courses.find(c => c.id === id);
-    
-    if (!course) return null;
-
-    const renderAnnouncementCard = (item: Announcement) => (
-        <View key={item.id} style={styles.announcementCard}>
-            <View style={styles.announcementHeader}>
-                <View style={styles.authorAvatar}>
-                    <Text style={styles.avatarText}>{item.author[0]}</Text>
-                </View>
-                <View style={styles.announcementHeaderText}>
-                    <Text style={styles.authorName}>{item.author}</Text>
-                    <Text style={styles.announcementDate}>{item.date}</Text>
-                </View>
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'stream':
+        return (
+          <View style={styles.streamContainer}>
+            <View style={styles.announcementInput}>
+              <TextInput
+                style={styles.input}
+                placeholder="Announce something to your class"
+                value={announcement}
+                onChangeText={setAnnouncement}
+                multiline
+              />
             </View>
-            <Text style={styles.announcementText}>{item.text}</Text>
-            <View style={styles.announcementFooter}>
-                <TouchableOpacity style={styles.footerButton}>
-                    <Ionicons name="chatbubble-outline" size={20} color="#666" />
-                    <Text style={styles.footerButtonText}>{item.comments}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.footerButton}>
-                    <Ionicons name="attach" size={20} color="#666" />
-                    <Text style={styles.footerButtonText}>{item.attachments}</Text>
-                </TouchableOpacity>
+            {announcements.map(renderAnnouncementCard)}
+          </View>
+        );
+      case 'classwork':
+        return (
+          <View style={styles.classworkContainer}>
+            {assignments.map(renderAssignmentCard)}
+          </View>
+        );
+      case 'people':
+        return (
+          <View style={styles.peopleContainer}>
+            <View style={styles.peopleSection}>
+              <Text style={styles.sectionTitle}>Teachers</Text>
+              <View style={styles.personCard}>
+                <View style={styles.personAvatar}>
+                  <Text style={styles.avatarText}>{course.instructor[0]}</Text>
+                </View>
+                <View style={styles.personInfo}>
+                  <Text style={styles.personName}>{course.instructor}</Text>
+                  <Text style={styles.personRole}>Course Owner</Text>
+                </View>
+              </View>
             </View>
+            <View style={styles.peopleSection}>
+              <Text style={styles.sectionTitle}>Students ({people.length})</Text>
+              {people.map((student) => (
+                <View key={student.id} style={styles.personCard}>
+                  <View style={styles.personAvatar}>
+                    <Text style={styles.avatarText}>{student.name[0]}</Text>
+                  </View>
+                  <View style={styles.personInfo}>
+                    <Text style={styles.personName}>{student.name}</Text>
+                    <Text style={styles.personRole}>{student.role}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        <ImageBackground
+          source={{ uri: course.banner }}
+          style={[styles.banner, { backgroundColor: course.color }]}
+          imageStyle={{ opacity: 0.2 }}
+        >
+          <View style={styles.bannerContent}>
+            <Text style={styles.title}>{course.title}</Text>
+            <Text style={styles.subtitle}>{course.code}</Text>
+            <Text style={styles.instructor}>{course.instructor}</Text>
+          </View>
+        </ImageBackground>
+
+        <View style={styles.tabs}>
+          {['stream', 'classwork', 'people'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === tab && styles.activeTab]}
+              onPress={() => setActiveTab(tab as 'stream' | 'classwork' | 'people')}
+            >
+              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
-    );
 
-    const renderAssignmentCard = (item: Assignment) => (
-        <TouchableOpacity key={item.id} style={styles.assignmentCard}>
-            <View style={styles.assignmentIcon}>
-                <MaterialIcons name="assignment" size={24} color={course.color} />
-            </View>
-            <View style={styles.assignmentContent}>
-                <Text style={styles.assignmentTitle}>{item.title}</Text>
-                <Text style={styles.assignmentDue}>Due {item.dueDate}</Text>
-            </View>
-            <Text style={styles.assignmentPoints}>{item.points} pts</Text>
-        </TouchableOpacity>
-    );
-
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case 'stream':
-                return (
-                    <View style={styles.streamContainer}>
-                        <View style={styles.announcementInput}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Announce something to your class"
-                                value={announcement}
-                                onChangeText={setAnnouncement}
-                                multiline
-                            />
-                            <View style={styles.inputActions}>
-                                <TouchableOpacity style={styles.attachButton}>
-                                    <Ionicons name="attach" size={24} color="#666" />
-                                </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={[styles.postButton, !announcement && styles.postButtonDisabled]}
-                                    disabled={!announcement}
-                                >
-                                    <Text style={[styles.postButtonText, !announcement && styles.postButtonTextDisabled]}>
-                                        Post
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                        {SAMPLE_ANNOUNCEMENTS.map(renderAnnouncementCard)}
-                    </View>
-                );
-            case 'classwork':
-                return (
-                    <View style={styles.classworkContainer}>
-                        <TouchableOpacity style={styles.createButton}>
-                            <Ionicons name="add" size={24} color="#fff" />
-                            <Text style={styles.createButtonText}>Create</Text>
-                        </TouchableOpacity>
-                        <View style={styles.topicSection}>
-                            <Text style={styles.topicTitle}>Projects</Text>
-                            {SAMPLE_ASSIGNMENTS
-                                .filter(a => a.topic === 'Projects')
-                                .map(renderAssignmentCard)}
-                        </View>
-                        <View style={styles.topicSection}>
-                            <Text style={styles.topicTitle}>Quizzes</Text>
-                            {SAMPLE_ASSIGNMENTS
-                                .filter(a => a.topic === 'Quizzes')
-                                .map(renderAssignmentCard)}
-                        </View>
-                    </View>
-                );
-            case 'people':
-                return (
-                    <View style={styles.peopleContainer}>
-                        <TouchableOpacity style={styles.inviteButton}>
-                            <Ionicons name="person-add" size={20} color={course.color} />
-                            <Text style={[styles.inviteButtonText, { color: course.color }]}>
-                                Invite Students
-                            </Text>
-                        </TouchableOpacity>
-                        <View style={styles.peopleSection}>
-                            <Text style={styles.sectionTitle}>Teachers</Text>
-                            <View style={styles.personCard}>
-                                <View style={styles.personAvatar}>
-                                    <Text style={styles.avatarText}>
-                                        {course.instructor.split(' ')[1][0]}
-                                    </Text>
-                                </View>
-                                <View style={styles.personInfo}>
-                                    <Text style={styles.personName}>{course.instructor}</Text>
-                                    <Text style={styles.personRole}>Course Owner</Text>
-                                </View>
-                            </View>
-                        </View>
-                        <View style={styles.peopleSection}>
-                            <Text style={styles.sectionTitle}>Students (25)</Text>
-                            <View style={styles.personCard}>
-                                <View style={styles.personAvatar}>
-                                    <Text style={styles.avatarText}>JS</Text>
-                                </View>
-                                <View style={styles.personInfo}>
-                                    <Text style={styles.personName}>John Smith</Text>
-                                    <Text style={styles.personRole}>Student</Text>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                );
-            default:
-                return null;
-        }
-    };
-
-    return (
-        <View style={styles.container}>
-            <ScrollView style={styles.scrollView}>
-                <ImageBackground
-                    source={{ uri: course.banner }}
-                    style={[styles.banner, { backgroundColor: course.color }]}
-                    imageStyle={{ opacity: 0.2 }}
-                >
-                    <View style={styles.bannerContent}>
-                        <Text style={styles.title}>{course.title}</Text>
-                        <Text style={styles.subtitle}>{course.code}</Text>
-                        <Text style={styles.instructor}>{course.instructor}</Text>
-                    </View>
-                </ImageBackground>
-
-                <View style={styles.tabs}>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'stream' && styles.activeTab]}
-                        onPress={() => setActiveTab('stream')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'stream' && styles.activeTabText]}>
-                            Stream
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'classwork' && styles.activeTab]}
-                        onPress={() => setActiveTab('classwork')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'classwork' && styles.activeTabText]}>
-                            Classwork
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'people' && styles.activeTab]}
-                        onPress={() => setActiveTab('people')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'people' && styles.activeTabText]}>
-                            People
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                {renderTabContent()}
-            </ScrollView>
-        </View>
-    );
+        {renderTabContent()}
+      </ScrollView>
+    </View>
+  );
 };
+
 
 const styles = StyleSheet.create({
     container: {

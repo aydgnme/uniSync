@@ -1,78 +1,143 @@
+import { useMessages } from '@/hooks/useMessages';
+import { Message } from '@/services/message.service';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const mockMessages = [
-  {
-    id: '1',
-    sender: 'Lecturer PhD Eng. Ionela Rusu',
-    subject: 'CS101 - Assignment Deadline',
-    message: 'Hello, the assignment deadline for CS101 course has been updated to March 20, 2024.',
-    time: '10:30',
-    unread: true,
-  },
-  {
-    id: '2',
-    sender: 'Student Affairs',
-    subject: 'Course Registration Approval',
-    message: 'Your spring semester course registrations have been approved by your advisor.',
-    time: 'Yesterday',
-    unread: true,
-  },
-  {
-    id: '3',
-    sender: 'Phd. Satco Bianca-Renata',
-    subject: 'MATH101 - Exam Location Change',
-    message: 'The midterm exam for MATH101 course will be held in classroom B-203.',
-    time: '2 days ago',
-    unread: false,
-  },
-];
+const MessageItem = ({ item, onMarkAsRead, onDelete }: { 
+  item: Message; 
+  onMarkAsRead: (id: string) => void;
+  onDelete: (id: string) => void;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-interface Message {
-  id: string;
-  sender: string;
-  subject: string;
-  message: string;
-  time: string;
-  unread: boolean;
-}
+  const handlePress = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+      if (item.unread) {
+        onMarkAsRead(item.id);
+      }
+    } else {
+      setIsExpanded(false);
+    }
+  };
 
-const MessageItem = ({ item }: { item: Message }) => (
-  <TouchableOpacity style={styles.messageCard}>
-    <View style={styles.messageHeader}>
-      <View style={styles.senderInfo}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{item.sender[0]}</Text>
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Message',
+      'Are you sure you want to delete this message?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => onDelete(item.id),
+        },
+      ],
+    );
+  };
+
+  return (
+    <TouchableOpacity 
+      style={[styles.messageCard, item.unread && styles.unreadMessageCard]} 
+      onPress={handlePress}
+    >
+      <View style={styles.messageHeader}>
+        <View style={styles.senderInfo}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{item.sender[0]}</Text>
+          </View>
+          <View>
+            <Text style={styles.senderName}>{item.sender}</Text>
+            <Text style={styles.messageTime}>{item.time}</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.senderName}>{item.sender}</Text>
-          <Text style={styles.messageTime}>{item.time}</Text>
+        <View style={styles.messageActions}>
+          {item.unread && <View style={styles.unreadDot} />}
+          {isExpanded && (
+            <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+              <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
-      {item.unread && <View style={styles.unreadDot} />}
-    </View>
-    <Text style={styles.subject}>{item.subject}</Text>
-    <Text style={styles.messagePreview} numberOfLines={2}>
-      {item.message}
-    </Text>
-  </TouchableOpacity>
+      <Text style={styles.subject}>{item.subject}</Text>
+      <Text 
+        style={styles.messagePreview} 
+        numberOfLines={isExpanded ? undefined : 2}
+      >
+        {item.message}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+const LoadingIndicator = () => (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color="#2196F3" />
+  </View>
+);
+
+const ErrorMessage = ({ message, onRetry }: { message: string; onRetry: () => void }) => (
+  <View style={styles.errorContainer}>
+    <Text style={styles.errorText}>{message}</Text>
+    <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
+      <Text style={styles.retryButtonText}>Try Again</Text>
+    </TouchableOpacity>
+  </View>
 );
 
 export default function MessagesScreen() {
+  const { 
+    messages = [], 
+    isLoading, 
+    isError, 
+    refetch, 
+    markAsRead, 
+    deleteMessage 
+  } = useMessages();
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+
+  if (isError) {
+    return (
+      <ErrorMessage 
+        message="Failed to load messages. Please try again." 
+        onRetry={refetch} 
+      />
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Messages</Text>
-        <TouchableOpacity style={styles.composeButton}>
-          <Ionicons name="create-outline" size={24} color="#2196F3" />
-        </TouchableOpacity>
-      </View>
       <FlatList
-        data={mockMessages}
-        renderItem={({ item }) => <MessageItem item={item} />}
+        data={messages}
+        renderItem={({ item }) => (
+          <MessageItem 
+            item={item} 
+            onMarkAsRead={markAsRead} 
+            onDelete={deleteMessage}
+          />
+        )}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refetch}
+          />
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No messages found</Text>
+          </View>
+        }
+        contentContainerStyle={{ flex: 1 }}
       />
     </View>
   );
@@ -109,6 +174,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  unreadMessageCard: {
+    backgroundColor: '#f0f7ff',
+  },
   messageHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -143,11 +211,19 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
+  messageActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#2196F3',
+  },
+  deleteButton: {
+    padding: 4,
   },
   subject: {
     fontSize: 16,
@@ -159,5 +235,43 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#FF3B30',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#2196F3',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 }); 

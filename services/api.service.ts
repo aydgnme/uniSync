@@ -58,12 +58,16 @@ class ApiService {
 
   // Generic request method
   private async request<T>(
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    endpoint: string,
-    data?: any
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+    endpoint: string | ((...args: any[]) => string),
+    data?: any,
+    ...args: any[]
   ): Promise<T> {
     try {
-      const url = `${this.api.defaults.baseURL}${endpoint}`;
+      const url = typeof endpoint === 'function' 
+        ? `${this.api.defaults.baseURL}${endpoint(...args)}`
+        : `${this.api.defaults.baseURL}${endpoint}`;
+      
       console.log(`Making ${method} request to:`, url);
   
       const headers: Record<string, string> = {
@@ -109,20 +113,24 @@ class ApiService {
   
 
   // HTTP method wrappers
-  public async get<T>(url: string): Promise<T> {
-    return this.request<T>('GET', url);
+  public async get<T>(endpoint: string | ((...args: any[]) => string), ...args: any[]): Promise<T> {
+    return this.request<T>('GET', endpoint, undefined, ...args);
   }
 
-  public async post<T>(url: string, data?: any): Promise<T> {
-    return this.request<T>('POST', url, data);
+  public async post<T>(endpoint: string | ((...args: any[]) => string), data?: any, ...args: any[]): Promise<T> {
+    return this.request<T>('POST', endpoint, data, ...args);
   }
 
-  public async put<T>(url: string, data?: any): Promise<T> {
-    return this.request<T>('PUT', url, data);
+  public async put<T>(endpoint: string | ((...args: any[]) => string), data?: any, ...args: any[]): Promise<T> {
+    return this.request<T>('PUT', endpoint, data, ...args);
   }
 
-  public async delete<T>(url: string): Promise<T> {
-    return this.request<T>('DELETE', url);
+  public async patch<T>(endpoint: string | ((...args: any[]) => string), data?: any, ...args: any[]): Promise<T> {
+    return this.request<T>('PATCH', endpoint, data, ...args);
+  }
+
+  public async delete<T>(endpoint: string | ((...args: any[]) => string), ...args: any[]): Promise<T> {
+    return this.request<T>('DELETE', endpoint, undefined, ...args);
   }
 }
 

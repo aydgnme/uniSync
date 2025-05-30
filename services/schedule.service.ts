@@ -2,11 +2,11 @@ import axios from 'axios';
 import moment from 'moment';
 import { API_CONFIG } from '../config/api.config';
 import {
-    Course,
-    CourseType,
-    ParityType,
-    ScheduleResponse,
-    TodayScheduleResponse
+  Course,
+  CourseType,
+  ParityType,
+  ScheduleResponse,
+  TodayScheduleResponse
 } from '../types/schedule.type';
 
 interface APICourseItem {
@@ -137,7 +137,7 @@ class ScheduleService {
         subgroupIndex 
       });
 
-      let path = `${this.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULE.TODAY}/${facultyId}/${specializationShortName}/${studyYear}/${groupName}`;
+      let path = `${this.BASE_URL}/schedule/${facultyId}/${specializationShortName}/${studyYear}/${groupName}`;
       if (subgroupIndex && subgroupIndex.trim() !== '') {
         path += `/${subgroupIndex}`;
       }

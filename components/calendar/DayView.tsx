@@ -8,7 +8,7 @@ interface Course {
     id: string;
     code?: string;
     title: string;
-    type: 'LECTURE' | 'SEMINAR' | 'LAB' | 'course';
+    type: 'LECTURE' | 'SEMINAR' | 'LAB';
     startTime?: string;
     endTime?: string;
     time?: string;
@@ -70,27 +70,26 @@ const getCourseStyle = (course: Course) => {
         };
     }
 
-    // Correct color mapping
-    if (course.type === 'course' || course.type === 'LECTURE') {
+    if (course.type === 'LECTURE') {
         return {
             backgroundColor: '#E9F5FF',
             borderLeftColor: '#2196F3',
             borderLeftWidth: 4,
             textColor: '#2196F3'
         };
-    } else if (course.type === 'lab' || course.type === 'LAB') {
+    } else if (course.type === 'LAB') {
         return {
             backgroundColor: '#FFF3E0',
             borderLeftColor: '#FB8C00',
             borderLeftWidth: 4,
             textColor: '#FB8C00'
         };
-    } else if (course.type === 'seminar' || course.type === 'SEMINAR') {
+    } else if (course.type === 'SEMINAR') {
         return {
-            backgroundColor: '#E8F5E9',
-            borderLeftColor: '#43A047',
+            backgroundColor: '#FFF5D4',
+            borderLeftColor: '#FFB74D',
             borderLeftWidth: 4,
-            textColor: '#43A047'
+            textColor: '#FFB74D'
         };
     } else {
         // Default

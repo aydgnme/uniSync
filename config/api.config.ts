@@ -12,10 +12,10 @@ export const API_CONFIG = {
       VERIFY_RESET_CODE: '/auth/verify-reset-code',
     },
     USER: {
-      PROFILE: '/users',
-      UPDATE_PROFILE: '/users/update',
-      CHANGE_PASSWORD: '/users/change-password',
-      GET_BY_MATRICULATION: (matriculationNumber: string) => `/users/by-matriculation?matriculationNumber=${matriculationNumber}`,
+      PROFILE: (userId: string) => `/users/${userId}`,
+      UPDATE_PROFILE: (userId: string) => `/users/${userId}`,
+      CHANGE_PASSWORD: (userId: string) => `/users/${userId}/change-password`,
+      GET_BY_MATRICULATION: (matriculationNumber: string) => `/users/by-matriculation/${matriculationNumber}`,
     },
     SCHEDULE: {
       TODAY: '/schedule/today',
@@ -26,6 +26,9 @@ export const API_CONFIG = {
       DETAILS: (id: string) => `/courses/${id}`,
       SCHEDULE: '/courses/schedule',
       GRADES: '/courses/grades',
+      ANNOUNCEMENTS: (id: string) => `/announcements/${id}`,
+      ASSIGNMENTS: (id: string) => `/assignments/${id}`,
+      PEOPLE: (id: string) => `/people/${id}`,
     },
     ANNOUNCEMENTS: {
       LIST: '/announcements',

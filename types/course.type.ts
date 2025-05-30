@@ -17,7 +17,7 @@ export interface Course {
     banner: string;
 }
   
-export interface Schedule 
+export interface Schedule {
     group: string;
     subgroup: string;
     weekNumber: number;

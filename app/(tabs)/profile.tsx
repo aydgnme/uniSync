@@ -154,17 +154,17 @@ const ProfileScreen = () => {
             <ActionButton 
               icon="chatbubbles-outline" 
               label="Secretary AI" 
-              onPress={() => navigation.navigate('Chat' as never)}
+              onPress={() => router.push('/(screens)/chat')}
             />
             <ActionButton 
               icon="document-text-outline" 
               label="Transcript" 
-              onPress={() => navigation.navigate('Grades' as never)}
+              onPress={() => router.push('/(screens)/grades')}
             />
             <ActionButton 
               icon="calendar-outline" 
               label="Calendar" 
-              onPress={() => navigation.navigate('Calendar' as never)}
+              onPress={() => router.push('/(tabs)/schedule')}
             />
             <ActionButton 
               icon="settings-outline" 

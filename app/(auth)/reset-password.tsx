@@ -6,13 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View
 } from "react-native";
 
 type Step = "identification" | "verification" | "newPassword";
@@ -195,12 +195,12 @@ const ResetPasswordScreen = () => {
 
       console.log('Verification response:', response);
 
-      if (response.isValid) {
+      if (response && response.isValid) {
         console.log('Code verified successfully, moving to new password step');
         setStep("newPassword");
       } else {
-        console.log('Code verification failed:', response.message);
-        setError(response.message);
+        console.log('Code verification failed:', response?.message || 'Invalid code');
+        setError(response?.message || 'Invalid verification code');
       }
     } catch (err: any) {
       console.log('Verification error:', {

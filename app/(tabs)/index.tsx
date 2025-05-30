@@ -7,15 +7,15 @@ import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  AppState,
-  AppStateStatus,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    AppState,
+    AppStateStatus,
+    Modal,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { useAnnouncements } from '../../hooks/useAnnouncements';
 import { Announcement } from '../../services/announcement.service';

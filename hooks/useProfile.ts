@@ -57,7 +57,7 @@ const mapResponseToUser = (response: UserProfileResponse): User => {
     academicInfo: response.academicInfo ? {
       program: response.academicInfo.program || '',
       semester: response.academicInfo.semester || 1,
-      studyYear: response.academicInfo.studyYear || 1,
+      studyYear: response.academicInfo.studyYear || Math.ceil((response.academicInfo.semester || 1) / 2),
       studentId: response.academicInfo.studentId || '',
       advisor: response.academicInfo.advisor || '',
       groupName: response.academicInfo.groupName || '',

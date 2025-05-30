@@ -6,16 +6,23 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 interface Course {
     id: string;
-    code: string;
+    code?: string;
     title: string;
-    type: 'LECTURE' | 'SEMINAR' | 'LAB';
-    startTime: string;
-    endTime: string;
+    type: 'LECTURE' | 'SEMINAR' | 'LAB' | 'course';
+    startTime?: string;
+    endTime?: string;
+    time?: string;
     duration: number;
-    room: string;
+    room?: string;
+    location?: string;
     teacher: string;
-    weekDay: number;
+    weekDay?: number;
     date?: string;
+    style?: {
+        backgroundColor: string;
+        borderLeftColor: string;
+        borderLeftWidth: number;
+    };
 }
 
 interface DayViewProps {
@@ -29,12 +36,19 @@ const END_HOUR = 21;
 const HOUR_HEIGHT = 60;
 
 const calculateCoursePosition = (course: Course, selectedDate: string) => {
-    if (!course.startTime || !course.endTime) {
-        // Defensive: If times are missing, don't render the course
+    let startTime, endTime;
+    
+    if (course.time) {
+        [startTime, endTime] = course.time.split(" - ");
+    } else if (course.startTime && course.endTime) {
+        startTime = course.startTime;
+        endTime = course.endTime;
+    } else {
         return { top: 0, height: 0 };
     }
-    const [startHour, startMinute] = course.startTime.split(":").map(Number);
-    const [endHour, endMinute] = course.endTime.split(":").map(Number);
+
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
     
     const startMinutes = startHour * 60 + startMinute;
     const endMinutes = endHour * 60 + endMinute;
@@ -44,6 +58,49 @@ const calculateCoursePosition = (course: Course, selectedDate: string) => {
     const height = ((endMinutes - startMinutes) / 60) * HOUR_HEIGHT;
     
     return { top, height };
+};
+
+const getCourseStyle = (course: Course) => {
+    if (course.style) {
+        return {
+            backgroundColor: course.style.backgroundColor,
+            borderLeftColor: course.style.borderLeftColor,
+            borderLeftWidth: course.style.borderLeftWidth,
+            textColor: course.style.borderLeftColor
+        };
+    }
+
+    // Correct color mapping
+    if (course.type === 'course' || course.type === 'LECTURE') {
+        return {
+            backgroundColor: '#E9F5FF',
+            borderLeftColor: '#2196F3',
+            borderLeftWidth: 4,
+            textColor: '#2196F3'
+        };
+    } else if (course.type === 'lab' || course.type === 'LAB') {
+        return {
+            backgroundColor: '#FFF3E0',
+            borderLeftColor: '#FB8C00',
+            borderLeftWidth: 4,
+            textColor: '#FB8C00'
+        };
+    } else if (course.type === 'seminar' || course.type === 'SEMINAR') {
+        return {
+            backgroundColor: '#E8F5E9',
+            borderLeftColor: '#43A047',
+            borderLeftWidth: 4,
+            textColor: '#43A047'
+        };
+    } else {
+        // Default
+        return {
+            backgroundColor: '#E9F5FF',
+            borderLeftColor: '#2196F3',
+            borderLeftWidth: 4,
+            textColor: '#2196F3'
+        };
+    }
 };
 
 const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
@@ -76,19 +133,18 @@ const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
                 ))}
 
                 {filteredCourses.map((course) => {
-                    // Defensive: skip if startTime or endTime is missing
-                    if (!course.startTime || !course.endTime) return null;
                     const { top, height } = calculateCoursePosition(course, selectedDate);
+                    const courseStyle = getCourseStyle(course);
+                    
                     console.log('DayView - Rendering course:', {
                         courseTitle: course.title,
                         top,
                         height,
-                        startTime: course.startTime,
-                        endTime: course.endTime
+                        time: course.time,
+                        type: course.type,
+                        style: courseStyle
                     });
-                    const selected = moment(selectedDate); // selected day
-                    const weekStart = selected.clone().startOf('isoWeek'); // Pazartesi
-                    const courseDate = weekStart.clone().add(course.weekDay - 1, 'days').format('YYYY-MM-DD');
+
                     return (
                         <View
                             key={course.id}
@@ -97,8 +153,9 @@ const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
                                 {
                                     top,
                                     height,
-                                    backgroundColor: course.type === 'LECTURE' ? '#E9F5FF' : '#FFF3E0',
-                                    borderLeftColor: course.type === 'LECTURE' ? '#2196F3' : '#FB8C00',
+                                    backgroundColor: courseStyle.backgroundColor,
+                                    borderLeftColor: courseStyle.borderLeftColor,
+                                    borderLeftWidth: courseStyle.borderLeftWidth,
                                 },
                             ]}
                         >
@@ -107,29 +164,29 @@ const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
                                     <Icon 
                                         name="time-outline" 
                                         size={16} 
-                                        color={course.type === 'LECTURE' ? '#2196F3' : '#FB8C00'} 
+                                        color={courseStyle.textColor}
                                     />
                                     <Text style={[
                                         styles.courseTimeText, 
                                         { 
-                                            color: course.type === 'LECTURE' ? '#2196F3' : '#FB8C00',
+                                            color: courseStyle.textColor,
                                             marginLeft: 4 
                                         }
-                                    ]}> {`${course.startTime} - ${course.endTime}`} </Text>
+                                    ]}> {course.time || `${course.startTime} - ${course.endTime}`} </Text>
                                 </View>
                                 <View style={stylesDay.courseLocation}>
                                     <Icon 
                                         name="location-outline" 
                                         size={16} 
-                                        color={course.type === 'LECTURE' ? '#2196F3' : '#FB8C00'} 
+                                        color={courseStyle.textColor}
                                     />
                                     <Text style={[
                                         styles.courseLocationText, 
                                         { 
-                                            color: course.type === 'LECTURE' ? '#2196F3' : '#FB8C00',
+                                            color: courseStyle.textColor,
                                             marginLeft: 4 
                                         }
-                                    ]}> {course.room} </Text>
+                                    ]}> {course.location || course.room} </Text>
                                 </View>
                             </View>
                             <Text style={[

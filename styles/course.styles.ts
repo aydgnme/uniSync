@@ -3,19 +3,20 @@ import { Platform, StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFF',
+        backgroundColor: Platform.select({
+            ios: '#F2F2F7',
+            android: '#F0F0F0',
+        }),
+        marginTop: -100,
     },
     content: {
         flex: 1,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: '#F2F2F7',
         padding: 16,
     },
     header: {
         padding: 20,
-        paddingTop: Platform.select({
-            ios: 20,
-            android: 60,
-        }),
+        paddingTop: 100,
         backgroundColor: '#FFF',
         borderBottomWidth: 1,
         borderBottomColor: '#E0E0E0',

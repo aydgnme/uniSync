@@ -1,5 +1,5 @@
 import CourseCard from '@/components/course/CourseCard';
-import courses from '@/data/courses.json';
+import { useCourses } from '@/hooks/useCourses';
 import { useProfile } from '@/hooks/useProfile';
 import { styles } from '@/styles/course.styles';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { ActivityIndicator, FlatList, SafeAreaView, Text, View } from 'react-nat
 const CoursesScreen = () => {
     const router = useRouter();
     const { user, loading } = useProfile();
+    const { courses, loading: coursesLoading, error } = useCourses();
     
     const groupIndex = user?.academicInfo?.groupName 
       ? user.academicInfo.subgroupIndex 

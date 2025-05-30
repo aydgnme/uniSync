@@ -14,9 +14,12 @@ export interface UserProfile {
   role: string;
   phone?: string;
   address?: string;
+  cnp?: string;
+  matriculationNumber?: string;
   academicInfo?: {
     program?: string;
     semester?: number;
+    studyYear?: number;
     groupName?: string;
     subgroupIndex?: string;
     studentId?: string;
@@ -26,6 +29,11 @@ export interface UserProfile {
     specializationShortName?: string;
     _id?: string;
   };
+  enrolledLectures?: string[];
+  resetCode?: string;
+  resetCodeExpiry?: number;
+  updatedAt?: string;
+  __v?: number;
 }
 
 export interface LoginResponse {
@@ -68,10 +76,13 @@ export interface UpdateUserRequest {
   academicInfo: {
     program: string;
     semester: number;
+    studyYear: number;
     groupName: string;
     subgroupIndex: string;
     advisor: string;
     gpa: number;
+    facultyId?: string;
+    specializationShortName?: string;
   };
 }
 
@@ -190,7 +201,6 @@ class AuthService {
 
   public async logout(): Promise<void> {
     try {
-      await apiService.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
       // Clear stored data
       await SecureStore.deleteItemAsync(this.TOKEN_KEY);
       await SecureStore.deleteItemAsync(this.USER_KEY);
@@ -275,14 +285,40 @@ class AuthService {
       apiService.setAuthToken(token);
   
       // Call with proper ID, no extra query params
-      const response = await apiService.get<UserProfile>(`/users/${userId}`);
+      const response = await apiService.get<any>(`/users/${userId}`);
       console.log('User profile response:', JSON.stringify(response, null, 2));
   
       if (!response) {
         throw new Error('No response from profile API');
       }
+
+      // Map backend response to frontend structure
+      const mappedResponse: UserProfile = {
+        _id: response._id.$oid || response._id,
+        email: response.email,
+        name: response.name,
+        role: response.role,
+        phone: response.phone,
+        address: response.address,
+        cnp: response.cnp,
+        matriculationNumber: response.matriculationNumber,
+        enrolledLectures: response.enrolledLectures,
+        academicInfo: response.academicInfo ? {
+          program: response.academicInfo.program,
+          semester: response.academicInfo.semester,
+          studyYear: response.academicInfo.studyYear,
+          studentId: response.academicInfo.studentId,
+          advisor: response.academicInfo.advisor,
+          groupName: response.academicInfo.groupName,
+          subgroupIndex: response.academicInfo.subgroupIndex,
+          gpa: response.academicInfo.gpa,
+          facultyId: response.academicInfo.facultyId,
+          specializationShortName: response.academicInfo.specializationShortName,
+          _id: response.academicInfo._id?.$oid || response.academicInfo._id
+        } : undefined
+      };
   
-      return response;
+      return mappedResponse;
     } catch (error: any) {
       console.error('Get user profile error:', {
         status: error.response?.status,
@@ -307,14 +343,57 @@ class AuthService {
         code,
       });
 
-      console.log('Verify reset code API response:', response);
-      return response;
+      console.log('Verify reset code API response:', JSON.stringify(response, null, 2));
+
+      // Check API response and convert to appropriate format
+      if (response) {
+        return {
+          isValid: true,
+          message: 'Code verified successfully'
+        };
+      } else {
+        return {
+          isValid: false,
+          message: 'Invalid verification code'
+        };
+      }
     } catch (error: any) {
       console.error('Verify reset code error:', {
         status: error.response?.status,
         data: error.response?.data,
         error
       });
+      throw error;
+    }
+  }
+
+  public async updateStudyYear(userId: string, studyYear: number): Promise<UserProfile> {
+    try {
+      const user = await this.getUserProfile(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const updateData: UpdateUserRequest = {
+        name: user.name,
+        phone: user.phone || '',
+        address: user.address || '',
+        academicInfo: {
+          program: user.academicInfo?.program || '',
+          semester: user.academicInfo?.semester || 1,
+          studyYear: studyYear,
+          groupName: user.academicInfo?.groupName || '',
+          subgroupIndex: user.academicInfo?.subgroupIndex || '',
+          advisor: user.academicInfo?.advisor || '',
+          gpa: user.academicInfo?.gpa || 0,
+          facultyId: user.academicInfo?.facultyId || '',
+          specializationShortName: user.academicInfo?.specializationShortName || ''
+        }
+      };
+
+      return await this.updateUser(userId, updateData);
+    } catch (error) {
+      console.error('Update study year error:', error);
       throw error;
     }
   }

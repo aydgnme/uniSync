@@ -1,27 +1,60 @@
-import { courseService } from "@/services/course.service";
-import { Course } from "@/types/course.type";
-import { useEffect, useState } from "react";
-import { useProfile } from "./useProfile";
+import { useEffect, useState } from 'react';
 
-
+export interface Course {
+  id: string;
+  title: string;
+  code: string;
+  instructor: string;
+  color: string;
+  banner: string;
+}
 
 export const useCourses = () => {
-    const { user, loading: userLoading } = useProfile();
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (user?.academicInfo?.studentId) {
-            courseService.fetchCoursesByStudent(user.id)
-            .then(setCourses)
-            .catch(error => {
-                console.error('Failed to fetch courses: ',error);
-                setError('Failed to load courses');
-            })
-            .finally(()=>setLoading(false));
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      // TODO: Implement actual API call
+      // For now, using mock data
+      const mockCourses: Course[] = [
+        {
+          id: '1',
+          title: 'Introduction to Programming',
+          code: 'CS101',
+          instructor: 'Dr. John Smith',
+          color: '#1976D2',
+          banner: 'https://example.com/cs101-banner.jpg'
+        },
+        {
+          id: '2',
+          title: 'Data Structures',
+          code: 'CS102',
+          instructor: 'Dr. Jane Doe',
+          color: '#2196F3',
+          banner: 'https://example.com/cs102-banner.jpg'
         }
-    }, [user]);
+      ];
+      setCourses(mockCourses);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch courses');
+      console.error('Error fetching courses:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return { courses, loading: loading || userLoading, error };
-}
+  return {
+    courses,
+    loading,
+    error,
+    refetch: fetchCourses
+  };
+}; 

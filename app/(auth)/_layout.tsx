@@ -3,14 +3,19 @@ import React from 'react';
 
 export default function AuthLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: '#fff' },
-      }}
-    >
-      <Stack.Screen name="login" />
-      <Stack.Screen name="reset-password" />
+    <Stack>
+      <Stack.Screen
+        name="login"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="reset-password"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 } 

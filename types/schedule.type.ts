@@ -18,22 +18,20 @@ export interface ScheduleEntry {
   weekDay: number;   // 1 (Monday) ... 7 (Sunday)
 }
 
+// Course type for schedule API response
 export interface Course {
   id: string;
-  code: string;
-  title: string;
-  type: CourseType;
-  startTime: string;
-  endTime: string;
-  duration: number;
+  courseId: string;
+  courseCode: string;
+  courseTitle: string;
+  weekDay: number; // 1 (Monday) - 7 (Sunday)
+  startTime: string; // "HH:mm:ss"
+  endTime: string;   // "HH:mm:ss"
   room: string;
-  teacher: string;
-  group: string;
-  subgroup: string;
-  parity: ParityType;
-  weekDay: number;
-  date?: string;
-  color?: string;
+  parity: string; // "all" | "ODD" | "EVEN"
+  groupId: string;
+  groupName: string;
+  weeks: number[];
 }
 
 export interface ScheduleResponse {

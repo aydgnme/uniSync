@@ -125,7 +125,7 @@ const ProfileScreen = () => {
           </View>
           <InfoRow label="E-mail" value={user.email} />
           <InfoRow label="Phone Number" value={user.phone || ''} />
-          <InfoRow label="Address" value={user.address || ''} />
+          <InfoRow label="Nationality" value={user.nationality || ''} />
           <InfoRow label="CNP" value={user.cnp} />
           <InfoRow label="Matriculation Number" value={user.matriculationNumber} />
         </View>

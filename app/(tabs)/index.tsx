@@ -1,5 +1,7 @@
+import { Announcement, useAnnouncements } from '@/hooks/useAnnouncements';
+import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from "@/hooks/useProfile";
-import { useSchedule } from "@/hooks/useSchedule";
+import { ScheduleCourse, useSchedule } from "@/hooks/useSchedule";
 import styles, { colors } from "@/styles/main.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
@@ -7,18 +9,16 @@ import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    AppState,
-    AppStateStatus,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  AppState,
+  AppStateStatus,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { useAnnouncements } from '../../hooks/useAnnouncements';
-import { Announcement } from '../../services/announcement.service';
 
 type MainTabParamList = {
   Home: undefined;
@@ -56,6 +56,15 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   </TouchableOpacity>
 );
 
+// Temporary loading component for loading states
+function LoadingComponent() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color="#007AFF" />
+    </View>
+  );
+}
+
 export default function MainScreen() {
   const navigation = useNavigation<MainScreenNavigationProp>();
   const { user, loading } = useProfile();
@@ -64,6 +73,7 @@ export default function MainScreen() {
   const router = useRouter();
   const { announcements, loading: announcementsLoading, error: announcementsError, fetchAnnouncements } = useAnnouncements();
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
+  const { loading: authLoading } = useAuth();
 
   useEffect(() => {
     console.log("User data:", user);
@@ -97,6 +107,10 @@ export default function MainScreen() {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
+
+  if (authLoading) {
+    return <LoadingComponent />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -155,7 +169,7 @@ export default function MainScreen() {
           ) : scheduleError ? (
             <Text>{scheduleError}</Text>
           ) : todayCourses.length > 0 ? (
-            todayCourses.map((course, index) => (
+            todayCourses.map((course: ScheduleCourse, index: number) => (
               <View key={index} style={styles.classCard}>
                 <View style={styles.classTime}>
                   <Ionicons
@@ -165,7 +179,8 @@ export default function MainScreen() {
                   />
                   <Text style={styles.classTimeText}>{`${course.startTime} - ${course.endTime}`}</Text>
                 </View>
-                <Text style={styles.className}>{course.title}</Text>
+                {/* Use courseTitle and teacher fields from ScheduleCourse type */}
+                <Text style={styles.className}>{course.courseTitle}</Text>
                 <View style={styles.classDetails}>
                   <Text style={styles.classLocation}>
                     <Ionicons name="location-outline" size={16} color="#666" />{" "}
@@ -173,7 +188,8 @@ export default function MainScreen() {
                   </Text>
                   <Text style={styles.classProfessor}>
                     <Ionicons name="person-outline" size={16} color="#666" />{" "}
-                    {course.teacher}
+                    {/* Show groupName as fallback for teacher */}
+                    {course.groupName}
                   </Text>
                 </View>
               </View>
@@ -193,7 +209,7 @@ export default function MainScreen() {
           ) : announcements.length === 0 ? (
             <Text style={styles.emptyText}>No announcements available.</Text>
           ) : (
-            announcements.map((announcement) => (
+            announcements.map((announcement: Announcement) => (
               <TouchableOpacity 
                 key={announcement.id} 
                 style={styles.announcementCard}
@@ -243,10 +259,10 @@ export default function MainScreen() {
                     {selectedAnnouncement.attachments && selectedAnnouncement.attachments.length > 0 && (
                       <View style={styles.modalAttachments}>
                         <Text style={styles.modalAttachmentsTitle}>Attachments:</Text>
-                        {selectedAnnouncement.attachments.map((attachment, index) => (
+                        {selectedAnnouncement.attachments.map((attachment: { name: string; url: string }, index: number) => (
                           <TouchableOpacity key={index} style={styles.modalAttachmentItem}>
                             <Ionicons name="document-attach-outline" size={20} color={colors.primary} />
-                            <Text style={styles.modalAttachmentText}>{attachment}</Text>
+                            <Text style={styles.modalAttachmentText}>{attachment.name}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>

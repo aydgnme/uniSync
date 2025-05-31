@@ -1,10 +1,10 @@
+import { SectionCard } from '@/components/settings/SectionCard';
+import { SettingRow } from '@/components/settings/SettingRow';
+import { useSettings } from '@/hooks/useSettings.ts';
+import { styles } from '@/styles/settings.styles';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView, ScrollView, View } from 'react-native';
-import { SectionCard } from '../../components/settings/SectionCard';
-import { SettingRow } from '../../components/settings/SettingRow';
-import { useSettings } from '../../hooks/useSettings';
-import { styles } from '../../styles/settings.styles';
 
 const SettingsScreen = () => {
   const router = useRouter();

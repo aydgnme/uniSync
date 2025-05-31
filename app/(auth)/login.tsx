@@ -1,44 +1,79 @@
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { useAuth } from "@/context/AuthContext";
-import type { LoginRequest, LoginResponse } from "@/services/auth.service";
 import { authService } from "@/services/auth.service";
 import styles from "@/styles/auth.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+  user: {
+    user_id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    role?: string;
+    phone_number?: string;
+    nationality?: string;
+    cnp?: string;
+    matriculation_number?: string;
+    advisor?: string;
+    gpa?: number;
+    semester?: number;
+    study_year?: number;
+    group_name?: string;
+    subgroup_index?: string;
+    faculty_id?: string;
+    group_is_modular?: boolean;
+    is_modular?: boolean;
+    specialization_short_name?: string;
+    specialization_name?: string;
+  };
+}
 
 // Helper function for user data transformation
 const mapUserResponse = (userResponse: LoginResponse["user"]) => {
   return {
-    _id: userResponse._id,
-    name: userResponse.name,
+    _id: userResponse.user_id || "",
+    name: `${userResponse.first_name} ${userResponse.last_name}`.trim(),
     email: userResponse.email,
-    role: userResponse.role || "Student",
-    academicInfo: userResponse.academicInfo ? {
-      program: userResponse.academicInfo.program || "",
-      semester: userResponse.academicInfo.semester || 1,
-      studentId: userResponse.academicInfo.studentId || "",
-      advisor: userResponse.academicInfo.advisor || "",
-      groupName: userResponse.academicInfo.groupName || "",
-      subgroupIndex: userResponse.academicInfo.subgroupIndex || "",
-      gpa: userResponse.academicInfo.gpa || 0,
-      facultyId: userResponse.academicInfo.facultyId || "",
-      specializationShortName: userResponse.academicInfo.specializationShortName || "",
-      _id: userResponse.academicInfo._id
-    } : undefined
+    role: userResponse.role || "student",
+    phone: userResponse.phone_number || "",
+    natioanlity: userResponse.nationality || "",
+    cnp: userResponse.cnp || "",
+    matriculationNumber: userResponse.matriculation_number || "",
+    
+    academicInfo: {
+      advisor: userResponse.advisor || "",
+      gpa: userResponse.gpa || 0,
+      semester: userResponse.semester || 1,
+      studyYear: userResponse.study_year || 1,
+      groupName: userResponse.group_name || "",
+      subgroupIndex: userResponse.subgroup_index || "",
+      facultyId: userResponse.faculty_id || "",
+      studentId: userResponse.user_id,
+      isModular: userResponse.group_is_modular ?? userResponse.is_modular ?? false,
+      specializationShortName: userResponse.specialization_short_name || "",
+      program: userResponse.specialization_name || ""
+    }
   };
 };
 
@@ -76,19 +111,11 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      // console.log('Login attempt with:', { email: formData.email });
-      const response = await authService.login(formData);
-      // console.log('Login response received:', response);
+      const response = await authService.login(formData.email, formData.password);
 
       if (response && response.token && response.user) {
-        // Store token and user data securely
-        await SecureStore.setItemAsync("token", response.token);
-        await SecureStore.setItemAsync("userId", response.user._id);
-
-        // Map user data to expected format and update context
         const mappedUser = mapUserResponse(response.user);
-        await login(mappedUser, response.token);
-
+        await login(formData.email, formData.password);
         console.log("Login successful, navigating to main screen");
         router.replace("/(tabs)");
       } else {
@@ -130,8 +157,8 @@ export default function LoginScreen() {
           <Input
             label="Email"
             value={formData.email}
-            onChangeText={(value) =>
-              setFormData((prev) => ({ ...prev, email: value }))
+            onChangeText={(value: string) =>
+              setFormData((prev: LoginRequest) => ({ ...prev, email: value }))
             }
             placeholder="prenume.nume@student.usv.ro"
             keyboardType="email-address"
@@ -139,12 +166,12 @@ export default function LoginScreen() {
             autoComplete="email"
           />
 
-          <View style={{ position: 'relative' }}>
+          <View style={{ position: "relative" }}>
             <Input
               label="Password"
               value={formData.password}
-              onChangeText={(value) =>
-                setFormData((prev) => ({ ...prev, password: value }))
+              onChangeText={(value: string) =>
+                setFormData((prev: LoginRequest) => ({ ...prev, password: value }))
               }
               placeholder="StudentXXXXXX"
               secureTextEntry={!showPassword}
@@ -154,11 +181,11 @@ export default function LoginScreen() {
             <Pressable
               onPress={() => setShowPassword(!showPassword)}
               style={{
-                position: 'absolute',
+                position: "absolute",
                 right: 12,
                 top: 32,
                 padding: 8,
-                zIndex: 10
+                zIndex: 10,
               }}
             >
               <Ionicons

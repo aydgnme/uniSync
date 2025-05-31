@@ -6,13 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
 } from "react-native";
 
 type Step = "identification" | "verification" | "newPassword";
@@ -270,13 +270,13 @@ const ResetPasswordScreen = () => {
     });
 
     try {
-      await authService.resetPassword({
-        cnp: formData.cnp,
-        matriculationNumber: formData.matriculationNumber,
-        code: formData.resetCode,
-        newPassword: formData.newPassword,
-        confirmPassword: formData.confirmPassword
-      });
+      await authService.resetPassword(
+        formData.cnp,
+        formData.matriculationNumber,
+        formData.resetCode,
+        formData.newPassword,
+        formData.confirmPassword
+      );
 
       console.log('Password reset successful');
       

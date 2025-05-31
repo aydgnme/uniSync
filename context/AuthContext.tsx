@@ -1,111 +1,122 @@
-import { authService, UserProfile } from '@/services/auth.service';
+import { authService } from '@/services/auth.service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export interface User extends UserProfile {
-  token: string;
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  nationality: string;
+  cnp: string;
+  matriculationNumber: string;
+  academicInfo: {
+    advisor: string;
+    gpa: number;
+    semester: number;
+    studyYear: number;
+    groupName: string;
+    subgroupIndex: string;
+    facultyId: string;
+    studentId: string;
+    isModular: boolean;
+    specializationShortName: string;
+    program: string;
+  };
 }
 
 interface AuthContextType {
   user: User | null;
-  isAuthenticated: boolean;
   loading: boolean;
-  login: (userData: UserProfile, token: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: false,
+  login: async () => {},
+  logout: async () => {},
+});
 
-const STORAGE_KEYS = {
-  TOKEN: 'token',
-  USER_ID: 'userId'
-};
-
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    loadUser();
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          router.replace('/(auth)/login');
+          return;
+        }
+
+        const response = await authService.checkUser();
+        if (response && response.user) {
+          setUser(response.user);
+          router.replace('/(tabs)');
+        } else {
+          await AsyncStorage.removeItem('token');
+          router.replace('/(auth)/login');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        await AsyncStorage.removeItem('token');
+        router.replace('/(auth)/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
-  const loadUser = async () => {
+  const login = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      const [token, userId] = await Promise.all([
-        AsyncStorage.getItem(STORAGE_KEYS.TOKEN),
-        AsyncStorage.getItem(STORAGE_KEYS.USER_ID)
-      ]);
-
-      //console.log('Stored credentials:', { token, userId });
-
-      if (token && userId) {
-        try {
-          // Fetch user data using userId
-          const response = await authService.getUserProfile(userId);
-          console.log('User profile response:', response);
-          
-          const userWithToken = { ...response, token };
-          setUser(userWithToken);
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-          // If there's an error fetching the profile, clear the stored credentials
-          await AsyncStorage.multiRemove([STORAGE_KEYS.TOKEN, STORAGE_KEYS.USER_ID]);
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
+      const response = await authService.login(email, password);
+      if (response && response.user) {
+        setUser(response.user);
+        router.replace('/(tabs)');
       }
     } catch (error) {
-      console.error('Error loading user:', error);
-      setUser(null);
-      setIsAuthenticated(false);
+      console.error('Login error:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (userData: UserProfile, token: string) => {
-    try {
-      console.log('Login data:', { userData, token });
-      const userWithToken = { ...userData, token };
-      await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_ID, userData._id);
-      setUser(userWithToken);
-      setIsAuthenticated(true);
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
-  };
-
   const logout = async () => {
+    setLoading(true);
     try {
-      await AsyncStorage.multiRemove([STORAGE_KEYS.TOKEN, STORAGE_KEYS.USER_ID]);
+      await authService.logout();
+      await AsyncStorage.removeItem('token');
       setUser(null);
-      setIsAuthenticated(false);
       router.replace('/(auth)/login');
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};

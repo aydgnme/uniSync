@@ -1,5 +1,3 @@
-import { apiService } from './api.service';
-
 export interface Message {
   id: string;
   sender: string;
@@ -9,33 +7,18 @@ export interface Message {
   unread: boolean;
 }
 
-class MessageService {
-  private static instance: MessageService;
+// This is a mock service. Replace with actual API calls in production
+export const messageService = {
+  getMessages: async (): Promise<Message[]> => {
+    // TODO: Implement actual API call
+    return [];
+  },
 
-  private constructor() {}
+  markAsRead: async (messageId: string): Promise<void> => {
+    // TODO: Implement actual API call
+  },
 
-  public static getInstance(): MessageService {
-    if (!MessageService.instance) {
-      MessageService.instance = new MessageService();
-    }
-    return MessageService.instance;
+  deleteMessage: async (messageId: string): Promise<void> => {
+    // TODO: Implement actual API call
   }
-
-  public async getMessages(): Promise<Message[]> {
-    return apiService.get<Message[]>('/messages');
-  }
-
-  public async getMessage(id: string): Promise<Message> {
-    return apiService.get<Message>(`/messages/${id}`);
-  }
-
-  public async markAsRead(id: string): Promise<void> {
-    return apiService.patch<void>(`/messages/${id}/read`);
-  }
-
-  public async deleteMessage(id: string): Promise<void> {
-    return apiService.delete<void>(`/messages/${id}`);
-  }
-}
-
-export const messageService = MessageService.getInstance(); 
+}; 

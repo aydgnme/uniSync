@@ -8,10 +8,10 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Platform.select({
-      ios: '#F2F2F7',
+      ios: '#F2F2F2',
       android: '#F0F0F0',
     }),
-    marginTop: -100,
+    marginTop: -50,
   },
   content: {
     flex: 1,
@@ -197,11 +197,15 @@ export const styles = StyleSheet.create({
     color: '#666',
     marginLeft: 4,
   },
+  noEventsContainer: {
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+  },
   noEventsText: {
-    textAlign: 'center',
     color: '#666',
-    fontSize: 16,
-    marginTop: 20,
+    fontSize: 14,
   },
   dayView: {
     flex: 1,
@@ -238,7 +242,7 @@ export const styles = StyleSheet.create({
   },
   weekView: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#f7f7f7',
   },
   weekSelector: {
     flexDirection: 'row',
@@ -256,31 +260,33 @@ export const styles = StyleSheet.create({
   },
   weekDaySection: {
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
   weekDayHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    marginBottom: 8,
     paddingVertical: 8,
-    backgroundColor: '#F8F9FA',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   weekDayName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#202124',
+    marginRight: 8,
   },
   weekDayDate: {
     fontSize: 14,
     color: '#666',
   },
   weekItemCard: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    marginHorizontal: 16,
-    marginTop: 8,
-    borderRadius: 12,
-    overflow: 'hidden',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#2196F3',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -297,32 +303,25 @@ export const styles = StyleSheet.create({
     }),
   },
   weekItemTime: {
-    width: 80,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F8F9FA',
-    borderRightWidth: 1,
-    borderRightColor: '#E5E5E5',
+    marginBottom: 8,
   },
   weekItemTimeText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#000',
+    color: '#202124',
   },
   weekItemDuration: {
     fontSize: 12,
     color: '#666',
-    marginTop: 4,
+    marginTop: 2,
   },
   weekItemContent: {
     flex: 1,
-    padding: 12,
   },
   weekItemTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#202124',
     marginBottom: 8,
   },
   weekItemDetails: {
@@ -487,5 +486,23 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#616161',
     marginTop: 2,
+  },
+  weekHeader: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    alignItems: 'center',
+  },
+  weekNumber: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a73e8',
+  },
+  weekIndicator: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    fontStyle: 'italic'
   },
 });

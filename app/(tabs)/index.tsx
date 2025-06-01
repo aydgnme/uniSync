@@ -1,23 +1,26 @@
+import { useAcademicCalendar } from '@/context/AcademicCalendarContext';
+import { useScheduleContext } from "@/context/ScheduleContext";
 import { Announcement, useAnnouncements } from '@/hooks/useAnnouncements';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from "@/hooks/useProfile";
-import { ScheduleCourse, useSchedule } from "@/hooks/useSchedule";
 import styles, { colors } from "@/styles/main.styles";
+import { ScheduleItem } from '@/types/schedule.type';
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import moment from 'moment';
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  AppState,
-  AppStateStatus,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    AppState,
+    AppStateStatus,
+    Modal,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 
 type MainTabParamList = {
@@ -34,13 +37,6 @@ interface QuickActionButtonProps {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress: () => void;
-}
-
-interface ScheduleItem {
-  time: string;
-  subject: string;
-  location: string;
-  professor: string;
 }
 
 const QuickActionButton: React.FC<QuickActionButtonProps> = ({
@@ -68,12 +64,13 @@ function LoadingComponent() {
 export default function MainScreen() {
   const navigation = useNavigation<MainScreenNavigationProp>();
   const { user, loading } = useProfile();
-  const { todayCourses, isLoading: scheduleLoading, error: scheduleError, refreshSchedule } = useSchedule();
+  const { schedule: courses, isLoading, error, refreshSchedule } = useScheduleContext();
   const appState = useRef(AppState.currentState);
   const router = useRouter();
   const { announcements, loading: announcementsLoading, error: announcementsError, fetchAnnouncements } = useAnnouncements();
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const { loading: authLoading } = useAuth();
+  const { calendarData } = useAcademicCalendar();
 
   useEffect(() => {
     console.log("User data:", user);
@@ -106,6 +103,50 @@ export default function MainScreen() {
   const truncateText = (text: string, maxLength: number) => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
+  };
+
+  // Refresh schedule
+  const handleRefresh = () => {
+    refreshSchedule();
+  };
+
+  const getTodayCourses = () => {
+    if (!courses || courses.length === 0) return [];
+    
+    const today = moment();
+    const weekNumber = calendarData?.weekNumber || 0;
+    const parity = calendarData?.parity || 'ODD';
+    const todayWeekDay = today.isoWeekday().toString();
+    
+    console.log('Today\'s schedule check:', {
+      date: today.format('YYYY-MM-DD'),
+      weekNumber,
+      parity,
+      weekDay: todayWeekDay
+    });
+    
+    return courses.filter((course: ScheduleItem) => {
+      // Week number check
+      if (!course.weeks.includes(weekNumber)) {
+        console.log(`Course ${course.courseTitle} not in current week ${weekNumber}`);
+        return false;
+      }
+      
+      // Parity check
+      if (course.parity !== 'all' && course.parity !== parity) {
+        console.log(`Course ${course.courseTitle} parity mismatch: ${course.parity} vs ${parity}`);
+        return false;
+      }
+      
+      // Day check
+      if (course.weekDay !== todayWeekDay) {
+        console.log(`Course ${course.courseTitle} not on current day: ${course.weekDay} vs ${todayWeekDay}`);
+        return false;
+      }
+      
+      console.log(`Course ${course.courseTitle} is valid for today`);
+      return true;
+    });
   };
 
   if (authLoading) {
@@ -164,12 +205,12 @@ export default function MainScreen() {
         {/* Today's Schedule */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Today's Schedule</Text>
-          {loading || scheduleLoading ? (
+          {isLoading ? (
             <Text>Loading...</Text>
-          ) : scheduleError ? (
-            <Text>{scheduleError}</Text>
-          ) : todayCourses.length > 0 ? (
-            todayCourses.map((course: ScheduleCourse, index: number) => (
+          ) : error ? (
+            <Text>{error}</Text>
+          ) : getTodayCourses().length > 0 ? (
+            getTodayCourses().map((course: ScheduleItem, index: number) => (
               <View key={index} style={styles.classCard}>
                 <View style={styles.classTime}>
                   <Ionicons
@@ -179,7 +220,6 @@ export default function MainScreen() {
                   />
                   <Text style={styles.classTimeText}>{`${course.startTime} - ${course.endTime}`}</Text>
                 </View>
-                {/* Use courseTitle and teacher fields from ScheduleCourse type */}
                 <Text style={styles.className}>{course.courseTitle}</Text>
                 <View style={styles.classDetails}>
                   <Text style={styles.classLocation}>
@@ -188,7 +228,6 @@ export default function MainScreen() {
                   </Text>
                   <Text style={styles.classProfessor}>
                     <Ionicons name="person-outline" size={16} color="#666" />{" "}
-                    {/* Show groupName as fallback for teacher */}
                     {course.groupName}
                   </Text>
                 </View>
@@ -205,7 +244,7 @@ export default function MainScreen() {
           {announcementsLoading ? (
             <ActivityIndicator size="small" color="#0000ff" />
           ) : announcementsError ? (
-            <Text style={styles.errorText}>{announcementsError}</Text>
+            <Text style={styles.errorText}>Error loading announcements</Text>
           ) : announcements.length === 0 ? (
             <Text style={styles.emptyText}>No announcements available.</Text>
           ) : (

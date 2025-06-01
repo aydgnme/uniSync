@@ -1,5 +1,7 @@
+import { useAcademicCalendar } from '@/context/AcademicCalendarContext';
 import { styles } from '@/styles/calendar.styles';
 import { Class, Event, MarkedDates } from '@/types/calendar.type';
+import moment from 'moment';
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
@@ -13,6 +15,11 @@ interface MonthViewProps {
     classes: Class[];
 }
 
+interface ClassWithWeekIndicator extends Class {
+    weekIndicator: string;
+    uniqueKey: string;
+}
+
 const MonthView: React.FC<MonthViewProps> = ({ 
     selectedDate, 
     markedDates, 
@@ -20,12 +27,35 @@ const MonthView: React.FC<MonthViewProps> = ({
     events,
     classes = [] 
 }) => {
-    // Filter classes for the selected day
-    const getClassesForDate = (date: string) => {
-        const dayOfWeek = new Date(date).getDay();
-        const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        return classes.filter(cls => cls.day.toLowerCase() === daysOfWeek[dayOfWeek]);
+    const { calendarData } = useAcademicCalendar();
+
+    // Get classes for the selected date and academic week
+    const getClassesForDate = (date: string): ClassWithWeekIndicator[] => {
+        const selectedMoment = moment(date);
+        const dayOfWeek = selectedMoment.isoWeekday(); // 1 (Mon) - 7 (Sun)
+        const selectedWeek = calendarData?.weekNumber || 0;
+
+        if (selectedWeek === 0) return []; // date outside semester
+
+        // Filter by day + week
+        const filteredClasses = classes
+            .filter(cls => parseInt(cls.day) === dayOfWeek)
+            .map(cls => {
+                const classWeeks = cls.weeks || [];
+                if (!classWeeks.includes(selectedWeek)) return null;
+                return {
+                    ...cls,
+                    weekIndicator: `Academic Week ${selectedWeek}`,
+                    uniqueKey: `${cls.id}-week-${selectedWeek}`
+                };
+            })
+            .filter((cls): cls is ClassWithWeekIndicator => cls !== null);
+
+        return filteredClasses;
     };
+
+    const classesForSelectedDate = getClassesForDate(selectedDate);
+    const eventsForSelectedDate = events.filter(event => event.date === selectedDate);
 
     return (
         <View style={styles.monthContainer}>
@@ -48,25 +78,23 @@ const MonthView: React.FC<MonthViewProps> = ({
             />
 
             <ScrollView style={styles.eventList}>
-                {/* Classes */}
-                {getClassesForDate(selectedDate).map(cls => (
-                    <View key={cls.id} style={styles.classCard}>
+                {classesForSelectedDate.map(cls => (
+                    <View key={cls.uniqueKey} style={styles.classCard}>
                         <Text style={styles.classTitle}>{cls.title}</Text>
                         <Text style={styles.classTime}>
                             {cls.startTime} - {cls.endTime}
                         </Text>
                         <Text style={styles.classRoom}>Room: {cls.room}</Text>
+                        <Text style={styles.weekIndicator}>{cls.weekIndicator}</Text>
                     </View>
                 ))}
 
-                {/* Events */}
-                {events.filter(event => event.date === selectedDate).map(event => (
+                {eventsForSelectedDate.map(event => (
                     <EventCard key={event.id} event={event} />
                 ))}
 
-                {/* No classes or events */}
-                {getClassesForDate(selectedDate).length === 0 && 
-                 events.filter(event => event.date === selectedDate).length === 0 && (
+                {classesForSelectedDate.length === 0 &&
+                 eventsForSelectedDate.length === 0 && (
                     <Text style={styles.noEventsText}>No classes or events on this date</Text>
                 )}
             </ScrollView>

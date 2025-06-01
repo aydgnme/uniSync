@@ -50,35 +50,37 @@ interface LoginResponse {
 }
 
 // Helper function for user data transformation
-const mapUserResponse = (userResponse: LoginResponse["user"]) => {
+export const mapUserProfileResponse = (response: any) => {
   return {
-    _id: userResponse.user_id || "",
-    name: `${userResponse.first_name} ${userResponse.last_name}`.trim(),
-    email: userResponse.email,
-    role: userResponse.role || "student",
-    phone: userResponse.phone_number || "",
-    natioanlity: userResponse.nationality || "",
-    cnp: userResponse.cnp || "",
-    matriculationNumber: userResponse.matriculation_number || "",
-    
+    id: response.id,
+    name: `${response.first_name} ${response.last_name}`,
+    email: response.email,
+    role: response.role,
+    phone: response.phone_number,
+    gender: response.gender,
+    dateOfBirth: response.date_of_birth,
+    nationality: response.nationality,
+    matriculationNumber: response.student_info?.matriculation_number || '',
+    cnp: response.student_info?.cnp || '',
     academicInfo: {
-      advisor: userResponse.advisor || "",
-      gpa: userResponse.gpa || 0,
-      semester: userResponse.semester || 1,
-      studyYear: userResponse.study_year || 1,
-      groupName: userResponse.group_name || "",
-      subgroupIndex: userResponse.subgroup_index || "",
-      facultyId: userResponse.faculty_id || "",
-      studentId: userResponse.user_id,
-      isModular: userResponse.group_is_modular ?? userResponse.is_modular ?? false,
-      specializationShortName: userResponse.specialization_short_name || "",
-      program: userResponse.specialization_name || ""
+      advisor: response.student_info?.advisor || '',
+      gpa: response.student_info?.gpa || 0,
+      facultyId: response.student_info?.faculty_id || '',
+      facultyName: response.student_info?.faculty_name || '',
+      groupName: response.student_info?.group_name || '',
+      subgroupIndex: response.student_info?.subgroup_index || '',
+      semester: response.student_info?.semester || 0,
+      studyYear: response.student_info?.study_year || 0,
+      specializationId: response.student_info?.specialization_id || '',
+      specializationShortName: response.student_info?.specialization_short_name || '',
+      program: response.student_info?.specialization_name || '',
+      isModular: response.student_info?.is_modular || false
     }
   };
 };
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { loginWithToken } = useAuth();
   const [formData, setFormData] = useState<LoginRequest>({
     email: "",
     password: "",
@@ -107,15 +109,20 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!validateForm()) return;
-
+  
     setLoading(true);
-
+  
     try {
       const response = await authService.login(formData.email, formData.password);
-
+  
       if (response && response.token && response.user) {
-        const mappedUser = mapUserResponse(response.user);
-        await login(formData.email, formData.password);
+        const mappedUser = mapUserProfileResponse({
+          ...response.user,
+          ...response, // additional fields may be in student_info
+        });
+
+        await loginWithToken(response.token, mappedUser);
+  
         console.log("Login successful, navigating to main screen");
         router.replace("/(tabs)");
       } else {

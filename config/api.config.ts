@@ -1,13 +1,14 @@
-// src/config/api.config.ts
-
 export const API_CONFIG = {
-  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api', // fallback for dev
-  TIMEOUT: 10000, // 10 seconds
+  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.141:3000/api', // fallback for dev
+  TIMEOUT: 30000, // 30 seconds
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
   ENDPOINTS: {
+    TIME: {
+      ACADEMIC_CALENDAR: '/time/academic-calendar',
+    },
     AUTH: {
       LOGIN: '/auth/login',
       REGISTER: '/auth/register',
@@ -19,7 +20,7 @@ export const API_CONFIG = {
       RESEND_VERIFICATION: '/auth/resend-verification',
     },
     USER: {
-      PROFILE: '/users/profile',
+      PROFILE: (userId: string) => `/users/${userId}`,
       UPDATE_PROFILE: '/users/profile',
       CHANGE_PASSWORD: '/users/change-password',
       UPLOAD_AVATAR: '/users/avatar',

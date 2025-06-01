@@ -1,29 +1,34 @@
 import { authService } from '@/services/auth.service';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export interface User {
-  _id: string;
-  name: string;
+  id: string;
   email: string;
   role: string;
-  phone: string;
-  nationality: string;
-  cnp: string;
-  matriculationNumber: string;
-  academicInfo: {
-    advisor: string;
-    gpa: number;
-    semester: number;
-    studyYear: number;
-    groupName: string;
-    subgroupIndex: string;
-    facultyId: string;
-    studentId: string;
-    isModular: boolean;
-    specializationShortName: string;
-    program: string;
+  name?: string;
+  phone?: string;
+  gender?: 'male' | 'female' | 'other';
+  dateOfBirth?: string;
+  nationality?: string;
+  cnp?: string;
+  matriculationNumber?: string;
+  profileImageUrl?: string;
+  academicInfo?: {
+    advisor?: string;
+    gpa?: number;
+    semester?: number;
+    studyYear?: number;
+    groupName?: string;
+    subgroupIndex?: string;
+    facultyId?: string;
+    facultyName?: string;
+    specializationId?: string;
+    specializationShortName?: string;
+    isModular?: boolean;
+    studentId?: string;
+    program?: string;
   };
 }
 
@@ -31,13 +36,18 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithToken: (token: string, user: User) => Promise<void>;
   logout: () => Promise<void>;
 }
+
+export const TOKEN_KEY = 'auth_token';
+const USER_ID_KEY = 'user_id';
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: false,
   login: async () => {},
+  loginWithToken: async () => {},
   logout: async () => {},
 });
 
@@ -46,42 +56,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Initialize auth state
   useEffect(() => {
-    const checkAuth = async () => {
+    const initializeAuth = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
+        console.log('Initializing auth state...');
+        const token = await SecureStore.getItemAsync(TOKEN_KEY);
+        
         if (!token) {
+          console.log('No token found in SecureStore, redirecting to login');
           router.replace('/(auth)/login');
           return;
         }
 
-        const response = await authService.checkUser();
-        if (response && response.user) {
-          setUser(response.user);
-          router.replace('/(tabs)');
-        } else {
-          await AsyncStorage.removeItem('token');
-          router.replace('/(auth)/login');
-        }
+        console.log('Token found in SecureStore, checking user data');
+        const userData = await authService.checkUser();
+        console.log('User data loaded successfully');
+        setUser(userData);
+        router.replace('/(tabs)');
       } catch (error) {
-        console.error('Auth check failed:', error);
-        await AsyncStorage.removeItem('token');
+        console.error('Auth initialization failed:', error);
+        await SecureStore.deleteItemAsync(TOKEN_KEY);
         router.replace('/(auth)/login');
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
+      console.log('Attempting login...');
       const response = await authService.login(email, password);
-      if (response && response.user) {
-        setUser(response.user);
+  
+      if (response && response.token) {
+        console.log('Saving token to SecureStore...');
+        await SecureStore.setItemAsync(TOKEN_KEY, response.token);
+  
+        console.log('Login successful, fetching user data...');
+        const userData = await authService.checkUser();
+        console.log('User data fetched successfully');
+        setUser(userData);
         router.replace('/(tabs)');
+      } else {
+        throw new Error('Login failed: No token received');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -91,11 +112,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithToken = async (token: string, userData: User) => {
+    setLoading(true);
+    try {
+      console.log('Saving token to SecureStore...');
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      setUser(userData);
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Login with token error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
-      await authService.logout();
-      await AsyncStorage.removeItem('token');
+      console.log('Logging out...');
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
       setUser(null);
       router.replace('/(auth)/login');
     } catch (error) {
@@ -107,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithToken, logout }}>
       {children}
     </AuthContext.Provider>
   );

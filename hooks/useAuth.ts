@@ -3,12 +3,13 @@ import { useCallback, useContext } from 'react';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
 
   const { user, login, logout, loading } = context;
+
 
   const handleLogin = useCallback(async (email: string, password: string) => {
     try {
@@ -37,4 +38,4 @@ export const useAuth = () => {
     logout: handleLogout,
     isAuthenticated: !!user,
   };
-}; 
+};

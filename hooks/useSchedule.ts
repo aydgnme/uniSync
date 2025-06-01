@@ -1,51 +1,34 @@
-import { useCallback, useState } from 'react';
-
-export interface ScheduleCourse {
-  courseTitle: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  groupName: string;
-}
+import { scheduleService } from '@/services/schedule.service';
+import { ScheduleItem } from '@/types/schedule.type';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from 'react';
 
 export const useSchedule = () => {
-  const [todayCourses, setTodayCourses] = useState<ScheduleCourse[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<ScheduleItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshSchedule = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // TODO: Implement actual API call
-      const mockCourses: ScheduleCourse[] = [
-        {
-          courseTitle: "Introduction to Programming",
-          startTime: "09:00",
-          endTime: "10:30",
-          room: "Room 101",
-          groupName: "Group A"
-        },
-        {
-          courseTitle: "Data Structures",
-          startTime: "11:00",
-          endTime: "12:30",
-          room: "Room 202",
-          groupName: "Group B"
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const token = await SecureStore.getItemAsync('auth_token');
+        if (!token) {
+          console.log('No token available, skipping schedule fetch');
+          setLoading(false);
+          return;
         }
-      ];
-      setTodayCourses(mockCourses);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch schedule');
-    } finally {
-      setIsLoading(false);
-    }
+
+        const response = await scheduleService.getMySchedule();
+        setData(response.data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch schedule');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetch();
   }, []);
 
-  return {
-    todayCourses,
-    isLoading,
-    error,
-    refreshSchedule
-  };
-}; 
+  return { data, loading, error };
+};

@@ -34,6 +34,56 @@ const abbreviateProgramName = (program?: string): string => {
     : program;
 };
 
+const abbreviateFacultyName = (facultyName?: string): string => {
+  if (!facultyName) return '-';
+  if (facultyName.length <= 15) return facultyName;
+
+  // Special mappings for faculty names
+  const facultyMappings: { [key: string]: string } = {
+    'Facultatea de Inginerie Electrică şi Ştiinţa Calculatoarelor': 'FIESC',
+    'Facultatea de Inginerie Mecanică, Industrială şi Transporturi': 'FIMIT',
+    'Facultatea de Inginerie Chimică şi Protecţia Mediului': 'FICPM',
+    'Facultatea de Inginerie Materiale şi Construcţii': 'FIMC',
+    'Facultatea de Inginerie Industrială şi Robotică': 'FIIR',
+    'Facultatea de Inginerie Electrotehnică': 'FIE',
+    'Facultatea de Inginerie Software': 'FIS',
+    'Facultatea de Inginerie Sistemelor': 'FIS',
+    'Facultatea de Inginerie Medicală': 'FIM',
+    'Facultatea de Inginerie Civilă': 'FIC',
+    'Facultatea de Inginerie Geodezică': 'FIG',
+    'Facultatea de Inginerie Geologică': 'FIG',
+    'Facultatea de Inginerie Hidraulică': 'FIH',
+    'Facultatea de Inginerie Hărţi': 'FIH',
+    'Facultatea de Inginerie Industrială': 'FII',
+    'Facultatea de Inginerie Mecanică': 'FIM',
+    'Facultatea de Inginerie Mecatronică': 'FIM',
+    'Facultatea de Inginerie Nucleară': 'FIN',
+    'Facultatea de Inginerie Petrol': 'FIP',
+    'Facultatea de Inginerie Silvică': 'FIS',
+    'Facultatea de Inginerie Tehnologică': 'FIT',
+    'Facultatea de Inginerie Textilă': 'FIT',
+    'Facultatea de Inginerie Transporturi': 'FIT',
+    'Facultatea de Inginerie Urbană': 'FIU',
+    'Facultatea de Inginerie Zootehnică': 'FIZ'
+  };
+
+  // If there's a special mapping, use it
+  if (facultyMappings[facultyName]) {
+    return facultyMappings[facultyName];
+  }
+
+  // If there's no mapping, use the first letter of each word
+  return facultyName
+    .split(' ')
+    .map(word => word[0]?.toUpperCase() ?? '')
+    .join('');
+};
+
+const capitalizeFirstLetter = (str?: string): string => {
+  if (!str) return '-';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
 type ProfileScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ProfileScreen = () => {
@@ -124,8 +174,10 @@ const ProfileScreen = () => {
             <Text style={styles.sectionTitle}>Personal Information</Text>
           </View>
           <InfoRow label="E-mail" value={user.email} />
-          <InfoRow label="Phone Number" value={user.phone || ''} />
-          <InfoRow label="Nationality" value={user.nationality || ''} />
+          <InfoRow label="Phone Number" value={user.phone} />
+          <InfoRow label="Gender" value={capitalizeFirstLetter(user.gender)} />
+          <InfoRow label="Date of Birth" value={user.dateOfBirth} />
+          <InfoRow label="Nationality" value={user.nationality} />
           <InfoRow label="CNP" value={user.cnp} />
           <InfoRow label="Matriculation Number" value={user.matriculationNumber} />
         </View>
@@ -136,12 +188,13 @@ const ProfileScreen = () => {
             <Ionicons name="school-outline" size={24} color="rgb(0, 122, 255)" />
             <Text style={styles.sectionTitle}>Academic Information</Text>
           </View>
-          <InfoRow label="Program" value={abbreviateProgramName(user.academicInfo?.program)} />
-          <InfoRow label="Semester" value={user.academicInfo?.semester} />
-          <InfoRow label="Group" value={`${user.academicInfo?.groupName || ''}${user.academicInfo?.subgroupIndex || ''}`} />
-          <InfoRow label="Matriculation Number" value={user.matriculationNumber} />
-          <InfoRow label="Advisor" value={user.academicInfo?.advisor} />
-          <InfoRow label="GPA" value={user.academicInfo?.gpa} />
+          <InfoRow label="Faculty" value={abbreviateFacultyName(user.academicInfo?.facultyName)} />
+          <InfoRow label="Program" value={user.academicInfo?.program || '-'} />
+          <InfoRow label="Group" value={user.academicInfo?.groupName || '-'} />
+          <InfoRow label="Semester" value={user.academicInfo?.semester?.toString() || '-'} />
+          <InfoRow label="Study Year" value={user.academicInfo?.studyYear?.toString() || '-'} />
+          <InfoRow label="GPA" value={user.academicInfo?.gpa?.toString() || '-'} />
+          <InfoRow label="Advisor" value={user.academicInfo?.advisor || '-'} />
         </View>
 
         {/* Quick Access */}

@@ -8,126 +8,111 @@ interface WeekCourseCardProps {
 }
 
 const WeekCourseCard: React.FC<WeekCourseCardProps> = ({ course }) => {
-  const formatTime = (time: string | undefined) => {
+  const formatTime = (time?: string) => {
     if (!time) return '--:--';
-    // If time is not in "HH:mm" format, convert it
-    const [hours, minutes] = time.split(':').map(Number);
-    if (isNaN(hours) || isNaN(minutes)) return '--:--';
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    const [h, m] = time.split(':').map(Number);
+    if (isNaN(h) || isNaN(m)) return '--:--';
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
   };
 
-  const startTime = course.startTime;
-  const endTime = course.endTime;
+  const { title, teacher, room, code, startTime, endTime, duration, type } = course;
+
+  const isLab = type === 'LAB';
+  const backgroundColor = isLab ? '#eaf4fb' : '#FFE0B2';
+  const borderLeftColor = isLab ? '#2196F3' : '#FB8C00';
 
   return (
     <View style={styles.card}>
-      <View style={styles.timeContainer}>
+      <View style={styles.timeColumn}>
         <Text style={styles.timeText}>{formatTime(startTime)}</Text>
         <View style={styles.timeDivider} />
         <Text style={styles.timeText}>{formatTime(endTime)}</Text>
-        <Text style={styles.durationText}>{`${course.duration/60 || 0}h`}</Text>
+        <Text style={styles.durationText}>{`${(duration || 0) / 60}h`}</Text>
       </View>
-      <View
-        style={[
-          styles.contentContainer,
-          {
-            backgroundColor: course.type === 'LAB' ? '#eaf4fb' : '#FFE0B2',
-            borderLeftWidth: 3,
-            borderLeftColor: course.type === 'LAB' ? '#2196F3' : '#FB8C00',
-          },
-        ]}
-      >
-        <Text style={styles.title}>{course.title}</Text>
-        <View style={styles.detailsContainer}>
-          <View style={styles.locationContainer}>
-            <Icon name="location-outline" size={12} color="#666" />
-            <Text style={styles.infoText}>{course.room}</Text>
-          </View>
-          <Text style={styles.teacherText}>{course.teacher}</Text>
-          <Text style={styles.groupText}>{course.code}</Text>
+
+      <View style={[styles.infoBox, { backgroundColor, borderLeftColor }]}>
+        <Text style={styles.title}>{title}</Text>
+
+        <View style={styles.row}>
+          <Icon name="location-outline" size={14} color="#666" />
+          <Text style={styles.infoText}>{room || 'Unknown room'}</Text>
         </View>
+
+        <Text style={styles.subInfo}>{teacher}</Text>
+        <Text style={styles.subInfo}>{code}</Text>
       </View>
     </View>
   );
 };
 
+export default WeekCourseCard;
+
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    borderRadius: 8,
-    marginVertical: 4,
-    overflow: 'hidden',
+    marginVertical: 6,
     backgroundColor: '#fff',
+    borderRadius: 10,
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    overflow: 'hidden',
   },
-  timeContainer: {
+  timeColumn: {
     width: 70,
     backgroundColor: '#fff',
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
+    justifyContent: 'center',
+    paddingVertical: 10,
     borderRightWidth: 1,
     borderRightColor: '#eee',
   },
   timeText: {
-    fontWeight: '600',
     fontSize: 14,
+    fontWeight: '600',
     color: '#333',
-    textAlign: 'center',
   },
   timeDivider: {
-    width: 20,
     height: 1,
-    backgroundColor: '#ddd',
+    width: 24,
+    backgroundColor: '#ccc',
     marginVertical: 4,
   },
   durationText: {
-    color: '#666',
     fontSize: 11,
-    marginTop: 4,
-    textAlign: 'center',
-    backgroundColor: '#f5f5f5',
+    color: '#666',
+    backgroundColor: '#f0f0f0',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 6,
+    marginTop: 4,
   },
-  contentContainer: {
+  infoBox: {
     flex: 1,
     padding: 12,
-    backgroundColor: '#eaf4fb',
+    borderLeftWidth: 3,
   },
   title: {
-    fontWeight: 'bold',
     fontSize: 16,
+    fontWeight: '700',
+    color: '#222',
     marginBottom: 6,
-    color: '#111',
   },
-  detailsContainer: {
-    gap: 2,
-  },
-  locationContainer: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   infoText: {
-    color: '#666',
     fontSize: 13,
+    color: '#555',
     marginLeft: 4,
   },
-  teacherText: {
-    color: '#888',
+  subInfo: {
     fontSize: 13,
-    fontStyle: 'italic',
-  },
-  groupText: {
-    color: '#888',
-    fontSize: 13,
+    color: '#777',
+    marginTop: 2,
   },
 });
-
-export default WeekCourseCard;

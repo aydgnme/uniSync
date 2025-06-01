@@ -4,7 +4,7 @@ import WeekView from "@/components/calendar/WeekView";
 import { useProfile } from "@/hooks/useProfile";
 import { useSchedule } from "@/hooks/useSchedule";
 import { Course as CalendarCourse } from "@/types/calendar.type";
-import { Course } from "@/types/schedule.type";
+import { ScheduleItem } from "@/types/schedule.type";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,50 +19,64 @@ import {
 
 const TABS = ["Day", "Week", "Month"];
 
-const scheduleCourseToCalendarCourse = (course: Course): CalendarCourse => {
-  console.log('Converting schedule course to calendar course:', course);
-  
-  // Calculate the date for the current week and course's weekDay
-  let date = course.date;
-  if (!date) {
-    // Find the current week's first day (Monday)
-    const today = moment();
-    const currentWeekDay = today.isoWeekday(); // 1 (Monday) - 7 (Sunday)
-    // course.weekDay: 1 (Monday) - 7 (Sunday)
-    date = today.clone().add(course.weekDay - currentWeekDay, 'days').format('YYYY-MM-DD');
-    console.log('Generated date for course:', { 
-      courseTitle: course.title, 
-      weekDay: course.weekDay, 
-      currentWeekDay, 
-      generatedDate: date 
-    });
-  }
-  
-  const typeMapping = {
-    LAB: "lecture",
-    LECTURE: "course",
-    SEMINAR: "seminar",
-  } as const;
+const WEEKDAY_TO_NUMBER: Record<string, number> = {
+  'Monday': 1,
+  'Tuesday': 2,
+  'Wednesday': 3,
+  'Thursday': 4,
+  'Friday': 5,
+  'Saturday': 6,
+  'Sunday': 7
+};
 
-  const calendarCourse = {
-    id: course.id,
+const scheduleItemToCalendarCourse = (item: ScheduleItem): CalendarCourse => {
+  const today = moment();
+  const currentWeek = today.isoWeek();
+  const itemWeekDay = WEEKDAY_TO_NUMBER[item.weekDay];
+  
+  // Ensure weeks is an array of numbers
+  const weeks = Array.isArray(item.weeks) 
+    ? item.weeks.map(w => typeof w === 'string' ? parseInt(w) : w)
+    : [];
+  
+  console.log('[scheduleItemToCalendarCourse] Processing item:', {
+    courseTitle: item.courseTitle,
+    weekDay: item.weekDay,
+    convertedWeekDay: itemWeekDay,
+    weeks: weeks,
+    currentWeek: currentWeek
+  });
+  
+  // Calculate the date based on the current week and weekDay
+  const date = today.clone()
+    .isoWeek(currentWeek)
+    .isoWeekday(itemWeekDay)
+    .format('YYYY-MM-DD');
+  
+  return {
+    id: item.scheduleId,
+    title: item.courseTitle,
+    type: item.courseType as 'LECTURE' | 'LAB' | 'SEMINAR',
+    startTime: item.startTime,
+    endTime: item.endTime,
+    duration: moment(item.endTime, 'HH:mm').diff(moment(item.startTime, 'HH:mm'), 'minutes'),
+    room: item.room,
+    teacher: item.teacherName,
+    weekDay: itemWeekDay,
+    instructor: item.teacherName,
+    time: `${item.startTime} - ${item.endTime}`,
+    color: '#4A90E2',
+    banner: item.courseCode.substring(0, 2),
     date,
-    title: course.title,
-    time: `${course.startTime} - ${course.endTime}`,
-    location: course.room,
-    type: typeMapping[course.type],
-    teacher: course.teacher,
-    group: course.group,
-    duration: course.duration,
+    group: item.groupName,
+    location: item.room,
+    weeks: weeks,
     style: {
-      backgroundColor: course.type === 'LAB' ? '#eaf4fb' : '#FFE0B2',
+      backgroundColor: item.courseType === 'LAB' ? '#eaf4fb' : '#FFE0B2',
       borderLeftWidth: 3,
-      borderLeftColor: course.type === 'LAB' ? '#2196F3' : '#FB8C00',
+      borderLeftColor: item.courseType === 'LAB' ? '#2196F3' : '#FB8C00',
     }
   };
-  
-  console.log('Converted calendar course:', calendarCourse);
-  return calendarCourse;
 };
 
 const ScheduleScreen: React.FC = () => {
@@ -71,7 +85,7 @@ const ScheduleScreen: React.FC = () => {
     moment().format("YYYY-MM-DD")
   );
   const [markedDates, setMarkedDates] = useState({});
-  const { courses, todayCourses, isLoading, error, refreshSchedule } = useSchedule();
+  const { data: scheduleItems, loading, error } = useSchedule();
   const [calendarCourses, setCalendarCourses] = useState<CalendarCourse[]>([]);
   const { getGroup, getSubgroup, user } = useProfile();
   
@@ -82,35 +96,21 @@ const ScheduleScreen: React.FC = () => {
     : 'N/A';
 
   useEffect(() => {
-    console.log('Schedule Screen - User Academic Info:', {
-      facultyId: user?.academicInfo?.facultyId,
-      specializationShortName: user?.academicInfo?.specializationShortName,
-      groupName: user?.academicInfo?.groupName,
-      subgroupIndex: user?.academicInfo?.subgroupIndex,
-      groupIndex
-    });
-  }, [user]);
+    if (scheduleItems) {
+      const convertedCourses = scheduleItems.map(scheduleItemToCalendarCourse);
+      setCalendarCourses(convertedCourses);
+    }
+  }, [scheduleItems]);
 
   useEffect(() => {
-    console.log('Schedule Screen - Courses from API:', courses);
-    const coursesToConvert = selectedTab === "Day" ? todayCourses : courses;
-    const convertedCourses = coursesToConvert.map(scheduleCourseToCalendarCourse);
-    console.log('Schedule Screen - Converted Calendar Courses:', convertedCourses);
-    setCalendarCourses(convertedCourses);
-  }, [courses, todayCourses, selectedTab]);
-
-  useEffect(() => {
-    console.log('Schedule Screen - Generating marked dates for courses:', calendarCourses);
-    const marks: any = {};
+    const marks: Record<string, { marked: boolean; dotColor: string }> = {};
     calendarCourses.forEach((course) => {
       marks[course.date] = { marked: true, dotColor: "#1a73e8" };
     });
-    console.log('Schedule Screen - Generated marked dates:', marks);
     setMarkedDates(marks);
   }, [calendarCourses]);
 
-  if (isLoading) {
-    console.log('Schedule Screen - Loading state');
+  if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -125,7 +125,6 @@ const ScheduleScreen: React.FC = () => {
   }
 
   if (error) {
-    console.log('Schedule Screen - Error state:', error);
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -136,8 +135,7 @@ const ScheduleScreen: React.FC = () => {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
             onPress={() => {
-              console.log('Schedule Screen - Retrying schedule fetch');
-              refreshSchedule();
+              window.location.reload();
             }}
             style={styles.retryButton}
           >
@@ -172,10 +170,11 @@ const ScheduleScreen: React.FC = () => {
             classes={calendarCourses.map(course => ({
               id: course.id,
               title: course.title,
-              startTime: course.time.split(" - ")[0],
-              endTime: course.time.split(" - ")[1],
-              day: moment(course.date).isoWeekday().toString(),
+              startTime: course.startTime,
+              endTime: course.endTime,
+              day: course.weekDay.toString(),
               room: course.location,
+              weeks: course.weeks
             }))}
           />
         );
@@ -223,7 +222,7 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     paddingTop: Platform.select({
-      ios: 20,
+      ios: 5,
       android: 60,
     }),
     backgroundColor: '#FFF',
@@ -270,7 +269,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#f7f7f7',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     marginBottom: 1,

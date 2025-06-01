@@ -71,8 +71,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         console.log('Token found in SecureStore, checking user data');
         const userData = await authService.checkUser();
-        console.log('User data loaded successfully');
+        console.log('User data loaded successfully:', userData);
+        
+        if (!userData || !userData.id) {
+          console.error('Invalid user data received');
+          throw new Error('Invalid user data');
+        }
+        
         setUser(userData);
+        console.log('User state updated successfully');
         router.replace('/(tabs)');
       } catch (error) {
         console.error('Auth initialization failed:', error);
@@ -98,8 +105,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
         console.log('Login successful, fetching user data...');
         const userData = await authService.checkUser();
-        console.log('User data fetched successfully');
+        console.log('User data fetched successfully:', userData);
+        
+        if (!userData || !userData.id) {
+          throw new Error('Invalid user data received');
+        }
+        
         setUser(userData);
+        console.log('User state updated successfully');
         router.replace('/(tabs)');
       } else {
         throw new Error('Login failed: No token received');
@@ -117,7 +130,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Saving token to SecureStore...');
       await SecureStore.setItemAsync(TOKEN_KEY, token);
+      
+      if (!userData || !userData.id) {
+        throw new Error('Invalid user data');
+      }
+      
       setUser(userData);
+      console.log('User state updated successfully');
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Login with token error:', error);

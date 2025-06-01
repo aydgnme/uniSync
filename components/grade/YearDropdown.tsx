@@ -1,6 +1,5 @@
-import { styles } from '@/styles/yearDropdown.styles';
 import React from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface YearDropdownProps {
     selectedYear: string;
@@ -8,7 +7,11 @@ interface YearDropdownProps {
     availableYears: string[];
 }
 
-const YearDropdown: React.FC<YearDropdownProps> = ({ selectedYear, setSelectedYear, availableYears }) => {
+const YearDropdown: React.FC<YearDropdownProps> = ({
+    selectedYear,
+    setSelectedYear,
+    availableYears
+}) => {
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Academic Year</Text>
@@ -39,5 +42,37 @@ const YearDropdown: React.FC<YearDropdownProps> = ({ selectedYear, setSelectedYe
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        marginVertical: 8,
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#333',
+        marginBottom: 8,
+        marginHorizontal: 16,
+    },
+    yearButton: {
+        backgroundColor: '#E0E0E0',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginHorizontal: 4,
+        marginLeft: 16,
+    },
+    selectedYearButton: {
+        backgroundColor: '#1976D2',
+    },
+    yearButtonText: {
+        fontSize: 14,
+        color: '#333',
+        fontWeight: '500',
+    },
+    selectedYearButtonText: {
+        color: '#fff',
+    },
+});
 
 export default YearDropdown;

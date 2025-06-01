@@ -20,12 +20,17 @@ export const API_CONFIG = {
       RESEND_VERIFICATION: '/auth/resend-verification',
     },
     USER: {
-      PROFILE: (userId: string) => `/users/${userId}`,
+      PROFILE: '/users/profile',
       UPDATE_PROFILE: '/users/profile',
       CHANGE_PASSWORD: '/users/change-password',
       UPLOAD_AVATAR: '/users/avatar',
       GET_BY_MATRICULATION: (matriculationNumber: string) =>
         `/users/by-matriculation/${matriculationNumber}`,
+    },
+    GRADES: {
+      MY: '/grades/my',
+      BY_SEMESTER: (year: string, semester: number) => `/grades/semester/${year}/${semester}`,
+      BY_COURSE: (courseCode: string) => `/grades/course/${courseCode}`,
     },
     SCHEDULE: {
       TODAY: '/schedule/today',
@@ -35,12 +40,13 @@ export const API_CONFIG = {
     },
     COURSES: {
       LIST: '/courses',
+      MY: '/courses/my',
       DETAILS: (id: string) => `/courses/${id}`,
       ENROLL: (id: string) => `/courses/${id}/enroll`,
       UNENROLL: (id: string) => `/courses/${id}/unenroll`,
       GRADES: (id: string) => `/courses/${id}/grades`,
       SCHEDULE: '/courses/schedule',
-      PEOPLE: (id: string) => `/people/${id}`,
+      PEOPLE: (id: string) => `/courses/${id}/people`,
     },
     ANNOUNCEMENTS: {
       LIST: '/announcements',

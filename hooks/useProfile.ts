@@ -1,5 +1,6 @@
 import { useAuth, User } from '@/context/AuthContext';
 import { userService } from '@/services/user.service';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
@@ -99,19 +100,59 @@ export const useProfile = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (authUser?.id) {
-      fetchUserProfile();
-    }
+    const initializeProfile = async () => {
+      if (!authUser?.id) {
+        console.log('No auth user found, skipping profile initialization');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log('Initializing profile with auth user:', authUser);
+        setLoading(true);
+        setError(null);
+        const userData = await userService.getUserProfile(authUser.id);
+        console.log('Profile data loaded:', userData);
+        
+        if (!userData || !userData.id) {
+          throw new Error('Invalid profile data received');
+        }
+        
+        setUser(userData);
+        console.log('Profile state updated successfully');
+      } catch (err: any) {
+        console.error('Error fetching user profile:', err);
+        setError(err.message || 'Could not load profile');
+        if (err.response?.status === 401) {
+          await handleLogout();
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeProfile();
   }, [authUser?.id]);
 
   const fetchUserProfile = async () => {
-    if (!authUser?.id) return;
+    if (!authUser?.id) {
+      console.log('No auth user found, skipping profile fetch');
+      return;
+    }
 
     try {
+      console.log('Fetching user profile...');
       setLoading(true);
       setError(null);
       const userData = await userService.getUserProfile(authUser.id);
+      console.log('Profile data loaded:', userData);
+      
+      if (!userData || !userData.id) {
+        throw new Error('Invalid profile data received');
+      }
+      
       setUser(userData);
+      console.log('Profile state updated successfully');
     } catch (err: any) {
       console.error('Error fetching user profile:', err);
       setError(err.message || 'Could not load profile');
@@ -124,13 +165,24 @@ export const useProfile = () => {
   };
 
   const updateProfile = async (data: Partial<User>) => {
-    if (!authUser?.id) return;
+    if (!authUser?.id) {
+      console.log('No auth user found, skipping profile update');
+      return;
+    }
 
     try {
+      console.log('Updating user profile...');
       setLoading(true);
       setError(null);
       const updatedUser = await userService.updateUserProfile(authUser.id, data);
+      console.log('Profile updated:', updatedUser);
+      
+      if (!updatedUser || !updatedUser.id) {
+        throw new Error('Invalid profile data received');
+      }
+      
       setUser(updatedUser);
+      console.log('Profile state updated successfully');
       return updatedUser;
     } catch (err: any) {
       console.error('Error updating profile:', err);
@@ -142,13 +194,24 @@ export const useProfile = () => {
   };
 
   const updateProfileImage = async (imageUri: string) => {
-    if (!authUser?.id) return;
+    if (!authUser?.id) {
+      console.log('No auth user found, skipping profile image update');
+      return;
+    }
 
     try {
+      console.log('Updating profile image...');
       setLoading(true);
       setError(null);
       const updatedUser = await userService.updateProfileImage(authUser.id, imageUri);
+      console.log('Profile image updated:', updatedUser);
+      
+      if (!updatedUser || !updatedUser.id) {
+        throw new Error('Invalid profile data received');
+      }
+      
       setUser(updatedUser);
+      console.log('Profile state updated successfully');
       return updatedUser;
     } catch (err: any) {
       console.error('Error updating profile image:', err);
@@ -173,6 +236,7 @@ export const useProfile = () => {
           onPress: async () => {
             try {
               await authLogout();
+              await AsyncStorage.clear();
               router.replace('/(auth)/login');
             } catch (err) {
               Alert.alert('Error', 'Could not complete logout');

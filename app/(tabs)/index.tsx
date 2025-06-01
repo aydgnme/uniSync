@@ -12,15 +12,15 @@ import { useRouter } from "expo-router";
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    AppState,
-    AppStateStatus,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  AppState,
+  AppStateStatus,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 type MainTabParamList = {

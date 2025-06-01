@@ -1,3 +1,6 @@
+import { API_CONFIG } from '@/config/api.config';
+import { tokenService } from '@/services/token.service';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 export interface Course {
@@ -7,6 +10,13 @@ export interface Course {
   instructor: string;
   color: string;
   banner: string;
+  academicYear: string;
+  semester: number;
+}
+
+interface CourseResponse {
+  success: boolean;
+  data: Course[];
 }
 
 export const useCourses = () => {
@@ -21,30 +31,26 @@ export const useCourses = () => {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      // TODO: Implement actual API call
-      // For now, using mock data
-      const mockCourses: Course[] = [
-        {
-          id: '1',
-          title: 'Introduction to Programming',
-          code: 'CS101',
-          instructor: 'Dr. John Smith',
-          color: '#1976D2',
-          banner: 'https://example.com/cs101-banner.jpg'
-        },
-        {
-          id: '2',
-          title: 'Data Structures',
-          code: 'CS102',
-          instructor: 'Dr. Jane Doe',
-          color: '#2196F3',
-          banner: 'https://example.com/cs102-banner.jpg'
+      const token = await tokenService.getToken();
+      
+      if (!token) {
+        throw new Error('Token not found');
+      }
+
+      const response = await axios.get<CourseResponse>(API_CONFIG.ENDPOINTS.COURSES.MY, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      ];
-      setCourses(mockCourses);
+      });
+
+      if (!response.data.success) {
+        throw new Error('Failed to fetch courses');
+      }
+
+      setCourses(response.data.data);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch courses');
+      setError('Error fetching courses');
       console.error('Error fetching courses:', err);
     } finally {
       setLoading(false);

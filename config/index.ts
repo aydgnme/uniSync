@@ -1,4 +1,4 @@
-export const API_URL = 'http://192.168.1.7:3000/api';
+export const API_URL = 'http://192.168.0.141:3000/api';
 
 export const AUTH_ROUTES = {
   LOGIN: '/auth/login',

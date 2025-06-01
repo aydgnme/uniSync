@@ -9,8 +9,28 @@ const GradeDetails = () => {
     const { grades } = useGrades();
 
     const course = useMemo(() => {
-        return grades.find(grade => grade._id === id);
+        return grades.find(grade => grade.id === id);
     }, [grades, id]);
+
+    const getGradeColor = (grade: number) => {
+        if (grade >= 8) return '#4CAF50'; // Good (Green)
+        if (grade >= 5) return '#FF9800'; // Medium (Orange)
+        return '#F44336'; // Failed (Red)
+    };
+
+    const getGradeByType = (type: 'midterm' | 'final' | 'homework' | 'attendance') => {
+        const grade = grades.find(g => g.id === id && g.examType === type);
+        return grade ? grade.score : 0;
+    };
+
+    const totalGrade = useMemo(() => {
+        if (!course) return 0;
+        const midterm = getGradeByType('midterm') * 0.3;
+        const final = getGradeByType('final') * 0.4;
+        const homework = getGradeByType('homework') * 0.2;
+        const attendance = getGradeByType('attendance') * 0.1;
+        return midterm + final + homework + attendance;
+    }, [grades, id, course]);
 
     if (!course) {
         return (
@@ -20,37 +40,53 @@ const GradeDetails = () => {
         );
     }
 
-    const getGradeColor = (grade: number) => {
-        if (grade >= 8) return '#4CAF50'; // Good (Green)
-        if (grade >= 5) return '#FF9800'; // Medium (Orange)
-        return '#F44336'; // Failed (Red)
-    };
-
     return (
         <ScrollView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.courseName}>{course.lecture.title}</Text>
-                <Text style={styles.courseCode}>Course Code: {course.lecture.code}</Text>
+                <Text style={styles.courseName}>{course.course.title}</Text>
+                <Text style={styles.courseCode}>Course Code: {course.course.code}</Text>
             </View>
             
             <View style={styles.infoContainer}>
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Total Grade</Text>
-                    <Text style={[styles.infoValue, { color: getGradeColor(course.totalGrade) }]}> 
-                        {course.totalGrade.toFixed(1)}
+                    <Text style={[styles.infoValue, { color: getGradeColor(totalGrade) }]}> 
+                        {totalGrade.toFixed(1)}
                     </Text>
                 </View>
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Status</Text>
                     <Text style={[styles.infoValue, { 
-                        color: course.status === 'PASSED' ? '#4CAF50' : '#F44336' 
+                        color: totalGrade >= 5 ? '#4CAF50' : '#F44336' 
                     }]}> 
-                        {course.status === 'PASSED' ? 'Passed' : 'Failed'}
+                        {totalGrade >= 5 ? 'Passed' : 'Failed'}
                     </Text>
                 </View>
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Retake Count</Text>
-                    <Text style={styles.infoValue}>{course.retakeCount}</Text>
+                    <Text style={styles.infoValue}>0</Text>
+                </View>
+            </View>
+
+            <View style={styles.infoContainer}>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoLabel}>Credits</Text>
+                    <Text style={styles.infoValue}>{course.course.credits}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoLabel}>Academic Year</Text>
+                    <Text style={styles.infoValue}>{course.academicYear}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoLabel}>Semester</Text>
+                    <Text style={styles.infoValue}>{course.semester}</Text>
+                </View>
+            </View>
+
+            <View style={styles.infoContainer}>
+                <View style={styles.infoItem}>
+                    <Text style={styles.infoLabel}>Instructor</Text>
+                    <Text style={styles.infoValue}>{course.course.teacherName}</Text>
                 </View>
             </View>
 
@@ -59,8 +95,8 @@ const GradeDetails = () => {
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Midterm</Text>
                     <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(course.midtermGrade) }]}> 
-                            {course.midtermGrade}
+                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('midterm')) }]}> 
+                            {getGradeByType('midterm')}
                         </Text>
                         <Text style={styles.examWeight}>30%</Text>
                     </View>
@@ -68,8 +104,8 @@ const GradeDetails = () => {
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Final</Text>
                     <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(course.finalGrade) }]}> 
-                            {course.finalGrade}
+                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('final')) }]}> 
+                            {getGradeByType('final')}
                         </Text>
                         <Text style={styles.examWeight}>40%</Text>
                     </View>
@@ -77,8 +113,8 @@ const GradeDetails = () => {
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Homework</Text>
                     <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(course.homeworkGrade) }]}> 
-                            {course.homeworkGrade}
+                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('homework')) }]}> 
+                            {getGradeByType('homework')}
                         </Text>
                         <Text style={styles.examWeight}>20%</Text>
                     </View>
@@ -86,8 +122,8 @@ const GradeDetails = () => {
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Attendance</Text>
                     <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(course.attendanceGrade) }]}> 
-                            {course.attendanceGrade}
+                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('attendance')) }]}> 
+                            {getGradeByType('attendance')}
                         </Text>
                         <Text style={styles.examWeight}>10%</Text>
                     </View>
@@ -98,7 +134,7 @@ const GradeDetails = () => {
                 <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Last Updated</Text>
                     <Text style={styles.infoValue}>
-                        {new Date(course.lastUpdated).toLocaleDateString('en-US')}
+                        {new Date(course.gradedAt).toLocaleDateString('en-US')}
                     </Text>
                 </View>
             </View>

@@ -9,22 +9,21 @@ const CACHE_EXPIRY_KEY = 'grades_cache_expiry';
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
 export interface Grade {
-  id: string;
-  studentId: string;
-  courseId: string;
-  examType: 'midterm' | 'final' | 'homework' | 'attendance';
-  score: number;
-  letterGrade: string;
-  gradedAt: string;
-  createdBy: string;
-  academicYear: string;
-  semester: number;
-  course: {
-    code: string;
-    title: string;
-    credits: number;
-    teacherName: string;
-  };
+  student_id: string;
+  course_code: string;
+  course_title: string;
+  credits: number;
+  academic_year: string;
+  semester: string;
+  midterm_score: number;
+  final_score: number;
+  project_score: number | null;
+  homework_score: number | null;
+  midterm_weight: string;
+  final_weight: string;
+  project_weight: string | null;
+  homework_weight: string | null;
+  teacher_names: string;
 }
 
 interface GradeResponse {
@@ -131,7 +130,7 @@ export const gradeService = {
 
       console.log('Fetching grades from API...');
       const response = await api.get<{ success: boolean; data: Grade[] }>(
-        API_CONFIG.ENDPOINTS.GRADES.MY
+        API_CONFIG.ENDPOINTS.GRADES.SUMMARIZED
       );
 
       if (!response.data.success) {
@@ -141,8 +140,7 @@ export const gradeService = {
 
       console.log('API response successful:', {
         totalGrades: response.data.data.length,
-        firstGrade: response.data.data[0]?.course?.title,
-        lastUpdated: response.data.data[0]?.gradedAt
+        firstGrade: response.data.data[0]?.course_title,
       });
 
       // Save to cache
@@ -161,7 +159,7 @@ export const gradeService = {
       const cachedGrades = await getFromCache();
       if (cachedGrades) {
         return cachedGrades.filter(
-          grade => grade.academicYear === year && grade.semester === semester
+          grade => grade.academic_year === year && grade.semester === semester.toString()
         );
       }
 
@@ -182,7 +180,7 @@ export const gradeService = {
       // Check cache first
       const cachedGrades = await getFromCache();
       if (cachedGrades) {
-        const grade = cachedGrades.find(g => g.course.code === courseCode);
+        const grade = cachedGrades.find(g => g.course_code === courseCode);
         if (grade) return grade;
       }
 
@@ -204,13 +202,18 @@ export const gradeService = {
     if (grades.length === 0) return 0;
     
     const totalPoints = grades.reduce((sum, grade) => {
-      // Convert letter grade to numeric value
-      const numericGrade = parseFloat(grade.letterGrade);
-      return sum + (numericGrade * grade.course.credits);
+      // Calculate weighted average
+      const midterm = grade.midterm_score * parseFloat(grade.midterm_weight);
+      const final = grade.final_score * parseFloat(grade.final_weight);
+      const project = grade.project_score ? grade.project_score * parseFloat(grade.project_weight || '0') : 0;
+      const homework = grade.homework_score ? grade.homework_score * parseFloat(grade.homework_weight || '0') : 0;
+      
+      const totalScore = midterm + final + project + homework;
+      return sum + (totalScore * grade.credits);
     }, 0);
     
     const totalCredits = grades.reduce((sum, grade) => {
-      return sum + grade.course.credits;
+      return sum + grade.credits;
     }, 0);
     
     return totalCredits > 0 ? totalPoints / totalCredits : 0;

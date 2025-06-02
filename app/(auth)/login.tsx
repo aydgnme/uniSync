@@ -1,6 +1,6 @@
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { authService } from "@/services/auth.service";
 import styles from "@/styles/auth.styles";
 import { Ionicons } from "@expo/vector-icons";

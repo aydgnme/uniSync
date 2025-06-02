@@ -1,5 +1,5 @@
-import { useAcademicCalendar } from '@/context/AcademicCalendarContext';
-import { useScheduleContext } from "@/context/ScheduleContext";
+import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
+import { useScheduleContext } from "@/contexts/ScheduleContext";
 import { Announcement, useAnnouncements } from '@/hooks/useAnnouncements';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from "@/hooks/useProfile";

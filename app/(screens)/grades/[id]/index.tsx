@@ -9,7 +9,7 @@ const GradeDetails = () => {
     const { grades } = useGrades();
 
     const course = useMemo(() => {
-        return grades.find(grade => grade.id === id);
+        return grades.find(grade => grade.student_id === id);
     }, [grades, id]);
 
     const getGradeColor = (grade: number) => {
@@ -18,19 +18,14 @@ const GradeDetails = () => {
         return '#F44336'; // Failed (Red)
     };
 
-    const getGradeByType = (type: 'midterm' | 'final' | 'homework' | 'attendance') => {
-        const grade = grades.find(g => g.id === id && g.examType === type);
-        return grade ? grade.score : 0;
-    };
-
     const totalGrade = useMemo(() => {
         if (!course) return 0;
-        const midterm = getGradeByType('midterm') * 0.3;
-        const final = getGradeByType('final') * 0.4;
-        const homework = getGradeByType('homework') * 0.2;
-        const attendance = getGradeByType('attendance') * 0.1;
-        return midterm + final + homework + attendance;
-    }, [grades, id, course]);
+        const midterm = course.midterm_score * parseFloat(course.midterm_weight);
+        const final = course.final_score * parseFloat(course.final_weight);
+        const project = course.project_score ? course.project_score * parseFloat(course.project_weight || '0') : 0;
+        const homework = course.homework_score ? course.homework_score * parseFloat(course.homework_weight || '0') : 0;
+        return midterm + final + project + homework;
+    }, [course]);
 
     if (!course) {
         return (
@@ -43,8 +38,8 @@ const GradeDetails = () => {
     return (
         <ScrollView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.courseName}>{course.course.title}</Text>
-                <Text style={styles.courseCode}>Course Code: {course.course.code}</Text>
+                <Text style={styles.courseName}>{course.course_title}</Text>
+                <Text style={styles.courseCode}>Course Code: {course.course_code}</Text>
             </View>
             
             <View style={styles.infoContainer}>
@@ -63,30 +58,24 @@ const GradeDetails = () => {
                     </Text>
                 </View>
                 <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Retake Count</Text>
-                    <Text style={styles.infoValue}>0</Text>
-                </View>
-            </View>
-
-            <View style={styles.infoContainer}>
-                <View style={styles.infoItem}>
                     <Text style={styles.infoLabel}>Credits</Text>
-                    <Text style={styles.infoValue}>{course.course.credits}</Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Academic Year</Text>
-                    <Text style={styles.infoValue}>{course.academicYear}</Text>
-                </View>
-                <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Semester</Text>
-                    <Text style={styles.infoValue}>{course.semester}</Text>
+                    <Text style={styles.infoValue}>{course.credits}</Text>
                 </View>
             </View>
 
-            <View style={styles.infoContainer}>
-                <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Instructor</Text>
-                    <Text style={styles.infoValue}>{course.course.teacherName}</Text>
+            {/* Academic Year, Semester, Instructor Row */}
+            <View style={[styles.infoContainer, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f5f5f5', borderRadius: 12, padding: 12, marginBottom: 16 }]}> 
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 12, color: '#888', textAlign: 'center' }}>Academic Year</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 15, textAlign: 'center' }}>{course.academic_year}</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 11, color: '#888', textAlign: 'center' }}>Semester</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 15, textAlign: 'center' }}>{course.semester}</Text>
+                </View>
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <Text style={{ fontSize: 12, color: '#888', textAlign: 'center' }}>Instructor</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 13, textAlign: 'center', flexWrap: 'wrap' }}>{course.teacher_names}</Text>
                 </View>
             </View>
 
@@ -95,48 +84,43 @@ const GradeDetails = () => {
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Midterm</Text>
                     <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('midterm')) }]}> 
-                            {getGradeByType('midterm')}
+                        <Text style={[styles.examScore, { color: getGradeColor(course.midterm_score)}]}> 
+                            {course.midterm_score}
                         </Text>
-                        <Text style={styles.examWeight}>30%</Text>
+                        <Text style={styles.examWeight}>{parseFloat(course.midterm_weight) * 100}%</Text>
                     </View>
                 </View>
                 <View style={styles.examRow}>
                     <Text style={styles.examType}>Final</Text>
                     <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('final')) }]}> 
-                            {getGradeByType('final')}
+                        <Text style={[styles.examScore, { color: getGradeColor(course.final_score) }]}> 
+                            {course.final_score}
                         </Text>
-                        <Text style={styles.examWeight}>40%</Text>
+                        <Text style={styles.examWeight}>{parseFloat(course.final_weight) * 100}%</Text>
                     </View>
                 </View>
-                <View style={styles.examRow}>
-                    <Text style={styles.examType}>Homework</Text>
-                    <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('homework')) }]}> 
-                            {getGradeByType('homework')}
-                        </Text>
-                        <Text style={styles.examWeight}>20%</Text>
+                {course.project_score !== null && (
+                    <View style={styles.examRow}>
+                        <Text style={styles.examType}>Project</Text>
+                        <View style={styles.examDetails}>
+                            <Text style={[styles.examScore, { color: getGradeColor(course.project_score) }]}> 
+                                {course.project_score}
+                            </Text>
+                            <Text style={styles.examWeight}>{parseFloat(course.project_weight || '0') * 100}%</Text>
+                        </View>
                     </View>
-                </View>
-                <View style={styles.examRow}>
-                    <Text style={styles.examType}>Attendance</Text>
-                    <View style={styles.examDetails}>
-                        <Text style={[styles.examScore, { color: getGradeColor(getGradeByType('attendance')) }]}> 
-                            {getGradeByType('attendance')}
-                        </Text>
-                        <Text style={styles.examWeight}>10%</Text>
+                )}
+                {course.homework_score !== null && (
+                    <View style={styles.examRow}>
+                        <Text style={styles.examType}>Homework</Text>
+                        <View style={styles.examDetails}>
+                            <Text style={[styles.examScore, { color: getGradeColor(course.homework_score) }]}> 
+                                {course.homework_score}
+                            </Text>
+                            <Text style={styles.examWeight}>{parseFloat(course.homework_weight || '0') * 100}%</Text>
+                        </View>
                     </View>
-                </View>
-            </View>
-
-            <View style={styles.infoContainer}>
-                <View style={styles.infoItem}>
-                    <Text style={styles.infoLabel}>Last Updated</Text>
-                    <Text style={styles.infoValue}>
-                        {new Date(course.gradedAt).toLocaleDateString('en-US')}
-                    </Text>
-                </View>
+                )}
             </View>
         </ScrollView>
     );

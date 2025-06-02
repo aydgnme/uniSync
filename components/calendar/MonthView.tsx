@@ -1,4 +1,4 @@
-import { useAcademicCalendar } from '@/context/AcademicCalendarContext';
+import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
 import { styles } from '@/styles/calendar.styles';
 import { Class, Event, MarkedDates } from '@/types/calendar.type';
 import moment from 'moment';

@@ -21,6 +21,7 @@ const YearDropdown: React.FC<YearDropdownProps> = ({
                 showsHorizontalScrollIndicator={false}
                 renderItem={({ item }) => (
                     <TouchableOpacity
+                        key={`year-${item}`}
                         style={[
                             styles.yearButton,
                             selectedYear === item && styles.selectedYearButton
@@ -37,7 +38,7 @@ const YearDropdown: React.FC<YearDropdownProps> = ({
                         </Text>
                     </TouchableOpacity>
                 )}
-                keyExtractor={item => item}
+                keyExtractor={item => `year-${item}`}
             />
         </View>
     );

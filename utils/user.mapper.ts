@@ -1,4 +1,4 @@
-import { User } from '@/context/AuthContext';
+import { User } from '@/contexts/AuthContext';
 
 interface UserProfileResponse {
   id: string;

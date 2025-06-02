@@ -1,4 +1,4 @@
-import { User } from '@/context/AuthContext';
+import { User } from '@/contexts/AuthContext';
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';

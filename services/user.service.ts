@@ -1,4 +1,4 @@
-import { TOKEN_KEY, User } from '@/context/AuthContext';
+import { TOKEN_KEY, User } from '@/contexts/AuthContext';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_CONFIG } from '../config/api.config';

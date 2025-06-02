@@ -29,6 +29,7 @@ export const API_CONFIG = {
     },
     GRADES: {
       MY: '/grades/my',
+      SUMMARIZED: '/grades/summarized',
       BY_SEMESTER: (year: string, semester: number) => `/grades/semester/${year}/${semester}`,
       BY_COURSE: (courseCode: string) => `/grades/course/${courseCode}`,
     },

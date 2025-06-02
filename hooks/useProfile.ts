@@ -1,4 +1,4 @@
-import { useAuth, User } from '@/context/AuthContext';
+import { useAuth, User } from '@/contexts/AuthContext';
 import { userService } from '@/services/user.service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';

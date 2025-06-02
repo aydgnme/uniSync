@@ -1,7 +1,7 @@
-import { AcademicCalendarProvider } from "@/context/AcademicCalendarContext";
-import { AuthProvider } from "@/context/AuthContext";
-import { ScheduleProvider } from "@/context/ScheduleContext";
+import { AcademicCalendarProvider } from "@/contexts/AcademicCalendarContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { GradesProvider } from '@/contexts/GradesContext';
+import { ScheduleProvider } from "@/contexts/ScheduleContext";
 import { Stack } from "expo-router";
 import React from "react";
 

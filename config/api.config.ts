@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.141:3000/api', // fallback for dev
+  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api', // fallback for dev
   TIMEOUT: 30000, // 30 seconds
   HEADERS: {
     'Content-Type': 'application/json',

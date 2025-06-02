@@ -35,7 +35,6 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const response = await scheduleService.getMySchedule();
       console.log('[ScheduleContext] API response:', response);
-      console.log('[ScheduleContext] First schedule item:', response.data[0]);
       console.log('[ScheduleContext] Weeks array:', response.data[0]?.weeks);
 
       if (response.success) {

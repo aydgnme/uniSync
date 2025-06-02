@@ -1,4 +1,4 @@
-import { Course } from '@/types/course.type';
+import { Course } from '@/types/calendar.type';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -15,7 +15,7 @@ const WeekCourseCard: React.FC<WeekCourseCardProps> = ({ course }) => {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
   };
 
-  const { title, teacher, room, code, startTime, endTime, duration, type } = course;
+  const { title, teacher, room, startTime, endTime, duration, type, banner } = course;
 
   const isLab = type === 'LAB';
   const backgroundColor = isLab ? '#eaf4fb' : '#FFE0B2';
@@ -39,7 +39,7 @@ const WeekCourseCard: React.FC<WeekCourseCardProps> = ({ course }) => {
         </View>
 
         <Text style={styles.subInfo}>{teacher}</Text>
-        <Text style={styles.subInfo}>{code}</Text>
+        <Text style={styles.subInfo}>{banner}</Text>
       </View>
     </View>
   );

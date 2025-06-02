@@ -19,40 +19,41 @@ import {
 
 const TABS = ["Day", "Week", "Month"];
 
-const WEEKDAY_TO_NUMBER: Record<string, number> = {
-  'Monday': 1,
-  'Tuesday': 2,
-  'Wednesday': 3,
-  'Thursday': 4,
-  'Friday': 5,
-  'Saturday': 6,
-  'Sunday': 7
+const NUMBER_TO_WEEKDAY: Record<number, string> = {
+  1: 'Monday',
+  2: 'Tuesday',
+  3: 'Wednesday',
+  4: 'Thursday',
+  5: 'Friday',
+  6: 'Saturday',
+  7: 'Sunday'
 };
 
 const scheduleItemToCalendarCourse = (item: ScheduleItem): CalendarCourse => {
   const today = moment();
   const currentWeek = today.isoWeek();
-  const itemWeekDay = WEEKDAY_TO_NUMBER[item.weekDay];
+  const itemWeekDay = Number(item.weekDay) || 1; // Convert string to number
   
   // Ensure weeks is an array of numbers
   const weeks = Array.isArray(item.weeks) 
     ? item.weeks.map(w => typeof w === 'string' ? parseInt(w) : w)
     : [];
   
+  // Calculate the date for the course using a more reliable approach
+  // Get the start of the current week (Monday)
+  const startOfWeek = moment().startOf('isoWeek');
+  // Add the appropriate number of days to get to the target weekday
+  const courseDate = startOfWeek.add(itemWeekDay - 1, 'days').format('YYYY-MM-DD');
+  
   console.log('[scheduleItemToCalendarCourse] Processing item:', {
     courseTitle: item.courseTitle,
     weekDay: item.weekDay,
     convertedWeekDay: itemWeekDay,
     weeks: weeks,
-    currentWeek: currentWeek
+    currentWeek: currentWeek,
+    courseDate: courseDate,
+    startOfWeek: startOfWeek.format('YYYY-MM-DD')
   });
-  
-  // Calculate the date based on the current week and weekDay
-  const date = today.clone()
-    .isoWeek(currentWeek)
-    .isoWeekday(itemWeekDay)
-    .format('YYYY-MM-DD');
-  
   return {
     id: item.scheduleId,
     title: item.courseTitle,
@@ -67,10 +68,11 @@ const scheduleItemToCalendarCourse = (item: ScheduleItem): CalendarCourse => {
     time: `${item.startTime} - ${item.endTime}`,
     color: '#4A90E2',
     banner: item.courseCode.substring(0, 2),
-    date,
     group: item.groupName,
     location: item.room,
     weeks: weeks,
+    date: courseDate,
+    code: item.courseCode,
     style: {
       backgroundColor: item.courseType === 'LAB' ? '#eaf4fb' : '#FFE0B2',
       borderLeftWidth: 3,
@@ -172,9 +174,9 @@ const ScheduleScreen: React.FC = () => {
               title: course.title,
               startTime: course.startTime,
               endTime: course.endTime,
-              day: course.weekDay.toString(),
-              room: course.location,
-              weeks: course.weeks
+              day: (course.weekDay || 1).toString(), // Default to 1 if undefined
+              room: course.location || '',
+              weeks: course.weeks || []
             }))}
           />
         );

@@ -30,6 +30,12 @@ export interface Event {
     time: string;
     location: string;
     description?: string;
+    type?: 'LECTURE' | 'LAB' | 'SEMINAR';
+    style?: {
+        backgroundColor: string;
+        borderLeftWidth: number;
+        borderLeftColor: string;
+    };
 }
 
 export interface MarkedDates {

@@ -79,14 +79,22 @@ const MonthView: React.FC<MonthViewProps> = ({
 
             <ScrollView style={styles.eventList}>
                 {classesForSelectedDate.map(cls => (
-                    <View key={cls.uniqueKey} style={styles.classCard}>
-                        <Text style={styles.classTitle}>{cls.title}</Text>
-                        <Text style={styles.classTime}>
-                            {cls.startTime} - {cls.endTime}
-                        </Text>
-                        <Text style={styles.classRoom}>Room: {cls.room}</Text>
-                        <Text style={styles.weekIndicator}>{cls.weekIndicator}</Text>
-                    </View>
+                    <EventCard 
+                        key={cls.uniqueKey} 
+                        event={{
+                            id: cls.id,
+                            title: cls.title,
+                            time: `${cls.startTime} - ${cls.endTime}`,
+                            location: cls.room,
+                            date: selectedDate,
+                            type: 'LECTURE',
+                            style: {
+                                backgroundColor: '#FFE0B2',
+                                borderLeftWidth: 3,
+                                borderLeftColor: '#FB8C00'
+                            }
+                        }} 
+                    />
                 ))}
 
                 {eventsForSelectedDate.map(event => (

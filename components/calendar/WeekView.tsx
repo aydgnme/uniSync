@@ -27,6 +27,7 @@ const WeekView: React.FC<WeekViewProps> = ({ selectedDate, events }) => {
     return (
         <ScrollView style={styles.weekView}>
             {days.map((day, index) => {
+                
                 const currentDate = day.format("YYYY-MM-DD");
                 const dayEvents = events.filter(event => event.date === currentDate);
 

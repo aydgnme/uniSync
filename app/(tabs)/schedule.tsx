@@ -1,6 +1,7 @@
 import DayView from "@/components/calendar/DayView";
 import MonthView from "@/components/calendar/MonthView";
 import WeekView from "@/components/calendar/WeekView";
+import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
 import { useProfile } from "@/hooks/useProfile";
 import { useSchedule } from "@/hooks/useSchedule";
 import { Course as CalendarCourse } from "@/types/calendar.type";
@@ -8,13 +9,13 @@ import { ScheduleItem } from "@/types/schedule.type";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Platform,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const TABS = ["Day", "Week", "Month"];
@@ -29,31 +30,35 @@ const NUMBER_TO_WEEKDAY: Record<number, string> = {
   7: 'Sunday'
 };
 
-const scheduleItemToCalendarCourse = (item: ScheduleItem): CalendarCourse => {
+const scheduleItemToCalendarCourse = (item: ScheduleItem, weekStart: moment.Moment): CalendarCourse => {
   const today = moment();
   const currentWeek = today.isoWeek();
-  const itemWeekDay = Number(item.weekDay) || 1; // Convert string to number
+  const itemWeekDay = Number(item.weekDay) || 1;
   
-  // Ensure weeks is an array of numbers
-  const weeks = Array.isArray(item.weeks) 
-    ? item.weeks.map(w => typeof w === 'string' ? parseInt(w) : w)
-    : [];
+  // Parse weeks array from the API response
+  let weeks: number[] = [];
+  try {
+    if (Array.isArray(item.weeks)) {
+      weeks = item.weeks.map(w => typeof w === 'string' ? parseInt(w) : w);
+    } else if (typeof item.weeks === 'string') {
+      // If weeks is a string like "[1,2,3]", parse it
+      weeks = JSON.parse(item.weeks);
+    }
+  } catch (error) {
+    console.log('[scheduleItemToCalendarCourse] Error parsing weeks:', error);
+    weeks = []; // Default to empty array if parsing fails
+  }
   
-  // Calculate the date for the course using a more reliable approach
-  // Get the start of the current week (Monday)
-  const startOfWeek = moment().startOf('isoWeek');
-  // Add the appropriate number of days to get to the target weekday
-  const courseDate = startOfWeek.add(itemWeekDay - 1, 'days').format('YYYY-MM-DD');
+  const courseDate = weekStart.add(itemWeekDay - 1, 'days').format('YYYY-MM-DD');
   
-  console.log('[scheduleItemToCalendarCourse] Processing item:', {
-    courseTitle: item.courseTitle,
+  console.log('[scheduleItemToCalendarCourse] Processing course:', {
+    title: item.courseTitle,
     weekDay: item.weekDay,
-    convertedWeekDay: itemWeekDay,
     weeks: weeks,
     currentWeek: currentWeek,
-    courseDate: courseDate,
-    startOfWeek: startOfWeek.format('YYYY-MM-DD')
+    courseDate: courseDate
   });
+
   return {
     id: item.scheduleId,
     title: item.courseTitle,
@@ -65,14 +70,13 @@ const scheduleItemToCalendarCourse = (item: ScheduleItem): CalendarCourse => {
     teacher: item.teacherName,
     weekDay: itemWeekDay,
     instructor: item.teacherName,
-    time: `${item.startTime} - ${item.endTime}`,
+    time: `${moment(item.startTime, 'HH:mm:ss').format('HH:mm')} - ${moment(item.endTime, 'HH:mm:ss').format('HH:mm')}`,
     color: '#4A90E2',
     banner: item.courseCode.substring(0, 2),
     group: item.groupName,
     location: item.room,
     weeks: weeks,
     date: courseDate,
-    code: item.courseCode,
     style: {
       backgroundColor: item.courseType === 'LAB' ? '#eaf4fb' : '#FFE0B2',
       borderLeftWidth: 3,
@@ -90,6 +94,7 @@ const ScheduleScreen: React.FC = () => {
   const { data: scheduleItems, loading, error } = useSchedule();
   const [calendarCourses, setCalendarCourses] = useState<CalendarCourse[]>([]);
   const { getGroup, getSubgroup, user } = useProfile();
+  const { calendarData } = useAcademicCalendar();
   
   const groupIndex = user?.academicInfo?.groupName 
     ? user.academicInfo.subgroupIndex 
@@ -99,18 +104,39 @@ const ScheduleScreen: React.FC = () => {
 
   useEffect(() => {
     if (scheduleItems) {
-      const convertedCourses = scheduleItems.map(scheduleItemToCalendarCourse);
+      // Seçili haftanın başı (Pazartesi)
+      const weekStart = moment(selectedDate).startOf('isoWeek');
+      const convertedCourses = scheduleItems.map(item => scheduleItemToCalendarCourse(item, weekStart));
       setCalendarCourses(convertedCourses);
     }
-  }, [scheduleItems]);
+  }, [scheduleItems, selectedDate]);
 
   useEffect(() => {
-    const marks: Record<string, { marked: boolean; dotColor: string }> = {};
-    calendarCourses.forEach((course) => {
-      marks[course.date] = { marked: true, dotColor: "#1a73e8" };
+    // Sadece seçili tarihe nokta koy
+    setMarkedDates({
+      [selectedDate]: { marked: true, dotColor: "#1a73e8", selected: true }
     });
-    setMarkedDates(marks);
-  }, [calendarCourses]);
+  }, [selectedDate]);
+
+  const getFilteredCourses = () => {
+    const academicWeek = calendarData?.weekNumber ?? 0;
+    //console.log('[getFilteredCourses] Academic week:', academicWeek);
+    
+    const filtered = calendarCourses.filter(course => {
+      const shouldShow = !course.weeks || course.weeks.length === 0 || course.weeks.includes(academicWeek);
+      //console.log('[getFilteredCourses] Course:', {
+      //  title: course.title,
+      //  weeks: course.weeks,
+      //  shouldShow: shouldShow
+      //});
+      return shouldShow;
+    });
+    
+    //console.log('[getFilteredCourses] Total courses:', calendarCourses.length);
+    //console.log('[getFilteredCourses] Filtered courses:', filtered.length);
+    
+    return filtered;
+  };
 
   if (loading) {
     return (
@@ -148,19 +174,21 @@ const ScheduleScreen: React.FC = () => {
     );
   }
 
+  const filteredCourses = getFilteredCourses();
+
   const renderTabContent = () => {
     switch (selectedTab) {
       case "Day":
         return (
           <DayView
             selectedDate={selectedDate}
-            courses={calendarCourses}
-            events={calendarCourses}
+            courses={filteredCourses}
+            events={filteredCourses}
           />
         );
       case "Week":
         return (
-          <WeekView selectedDate={selectedDate} events={calendarCourses} />
+          <WeekView selectedDate={selectedDate} events={filteredCourses} />
         );
       case "Month":
         return (
@@ -168,13 +196,13 @@ const ScheduleScreen: React.FC = () => {
             selectedDate={selectedDate}
             markedDates={markedDates}
             onDateChange={setSelectedDate}
-            events={calendarCourses}
-            classes={calendarCourses.map(course => ({
+            events={filteredCourses}
+            classes={filteredCourses.map(course => ({
               id: course.id,
               title: course.title,
               startTime: course.startTime,
               endTime: course.endTime,
-              day: (course.weekDay || 1).toString(), // Default to 1 if undefined
+              day: (course.weekDay || 1).toString(),
               room: course.location || '',
               weeks: course.weeks || []
             }))}

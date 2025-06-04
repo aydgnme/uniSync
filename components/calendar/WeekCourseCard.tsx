@@ -18,8 +18,8 @@ const WeekCourseCard: React.FC<WeekCourseCardProps> = ({ course }) => {
   const { title, teacher, room, startTime, endTime, duration, type, banner } = course;
 
   const isLab = type === 'LAB';
-  const backgroundColor = isLab ? '#eaf4fb' : '#FFE0B2';
-  const borderLeftColor = isLab ? '#2196F3' : '#FB8C00';
+  const backgroundColor = isLab ? '#FFE0B2' : '#eaf4fb';
+  const borderLeftColor = isLab ? '#FB8C00' : '#2196F3';
 
   return (
     <View style={styles.card}>

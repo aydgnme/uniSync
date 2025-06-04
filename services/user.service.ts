@@ -1,22 +1,6 @@
-import { TOKEN_KEY, User } from '@/contexts/AuthContext';
-import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { User } from '@/contexts/AuthContext';
 import { API_CONFIG } from '../config/api.config';
-
-const api = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
-  headers: API_CONFIG.HEADERS,
-});
-
-// Add request interceptor to include auth token
-api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import api from './api.service';
 
 interface UserProfileResponse {
   success: boolean;
@@ -87,9 +71,9 @@ const mapUserProfileResponse = (response: UserProfileResponse): User => {
 export const userService = {
   getUserProfile: async (userId: string): Promise<User> => {
     try {
-      console.log('Fetching user profile...');
+      //console.log('Fetching user profile...');
       const response = await api.get<UserProfileResponse>(API_CONFIG.ENDPOINTS.USER.PROFILE);
-      console.log('Raw API Response:', JSON.stringify(response.data, null, 2));
+      //console.log('Raw API Response:', JSON.stringify(response.data, null, 2));
       
       if (!response.data.success) {
         console.error('API returned unsuccessful response:', response.data);
@@ -102,7 +86,7 @@ export const userService = {
       }
 
       const mappedUser = mapUserProfileResponse(response.data);
-      console.log('Mapped user data:', JSON.stringify(mappedUser, null, 2));
+      //console.log('Mapped user data:', JSON.stringify(mappedUser, null, 2));
       return mappedUser;
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -112,9 +96,9 @@ export const userService = {
 
   updateUserProfile: async (userId: string, data: Partial<User>): Promise<User> => {
     try {
-      console.log('Updating user profile...');
-      const response = await api.put<UserProfileResponse>(API_CONFIG.ENDPOINTS.USER.PROFILE(userId), data);
-      console.log('Update profile response:', response.data);
+      //console.log('Updating user profile...');
+      const response = await api.put<UserProfileResponse>(API_CONFIG.ENDPOINTS.USER.UPDATE_PROFILE, data);
+      //console.log('Update profile response:', response.data);
       
       const mappedUser = mapUserProfileResponse(response.data);
       return mappedUser;

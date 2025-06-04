@@ -1,3 +1,4 @@
+import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
 import { styles } from '@/styles/calendar.styles';
 import { Course } from '@/types/calendar.type';
 import moment from 'moment';
@@ -13,8 +14,10 @@ interface WeekViewProps {
 const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 const WeekView: React.FC<WeekViewProps> = ({ selectedDate, events }) => {
+    const { calendarData } = useAcademicCalendar();
     const weekStart = moment(selectedDate).startOf("isoWeek");
     const days = Array.from({ length: 7 }, (_, i) => moment(weekStart).add(i, "days"));
+    const academicWeek = calendarData?.weekNumber || 0;
 
     if (!events) {
         return (
@@ -27,9 +30,15 @@ const WeekView: React.FC<WeekViewProps> = ({ selectedDate, events }) => {
     return (
         <ScrollView style={styles.weekView}>
             {days.map((day, index) => {
-                
                 const currentDate = day.format("YYYY-MM-DD");
-                const dayEvents = events.filter(event => event.date === currentDate);
+                const dayOfWeek = day.isoWeekday();
+                const dayEvents = events.filter(event => {
+                    const eventWeeks = event.weeks || [];
+                    return (event.weekDay === dayOfWeek && eventWeeks.includes(academicWeek));
+                }).sort((a, b) => {
+                    if (!a.startTime || !b.startTime) return 0;
+                    return a.startTime.localeCompare(b.startTime);
+                });
 
                 return (
                     <View key={currentDate} style={styles.weekDaySection}>

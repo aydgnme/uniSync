@@ -50,8 +50,8 @@ export function mapScheduleToCoursesByWeek(selectedDate: string, scheduleItems: 
     const endMoment = moment(item.endTime, 'HH:mm:ss');
     const duration = endMoment.diff(startMoment, 'minutes');
 
-    const startTime = item.startTime.substring(0, 5); // Convert to HH:mm format
-    const endTime = item.endTime.substring(0, 5); // Convert to HH:mm format
+    const startTime = moment(item.startTime, 'HH:mm:ss').format('HH:mm');
+    const endTime = moment(item.endTime, 'HH:mm:ss').format('HH:mm');
 
     return {
       id: item.scheduleId,

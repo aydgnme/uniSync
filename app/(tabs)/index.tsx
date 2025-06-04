@@ -1,8 +1,9 @@
 import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
 import { useScheduleContext } from "@/contexts/ScheduleContext";
-import { Announcement, useAnnouncements } from '@/hooks/useAnnouncements';
+import { useAnnouncements } from '@/hooks/useAnnouncements';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from "@/hooks/useProfile";
+import { Announcement } from '@/services/announcement.service';
 import styles, { colors } from "@/styles/main.styles";
 import { ScheduleItem } from '@/types/schedule.type';
 import { Ionicons } from "@expo/vector-icons";
@@ -73,8 +74,8 @@ export default function MainScreen() {
   const { calendarData } = useAcademicCalendar();
 
   useEffect(() => {
-    console.log("User data:", user);
-    console.log("Loading state:", loading);
+    //("User data:", user);
+    //console.log("Loading state:", loading);
   }, [user, loading]);
 
   useEffect(() => {
@@ -218,7 +219,7 @@ export default function MainScreen() {
                     size={20}
                     color="rgb(0, 122, 255)"
                   />
-                  <Text style={styles.classTimeText}>{`${course.startTime} - ${course.endTime}`}</Text>
+                  <Text style={styles.classTimeText}>{`${moment(course.startTime, 'HH:mm:ss').format('HH:mm')} - ${moment(course.endTime, 'HH:mm:ss').format('HH:mm')}`}</Text>
                 </View>
                 <Text style={styles.className}>{course.courseTitle}</Text>
                 <View style={styles.classDetails}>
@@ -258,12 +259,20 @@ export default function MainScreen() {
                   <Text style={styles.announcementTitle}>
                     {announcement.title}
                   </Text>
-                  <Text style={styles.announcementType}>{announcement.type}</Text>
+                  <Text style={styles.announcementType}>{announcement.category}</Text>
                 </View>
                 <Text style={styles.announcementContent}>
                   {truncateText(announcement.content, 100)}
                 </Text>
-                <Text style={styles.announcementDate}>{announcement.date}</Text>
+                <Text style={styles.announcementDate}>
+                  {new Date(announcement.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Text>
               </TouchableOpacity>
             ))
           )}
@@ -290,22 +299,19 @@ export default function MainScreen() {
                     </TouchableOpacity>
                   </View>
                   <View style={styles.modalTypeContainer}>
-                    <Text style={styles.modalType}>{selectedAnnouncement.type}</Text>
-                    <Text style={styles.modalDate}>{selectedAnnouncement.date}</Text>
+                    <Text style={styles.modalType}>{selectedAnnouncement.category}</Text>
+                    <Text style={styles.modalDate}>
+                      {new Date(selectedAnnouncement.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Text>
                   </View>
                   <ScrollView style={styles.modalScrollView}>
                     <Text style={styles.modalContentText}>{selectedAnnouncement.content}</Text>
-                    {selectedAnnouncement.attachments && selectedAnnouncement.attachments.length > 0 && (
-                      <View style={styles.modalAttachments}>
-                        <Text style={styles.modalAttachmentsTitle}>Attachments:</Text>
-                        {selectedAnnouncement.attachments.map((attachment: { name: string; url: string }, index: number) => (
-                          <TouchableOpacity key={index} style={styles.modalAttachmentItem}>
-                            <Ionicons name="document-attach-outline" size={20} color={colors.primary} />
-                            <Text style={styles.modalAttachmentText}>{attachment.name}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    )}
                   </ScrollView>
                 </>
               )}

@@ -42,12 +42,7 @@ export const API_CONFIG = {
     COURSES: {
       LIST: '/courses',
       MY: '/courses/my',
-      DETAILS: (id: string) => `/courses/${id}`,
-      ENROLL: (id: string) => `/courses/${id}/enroll`,
-      UNENROLL: (id: string) => `/courses/${id}/unenroll`,
-      GRADES: (id: string) => `/courses/${id}/grades`,
       SCHEDULE: '/courses/schedule',
-      PEOPLE: (id: string) => `/courses/${id}/people`,
     },
     ANNOUNCEMENTS: {
       LIST: '/announcements',
@@ -56,6 +51,14 @@ export const API_CONFIG = {
       UPDATE: (id: string) => `/announcements/${id}`,
       DELETE: (id: string) => `/announcements/${id}`,
     },
+    UNIVERSITY: {
+      ANNOUNCEMENTS: '/university/announcements',
+    },
+    CLASSROOM: {
+      ALL: '/api/classroom/classrooms',
+      BY_STUDENT: (id: string) => `/api/classroom/student/${id}`,
+      ENROLL: '/api/classroom/enroll',
+    }
   },
 } as const;
 

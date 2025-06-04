@@ -1,3 +1,4 @@
+import { useCourses } from "@/hooks/useCourses";
 import { useProfile } from "@/hooks/useProfile";
 import { styles } from "@/styles/profile.styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -90,15 +91,17 @@ const ProfileScreen = () => {
   const navigation = useNavigation<ProfileScreenNavigationProp>();
   const router = useRouter();
   const { user, loading, error, fetchUserProfile, handleLogout } = useProfile();
+  const studentId = user?.id || '';
+  const { courses, loading: coursesLoading, error: coursesError, refetch } = useCourses(studentId);
 
   useEffect(() => {
-    if (user?.academicInfo) {
-      console.log('Group Info:', {
-        groupName: user.academicInfo.groupName,
-        subgroupIndex: user.academicInfo.subgroupIndex,
-        combinedValue: `${user.academicInfo.groupName || ''}${user.academicInfo.subgroupIndex || ''}`
-      });
-    }
+    //if (user?.academicInfo) {
+     // console.log('Group Info:', {
+     //    groupName: user.academicInfo.groupName,
+     //   subgroupIndex: user.academicInfo.subgroupIndex,
+    //   combinedValue: `${user.academicInfo.groupName || ''}${user.academicInfo.subgroupIndex || ''}`
+    // });
+    //}
   }, [user?.academicInfo]);
 
   if (loading) {

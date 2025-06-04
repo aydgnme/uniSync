@@ -1,20 +1,14 @@
 import { User } from '@/contexts/AuthContext';
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
 import { API_CONFIG } from '../config/api.config';
+import api from './api.service';
 
 const TOKEN_KEY = 'auth_token';
 const USER_ID_KEY = 'user_id';
 
-const api = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
-  headers: API_CONFIG.HEADERS,
-});
-
 // Request interceptor - add token
-api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+api.interceptors.request.use(async (config: any) => {
   const token = await SecureStore.getItemAsync(TOKEN_KEY);
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -24,8 +18,8 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 
 // Response interceptor - error handling
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
+  (response: any) => response,
+  async (error: any) => {
     if (error.response?.status === 401) {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       await SecureStore.deleteItemAsync(USER_ID_KEY);

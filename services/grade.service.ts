@@ -1,6 +1,7 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_CONFIG } from '../config/api.config';
+import api from './api.service';
 import { authService } from './auth.service';
 import { tokenService } from './token.service';
 
@@ -30,12 +31,6 @@ interface GradeResponse {
   success: boolean;
   data: Grade[];
 }
-
-const api = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
-  headers: API_CONFIG.HEADERS,
-});
 
 // Add request interceptor to include auth token
 api.interceptors.request.use(async (config) => {

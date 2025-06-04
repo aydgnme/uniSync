@@ -13,10 +13,10 @@ const COURSE_COLOR = '#007AFF';
 const SEMINAR_COLOR = '#43A047';
 
 const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
-    const isLectureOrSeminar = course.type === 'lecture' || course.type === 'seminar';
+    const isLectureOrSeminar = course.type === 'LECTURE' || course.type === 'SEMINAR';
     const backgroundColor = isLectureOrSeminar ? '#FFE0B2' : '#E3F2FD';
-    const borderColor = course.type === 'lecture' ? LECTURE_COLOR : 
-                       course.type === 'seminar' ? SEMINAR_COLOR : COURSE_COLOR;
+    const borderColor = course.type === 'LECTURE' ? LECTURE_COLOR : 
+                       course.type === 'SEMINAR' ? SEMINAR_COLOR : COURSE_COLOR;
 
     return (
         <View style={[styles.eventCard, { backgroundColor, borderLeftColor: borderColor }]}>  
@@ -31,7 +31,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
                 </View>
             </View>
             <Text style={styles.eventTitle}>{course.title}</Text>
-            {course.teacher && <Text style={styles.eventTeacher}>{course.teacher}</Text>}
+            {course.teacher && <Text style={styles.eventTeacher}>{course.teacher.full_name}</Text>}
             {course.group && <Text style={styles.eventGroup}>{course.group}</Text>}
         </View>
     );

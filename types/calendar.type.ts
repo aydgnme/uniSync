@@ -1,12 +1,13 @@
 export interface Course {
     id: string;
+    code: string;
     title: string;
     type: 'LECTURE' | 'LAB' | 'SEMINAR';
     startTime: string;
     endTime: string;
     duration: number;
     room: string;
-    teacher: string;
+    teacher: { full_name: string };
     weekDay: number;
     instructor: string;
     time: string;

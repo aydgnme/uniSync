@@ -14,10 +14,11 @@ export const API_CONFIG = {
       REGISTER: '/auth/register',
       LOGOUT: '/auth/logout',
       REFRESH_TOKEN: '/auth/refresh-token',
-      FORGOT_PASSWORD: '/auth/forgot-password',
+      FORGOT_PASSWORD: '/auth/generate-reset-code',
       RESET_PASSWORD: '/auth/reset-password',
-      VERIFY_EMAIL: '/auth/verify-email',
+      VERIFY_EMAIL: '/auth/verify-reset-code',
       RESEND_VERIFICATION: '/auth/resend-verification',
+      CHANGE_PASSWORD: '/users/change-password',
     },
     USER: {
       PROFILE: '/users/profile',
@@ -26,6 +27,9 @@ export const API_CONFIG = {
       UPLOAD_AVATAR: '/users/avatar',
       GET_BY_MATRICULATION: (matriculationNumber: string) =>
         `/users/by-matriculation/${matriculationNumber}`,
+      SESSIONS: '/users/sessions',
+      LOGOUT_SESSION: '/users/sessions/logout',
+      LOGOUT_ALL_SESSIONS: '/users/sessions/logout-all',
     },
     GRADES: {
       MY: '/grades/my',
@@ -55,9 +59,9 @@ export const API_CONFIG = {
       ANNOUNCEMENTS: '/university/announcements',
     },
     CLASSROOM: {
-      ALL: '/api/classroom/classrooms',
-      BY_STUDENT: (id: string) => `/api/classroom/student/${id}`,
-      ENROLL: '/api/classroom/enroll',
+      ALL: '/classroom/classrooms',
+      BY_STUDENT: (id: string) => `/classroom/student/${id}`,
+      ENROLL: '/classroom/enroll',
     }
   },
 } as const;

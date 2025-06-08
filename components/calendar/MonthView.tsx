@@ -33,23 +33,18 @@ const MonthView: React.FC<MonthViewProps> = ({
     const getClassesForDate = (date: string): ClassWithWeekIndicator[] => {
         const selectedMoment = moment(date);
         const dayOfWeek = selectedMoment.isoWeekday(); // 1 (Mon) - 7 (Sun)
-        const selectedWeek = calendarData?.weekNumber || 0;
 
-        if (selectedWeek === 0) return []; // date outside semester
-
-        // Filter by day + week
+        // Filter by day only, without week restriction
         const filteredClasses = classes
             .filter(cls => parseInt(cls.day) === dayOfWeek)
             .map(cls => {
                 const classWeeks = cls.weeks || [];
-                if (!classWeeks.includes(selectedWeek)) return null;
                 return {
                     ...cls,
-                    weekIndicator: `Academic Week ${selectedWeek}`,
-                    uniqueKey: `${cls.id}-week-${selectedWeek}`
+                    weekIndicator: `Academic Weeks ${classWeeks.join(', ')}`,
+                    uniqueKey: `${cls.id}-weeks-${classWeeks.join('-')}`
                 };
-            })
-            .filter((cls): cls is ClassWithWeekIndicator => cls !== null);
+            });
 
         return filteredClasses;
     };

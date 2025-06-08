@@ -1,67 +1,92 @@
-import { academicCalendarService } from '@/services/academic-calendar.service';
-import { AcademicCalendarContextType, AcademicCalendarData } from '@/types/academic-calendar.type';
+import { API_CONFIG } from '@/config/api.config';
+import api from '@/services/api.service';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const STORAGE_KEY = '@academic_calendar_data';
+interface AcademicCalendarData {
+  currentDate: string;
+  weekNumber: number;
+  parity: 'ODD' | 'EVEN';
+}
+
+interface AcademicCalendarContextType {
+  academicCalendar: AcademicCalendarData | null;
+  isLoading: boolean;
+  error: string | null;
+  refreshCalendar: () => Promise<void>;
+}
 
 const AcademicCalendarContext = createContext<AcademicCalendarContextType | undefined>(undefined);
 
 export const AcademicCalendarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [calendarData, setCalendarData] = useState<AcademicCalendarData | null>(null);
+  const [academicCalendar, setAcademicCalendar] = useState<AcademicCalendarData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCalendarData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
+  const fetchAcademicCalendar = async () => {
     try {
-      const data = await academicCalendarService.getAcademicCalendar();
-      setCalendarData(data);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setIsLoading(true);
+      setError(null);
+
+      // Try to load from cache first
+      const cachedData = await AsyncStorage.getItem('academic_calendar');
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        setAcademicCalendar(parsedData);
+        console.log('Loaded academic calendar from cache:', parsedData);
+      }
+
+      // Fetch fresh data
+      const response = await api.get(API_CONFIG.ENDPOINTS.TIME.ACADEMIC_CALENDAR);
       
-      // Debug Log
-      const today = new Date();
-      const currentWeek = data.weekNumber;
-      const parity = data.parity;
-      console.log(`[AcademicCalendar] Today: ${today.toISOString().slice(0,10)}, Academic Week: ${currentWeek}, Parity: ${parity}`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch academic calendar';
-      setError(errorMessage);
-      console.error('[AcademicCalendarContext] Error:', errorMessage);
+      if (!response.data || typeof response.data !== 'object') {
+        throw new Error('Invalid response format from API');
+      }
+
+      const data = response.data.data; // API response is wrapped in a data object
+      console.log('Fetched academic calendar data:', data);
+
+      // Validate the data structure
+      const requiredFields = ['currentDate', 'weekNumber', 'parity'];
+      const missingFields = requiredFields.filter(field => !(field in data));
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Update state and cache
+      setAcademicCalendar(data);
+      await AsyncStorage.setItem('academic_calendar', JSON.stringify(data));
+      console.log('Updated academic calendar cache');
+
+    } catch (err: any) {
+      console.error('Error fetching academic calendar:', err);
+      setError(err.message || 'Failed to fetch academic calendar');
+      
+      // If we have cached data, keep using it
+      if (!academicCalendar) {
+        setAcademicCalendar(null);
+      }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchAcademicCalendar();
   }, []);
 
-  // Load initial data
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        // Try to load from storage first
-        const storedData = await AsyncStorage.getItem(STORAGE_KEY);
-        if (storedData) {
-          setCalendarData(JSON.parse(storedData));
-        }
-        
-        // Then fetch fresh data
-        await fetchCalendarData();
-      } catch (err) {
-        console.error('[AcademicCalendarContext] Initial load error:', err);
-      }
-    };
-
-    loadInitialData();
-  }, [fetchCalendarData]);
+  const refreshCalendar = async () => {
+    await fetchAcademicCalendar();
+  };
 
   return (
     <AcademicCalendarContext.Provider
       value={{
-        calendarData,
+        academicCalendar,
         isLoading,
         error,
-        refreshCalendar: fetchCalendarData,
+        refreshCalendar,
       }}
     >
       {children}
@@ -71,7 +96,7 @@ export const AcademicCalendarProvider: React.FC<{ children: React.ReactNode }> =
 
 export const useAcademicCalendar = () => {
   const context = useContext(AcademicCalendarContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAcademicCalendar must be used within an AcademicCalendarProvider');
   }
   return context;

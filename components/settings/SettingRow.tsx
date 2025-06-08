@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Platform, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleProp, Switch, Text, TextStyle, TouchableOpacity, View } from 'react-native';
 import { SETTINGS_CONSTANTS, styles } from '../../styles/settings.styles';
 
 interface SettingRowProps {
@@ -9,6 +9,7 @@ interface SettingRowProps {
   value?: boolean;
   onPress: () => void;
   showSwitch?: boolean;
+  style?: StyleProp<TextStyle>;
 }
 
 export const SettingRow: React.FC<SettingRowProps> = ({
@@ -17,11 +18,12 @@ export const SettingRow: React.FC<SettingRowProps> = ({
   value,
   onPress,
   showSwitch = false,
+  style,
 }) => (
   <TouchableOpacity style={styles.row} activeOpacity={showSwitch ? 1 : 0.7} onPress={onPress} disabled={showSwitch}>
     <View style={styles.rowLeft}>
       <Ionicons name={icon} size={20} color={SETTINGS_CONSTANTS.PRIMARY} style={{ marginRight: 12 }} />
-      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={[styles.rowLabel, style]}>{label}</Text>
     </View>
     {showSwitch ? (
       <Switch

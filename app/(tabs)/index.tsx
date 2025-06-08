@@ -3,6 +3,7 @@ import { useScheduleContext } from "@/contexts/ScheduleContext";
 import { useAnnouncements } from '@/hooks/useAnnouncements';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from "@/hooks/useProfile";
+import { useSchedule } from '@/hooks/useSchedule';
 import { Announcement } from '@/services/announcement.service';
 import styles, { colors } from "@/styles/main.styles";
 import { ScheduleItem } from '@/types/schedule.type';
@@ -62,16 +63,19 @@ function LoadingComponent() {
   );
 }
 
-export default function MainScreen() {
+const MainScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp>();
   const { user, loading } = useProfile();
-  const { schedule: courses, isLoading, error, refreshSchedule } = useScheduleContext();
+  const { schedule, isLoading, error } = useScheduleContext();
   const appState = useRef(AppState.currentState);
   const router = useRouter();
   const { announcements, loading: announcementsLoading, error: announcementsError, fetchAnnouncements } = useAnnouncements();
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const { loading: authLoading } = useAuth();
-  const { calendarData } = useAcademicCalendar();
+  const { calendarData, academicCalendar } = useAcademicCalendar();
+  const academicWeek = calendarData?.weekNumber || 0;
+  const { data: scheduleItems, loading: scheduleLoading, error: scheduleError } = useSchedule();
+  const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
 
   useEffect(() => {
     //("User data:", user);
@@ -112,43 +116,64 @@ export default function MainScreen() {
   };
 
   const getTodayCourses = () => {
-    if (!courses || courses.length === 0) return [];
-    
+    // Eğer calendarData henüz gelmediyse, boş dizi döndür
+    if (!calendarData || !schedule || schedule.length === 0) return [];
+
     const today = moment();
-    const weekNumber = calendarData?.weekNumber || 0;
-    const parity = calendarData?.parity || 'ODD';
+    const weekNumber = calendarData.weekNumber;
+    const parity = calendarData.parity;
     const todayWeekDay = today.isoWeekday().toString();
-    
+
     console.log('Today\'s schedule check:', {
       date: today.format('YYYY-MM-DD'),
       weekNumber,
       parity,
       weekDay: todayWeekDay
     });
-    
-    return courses.filter((course: ScheduleItem) => {
+
+    const filtered = schedule.filter((course: ScheduleItem) => {
       // Week number check
-      if (!course.weeks.includes(weekNumber)) {
-        console.log(`Course ${course.courseTitle} not in current week ${weekNumber}`);
+      if (!course.weeks || course.weeks.length === 0 || !course.weeks.includes(academicWeek)) {
+        console.log(`Course ${course.courseTitle} not in current week ${academicWeek}`);
         return false;
       }
-      
       // Parity check
       if (course.parity !== 'all' && course.parity !== parity) {
         console.log(`Course ${course.courseTitle} parity mismatch: ${course.parity} vs ${parity}`);
         return false;
       }
-      
       // Day check
       if (course.weekDay !== todayWeekDay) {
         console.log(`Course ${course.courseTitle} not on current day: ${course.weekDay} vs ${todayWeekDay}`);
         return false;
       }
-      
       console.log(`Course ${course.courseTitle} is valid for today`);
       return true;
     });
+
+    return filtered;
   };
+
+  const scheduleItemToCalendarCourse = (item: ScheduleItem, weekStart: moment.Moment, academicWeek: number): CalendarCourse => {
+    console.log('[scheduleItemToCalendarCourse] Processing course:', {
+      title: item.courseTitle,
+      weekDay: item.weekDay,
+      weeks: weeks,
+      academicWeek: academicWeek,
+      courseDate: courseDate
+    });
+    // ... existing code ...
+  };
+
+  useEffect(() => {
+    if (scheduleItems && calendarData) {
+      const weekStart = moment(selectedDate).startOf('isoWeek');
+      const convertedCourses = scheduleItems.map(item =>
+        scheduleItemToCalendarCourse(item, weekStart, calendarData.weekNumber)
+      );
+      setCalendarCourses(convertedCourses);
+    }
+  }, [scheduleItems, selectedDate, calendarData]);
 
   if (authLoading) {
     return <LoadingComponent />;
@@ -246,9 +271,7 @@ export default function MainScreen() {
             <ActivityIndicator size="small" color="#0000ff" />
           ) : announcementsError ? (
             <Text style={styles.errorText}>Error loading announcements</Text>
-          ) : announcements.length === 0 ? (
-            <Text style={styles.emptyText}>No announcements available.</Text>
-          ) : (
+          ) : Array.isArray(announcements) && announcements.length > 0 ? (
             announcements.map((announcement: Announcement) => (
               <TouchableOpacity 
                 key={announcement.id} 
@@ -275,6 +298,8 @@ export default function MainScreen() {
                 </Text>
               </TouchableOpacity>
             ))
+          ) : (
+            <Text style={styles.emptyText}>No announcements available.</Text>
           )}
         </View>
 
@@ -321,4 +346,6 @@ export default function MainScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
+
+export default MainScreen;

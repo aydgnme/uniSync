@@ -5,17 +5,23 @@ import { ScheduleProvider } from "@/contexts/ScheduleContext";
 import { Stack } from "expo-router";
 import React from "react";
 
+const AppContent = () => {
+  return (
+    <Stack>
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+    </Stack>
+  );
+};
+
 export default function RootLayout() {
   return (
     <AcademicCalendarProvider>
       <AuthProvider>
         <ScheduleProvider>
           <GradesProvider>
-            <Stack>
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-            </Stack>
+            <AppContent />
           </GradesProvider>
         </ScheduleProvider>
       </AuthProvider>

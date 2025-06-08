@@ -7,29 +7,6 @@ import api from './api.service';
 const TOKEN_KEY = 'auth_token';
 const USER_ID_KEY = 'user_id';
 
-// Request interceptor - add token
-api.interceptors.request.use(async (config: any) => {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Response interceptor - error handling
-api.interceptors.response.use(
-  (response: any) => response,
-  async (error: any) => {
-    if (error.response?.status === 401) {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      await SecureStore.deleteItemAsync(USER_ID_KEY);
-      // Redirect user to login page
-      // This part will be handled by navigation
-    }
-    return Promise.reject(error);
-  }
-);
-
 function isTokenExpired(token: string): boolean {
   try {
     const decoded: any = jwtDecode(token);
@@ -117,6 +94,19 @@ const mapUserProfileResponse = (response: UserProfileResponse): User => {
     } : undefined
   };
 };
+
+interface Session {
+  id: string;
+  user_id: string;
+  login_time: string;
+  logout_time: string | null;
+  ip_address: string;
+  device_info: string;
+}
+
+interface SessionsResponse {
+  sessions: Session[];
+}
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -291,6 +281,44 @@ export const authService = {
     } catch (error) {
       console.error('Token refresh error:', error);
       return null;
+    }
+  },
+
+  getSessions: async (): Promise<Session[]> => {
+    try {
+      console.log('Fetching sessions...');
+      const response = await api.get<SessionsResponse>(API_CONFIG.ENDPOINTS.USER.SESSIONS);
+      console.log('Sessions fetched successfully');
+      return response.data.sessions;
+    } catch (error) {
+      console.error('Get sessions error:', error);
+      throw error;
+    }
+  },
+
+  logoutSession: async (sessionId: string): Promise<void> => {
+    try {
+      console.log('Logging out session:', sessionId);
+      await api.post(API_CONFIG.ENDPOINTS.USER.LOGOUT_SESSION, null, {
+        headers: {
+          'x-session-id': sessionId
+        }
+      });
+      console.log('Session logged out successfully');
+    } catch (error) {
+      console.error('Logout session error:', error);
+      throw error;
+    }
+  },
+
+  logoutAllSessions: async (): Promise<void> => {
+    try {
+      console.log('Logging out all sessions...');
+      await api.post(API_CONFIG.ENDPOINTS.USER.LOGOUT_ALL_SESSIONS);
+      console.log('All sessions logged out successfully');
+    } catch (error) {
+      console.error('Logout all sessions error:', error);
+      throw error;
     }
   },
 }; 

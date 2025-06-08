@@ -12,7 +12,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
+  useWindowDimensions
 } from "react-native";
 
 type Step = "identification" | "verification" | "newPassword";
@@ -91,6 +92,8 @@ const ResetPasswordScreen = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
+  const { width } = useWindowDimensions();
+
   // Update password strength when password changes
   useEffect(() => {
     if (formData.newPassword) {
@@ -322,6 +325,20 @@ const ResetPasswordScreen = () => {
     }
   };
 
+  const verificationInput = {
+    textAlign: "center",
+    letterSpacing: width * 0.07,
+    fontSize: width * 0.08,
+    fontWeight: "600",
+    color: "#111827",
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    height: 40,
+    padding: 0,
+    width: "100%",
+    marginBottom: 8,
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView>
@@ -399,7 +416,7 @@ const ResetPasswordScreen = () => {
                     }}
                     keyboardType="numeric"
                     maxLength={6}
-                    placeholder=""
+                    placeholder="123456"
                     placeholderTextColor="#666"
                     textAlign="center"
                   />
@@ -642,8 +659,8 @@ const styles = StyleSheet.create({
   },
   verificationInput: {
     textAlign: "center",
-    letterSpacing: 24,
-    fontSize: 24,
+    letterSpacing: 32,
+    fontSize: 32,
     fontWeight: "600",
     color: "#111827",
     backgroundColor: "transparent",
@@ -651,13 +668,12 @@ const styles = StyleSheet.create({
     height: 40,
     padding: 0,
     width: "100%",
-    marginBottom: 8,
+    marginBottom: 0,
   },
   codeUnderlines: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    paddingHorizontal: 6,
   },
   codeUnderline: {
     width: 32,

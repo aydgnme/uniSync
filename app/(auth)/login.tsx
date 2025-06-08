@@ -25,6 +25,7 @@ interface LoginRequest {
 
 interface LoginResponse {
   token: string;
+  sessionId: string;
   user: {
     user_id: string;
     first_name: string;
@@ -213,7 +214,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity
             style={{ marginTop: 16, alignItems: "flex-start" }}
-            onPress={() => router.push("/(auth)/reset-password")}
+            onPress={() => router.push("/(auth)/resetPassword")}
             disabled={loading}
           >
             <Text style={styles.footerLink}>Forgot Password</Text>

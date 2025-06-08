@@ -11,7 +11,7 @@ export default function AuthLayout() {
         }}
       />
       <Stack.Screen
-        name="reset-password"
+        name="resetPassword"
         options={{
           headerShown: false,
         }}

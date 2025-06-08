@@ -29,7 +29,7 @@ const MonthView: React.FC<MonthViewProps> = ({
 }) => {
     const { calendarData } = useAcademicCalendar();
 
-    // Get classes for the selected date and academic week
+    // Get classes for the selected date
     const getClassesForDate = (date: string): ClassWithWeekIndicator[] => {
         const selectedMoment = moment(date);
         const dayOfWeek = selectedMoment.isoWeekday(); // 1 (Mon) - 7 (Sun)

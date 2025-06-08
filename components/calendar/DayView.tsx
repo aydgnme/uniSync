@@ -75,10 +75,10 @@ const getCourseStyle = (course: Course) => {
 
   if (course.type === "LECTURE") {
     return {
-      backgroundColor: "#FFF3E0",
-      borderLeftColor: "#FB8C00",
+      backgroundColor: "#FFF5D4",
+      borderLeftColor: "#FFB74D",
       borderLeftWidth: 4,
-      textColor: "#FB8C00",
+      textColor: "#FFB74D",
     };
   } else if (course.type === "LAB") {
     return {
@@ -89,10 +89,10 @@ const getCourseStyle = (course: Course) => {
     };
   } else if (course.type === "SEMINAR") {
     return {
-      backgroundColor: "#FFF5D4",
-      borderLeftColor: "#FFB74D",
+      backgroundColor: "#FFF3E0",
+      borderLeftColor: "#FB8C00",
       borderLeftWidth: 4,
-      textColor: "#FFB74D",
+      textColor: "#FB8C00",
     };
   } else {
     // Default
@@ -108,19 +108,10 @@ const getCourseStyle = (course: Course) => {
 const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
   const { calendarData } = useAcademicCalendar();
   const selectedDayOfWeek = moment(selectedDate).isoWeekday();
-  const academicWeek = calendarData?.weekNumber || 0;
-  if (academicWeek === 0)
-    return (
-      <ScrollView style={stylesDay.dayView}>
-        <Text style={styles.noEventsText}>No events</Text>
-      </ScrollView>
-    );
 
+  // Remove week restriction and show all classes for the selected day
   const filteredCourses = courses.filter((course) => {
-    const courseWeeks = course.weeks || [];
-    return (
-      course.weekDay === selectedDayOfWeek && courseWeeks.includes(academicWeek)
-    );
+    return course.weekDay === selectedDayOfWeek;
   });
 
   const hours = Array.from(
@@ -144,6 +135,9 @@ const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
         {filteredCourses.map((course) => {
           const { top, height } = calculateCoursePosition(course, selectedDate);
           const courseStyle = getCourseStyle(course);
+
+          // Add week indicator
+          const weekIndicator = course.weeks ? `Weeks: ${course.weeks.join(', ')}` : '';
 
           // Güvenli saat bilgisi
           const displayTime =
@@ -214,6 +208,11 @@ const DayView: React.FC<DayViewProps> = ({ selectedDate, courses }) => {
               >
                 {course.teacher}
               </Text>
+              {weekIndicator && (
+                <Text style={stylesDay.courseGroup}>
+                  {weekIndicator}
+                </Text>
+              )}
             </View>
           );
         })}

@@ -88,6 +88,13 @@ export default function ScreensLayout() {
           headerShown: true,
         }}
       />
+      <Stack.Screen
+        name="secretary"
+        options={{
+          title: 'Secretary',
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 } 

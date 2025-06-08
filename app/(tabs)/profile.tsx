@@ -210,7 +210,7 @@ const ProfileScreen = () => {
             <ActionButton 
               icon="chatbubbles-outline" 
               label="Secretary AI" 
-              onPress={() => router.push('/(screens)/chat')}
+              onPress={() => router.push('/(screens)/secretary')}
             />
             <ActionButton 
               icon="document-text-outline" 

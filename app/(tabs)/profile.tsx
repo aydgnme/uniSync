@@ -192,7 +192,7 @@ const ProfileScreen = () => {
             <Text style={styles.sectionTitle}>Academic Information</Text>
           </View>
           <InfoRow label="Faculty" value={abbreviateFacultyName(user.academicInfo?.facultyName)} />
-          <InfoRow label="Program" value={user.academicInfo?.program || '-'} />
+          <InfoRow label="Program" value={user.academicInfo?.specializationShortName || '-'} />
           <InfoRow label="Group" value={user.academicInfo?.groupName || '-'} />
           <InfoRow label="Semester" value={user.academicInfo?.semester?.toString() || '-'} />
           <InfoRow label="Study Year" value={user.academicInfo?.studyYear?.toString() || '-'} />

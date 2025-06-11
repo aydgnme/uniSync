@@ -11,6 +11,18 @@ interface DecodedToken {
   role: string;
 }
 
+// Utility function for token validation
+export const validateToken = (token: string): boolean => {
+  try {
+    const decoded = jwtDecode<DecodedToken>(token);
+    const currentTime = Date.now() / 1000;
+    return decoded.exp > currentTime;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return false;
+  }
+};
+
 export const tokenService = {
   // Save token
   saveToken: async (token: string): Promise<void> => {
@@ -49,11 +61,7 @@ export const tokenService = {
     try {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
       if (!token) return false;
-
-      const decoded = jwtDecode<DecodedToken>(token);
-      const currentTime = Date.now() / 1000;
-
-      return decoded.exp > currentTime;
+      return validateToken(token);
     } catch (error) {
       console.error('Error checking token validity:', error);
       return false;
@@ -65,10 +73,9 @@ export const tokenService = {
     try {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
       if (!token) return null;
-
       return jwtDecode<DecodedToken>(token);
     } catch (error) {
-      console.error('Error decoding token:', error);
+      console.error('Error getting decoded token:', error);
       return null;
     }
   },
@@ -81,7 +88,6 @@ export const tokenService = {
 
       const decoded = jwtDecode<DecodedToken>(token);
       const currentTime = Date.now() / 1000;
-
       return Math.max(0, decoded.exp - currentTime);
     } catch (error) {
       console.error('Error calculating token expiration time:', error);

@@ -1,11 +1,14 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api', // fallback for dev
+  BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3031/api', // fallback for dev
   TIMEOUT: 30000, // 30 seconds
   HEADERS: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
   ENDPOINTS: {
+    SYSTEM: {
+      HEALTH: '/system/health',
+    },
     TIME: {
       ACADEMIC_CALENDAR: '/time/academic-calendar',
     },
@@ -14,6 +17,7 @@ export const API_CONFIG = {
       REGISTER: '/auth/register',
       LOGOUT: '/auth/logout',
       REFRESH_TOKEN: '/auth/refresh-token',
+      VALIDATE: '/auth/validate',
       FORGOT_PASSWORD: '/auth/generate-reset-code',
       RESET_PASSWORD: '/auth/reset-password',
       VERIFY_EMAIL: '/auth/verify-reset-code',

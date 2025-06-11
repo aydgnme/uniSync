@@ -152,4 +152,9 @@ export const styles = StyleSheet.create({
     marginRight: 0,
     width: '100%',
   },
+  noSessionsText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
 }); 

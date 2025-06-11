@@ -4,13 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Pressable,
-  SafeAreaView,
-  Text,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Pressable,
+    SafeAreaView,
+    Text,
+    View,
 } from 'react-native';
 
 interface Session {
@@ -30,7 +30,9 @@ export default function SessionsScreen() {
   const fetchSessions = async () => {
     try {
       const data = await authService.getSessions();
-      setSessions(data);
+      // Only show active sessions
+      const activeSessions = data.filter(session => !session.logout_time);
+      setSessions(activeSessions);
     } catch (error) {
       console.error('Error fetching sessions:', error);
       Alert.alert('Error', 'Failed to load sessions. Please try again.');
@@ -56,7 +58,10 @@ export default function SessionsScreen() {
           onPress: async () => {
             try {
               await authService.logoutSession(sessionId);
-              fetchSessions();
+              // Remove the logged out session from the list
+              setSessions(prevSessions => 
+                prevSessions.filter(session => session.id !== sessionId)
+              );
             } catch (error) {
               console.error('Error logging out session:', error);
               Alert.alert('Error', 'Failed to logout session. Please try again.');
@@ -79,7 +84,8 @@ export default function SessionsScreen() {
           onPress: async () => {
             try {
               await authService.logoutAllSessions();
-              fetchSessions();
+              // Remove all sessions from the list
+              setSessions([]);
             } catch (error) {
               console.error('Error logging out all sessions:', error);
               Alert.alert('Error', 'Failed to logout all sessions. Please try again.');
@@ -156,25 +162,33 @@ export default function SessionsScreen() {
             <Ionicons name="arrow-back" size={24} color="#000" />
           </Pressable>
           <Text style={styles.headerTitle}>Active Sessions</Text>
-          <Pressable
-            onPress={handleLogoutAllSessions}
-            style={styles.logoutAllButton}
-          >
-            <Text style={styles.logoutAllText}>Logout All</Text>
-          </Pressable>
+          {sessions.length > 1 && (
+            <Pressable
+              onPress={handleLogoutAllSessions}
+              style={styles.logoutAllButton}
+            >
+              <Text style={styles.logoutAllText}>Logout All</Text>
+            </Pressable>
+          )}
         </View>
 
-        <FlatList
-          data={sessions}
-          renderItem={renderSession}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.sessionsList}
-          refreshing={refreshing}
-          onRefresh={() => {
-            setRefreshing(true);
-            fetchSessions();
-          }}
-        />
+        {sessions.length === 0 ? (
+          <View style={[styles.container, styles.centerContent]}>
+            <Text style={styles.noSessionsText}>No active sessions</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={sessions}
+            renderItem={renderSession}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.sessionsList}
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              fetchSessions();
+            }}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

@@ -1,11 +1,12 @@
 import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useScheduleContext } from "@/contexts/ScheduleContext";
 import { useAnnouncements } from '@/hooks/useAnnouncements';
-import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from "@/hooks/useProfile";
 import { useSchedule } from '@/hooks/useSchedule';
-import { Announcement } from '@/services/announcement.service';
 import styles, { colors } from "@/styles/main.styles";
+import { Announcement } from '@/types/announcement.type';
+import { Course as CalendarCourse } from '@/types/calendar.type';
 import { ScheduleItem } from '@/types/schedule.type';
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
@@ -72,10 +73,11 @@ const MainScreen = () => {
   const { announcements, loading: announcementsLoading, error: announcementsError, fetchAnnouncements } = useAnnouncements();
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const { loading: authLoading } = useAuth();
-  const { calendarData, academicCalendar } = useAcademicCalendar();
-  const academicWeek = calendarData?.weekNumber || 0;
-  const { data: scheduleItems, loading: scheduleLoading, error: scheduleError } = useSchedule();
+  const { academicCalendar, isLoading: calendarLoading, error: calendarError } = useAcademicCalendar();
+  const academicWeek = academicCalendar?.weekNumber || 0;
+  const { data: scheduleItems, loading: scheduleLoading, error: scheduleError, refresh: refreshSchedule } = useSchedule();
   const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
+  const [calendarCourses, setCalendarCourses] = useState<CalendarCourse[]>([]);
 
   useEffect(() => {
     //("User data:", user);
@@ -99,7 +101,7 @@ const MainScreen = () => {
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [refreshSchedule]);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -117,11 +119,11 @@ const MainScreen = () => {
 
   const getTodayCourses = () => {
     // Eğer calendarData henüz gelmediyse, boş dizi döndür
-    if (!calendarData || !schedule || schedule.length === 0) return [];
+    if (!academicCalendar || !schedule || schedule.length === 0) return [];
 
     const today = moment();
-    const weekNumber = calendarData.weekNumber;
-    const parity = calendarData.parity;
+    const weekNumber = academicCalendar.weekNumber;
+    const parity = academicCalendar.parity;
     const todayWeekDay = today.isoWeekday().toString();
 
     console.log('Today\'s schedule check:', {
@@ -154,26 +156,51 @@ const MainScreen = () => {
     return filtered;
   };
 
-  const scheduleItemToCalendarCourse = (item: ScheduleItem, weekStart: moment.Moment, academicWeek: number): CalendarCourse => {
-    console.log('[scheduleItemToCalendarCourse] Processing course:', {
+  const scheduleItemToCalendarCourse = (item: ScheduleItem): CalendarCourse => {
+    const today = moment();
+    const currentWeek = today.isoWeek();
+    const itemWeekDay = Number(item.weekDay) || 1;
+    const weeks = Array.isArray(item.weeks) 
+      ? item.weeks.map(w => typeof w === 'string' ? parseInt(w) : w)
+      : [];
+    const startOfWeek = moment().startOf('isoWeek');
+    const courseDate = startOfWeek.add(itemWeekDay - 1, 'days').format('YYYY-MM-DD');
+
+    return {
+      id: item.scheduleId,
       title: item.courseTitle,
-      weekDay: item.weekDay,
+      type: item.courseType as 'LECTURE' | 'LAB' | 'SEMINAR',
+      startTime: item.startTime,
+      endTime: item.endTime,
+      duration: moment(item.endTime, 'HH:mm').diff(moment(item.startTime, 'HH:mm'), 'minutes'),
+      room: item.room,
+      teacher: { full_name: item.teacherName },
+      weekDay: itemWeekDay,
+      instructor: item.teacherName,
+      time: `${item.startTime} - ${item.endTime}`,
+      color: '#4A90E2',
+      banner: item.courseCode.substring(0, 2),
+      group: item.groupName,
+      location: item.room,
       weeks: weeks,
-      academicWeek: academicWeek,
-      courseDate: courseDate
-    });
-    // ... existing code ...
+      date: courseDate,
+      code: item.courseCode,
+      style: {
+        backgroundColor: item.courseType === 'LAB' ? '#eaf4fb' : '#FFE0B2',
+        borderLeftWidth: 3,
+        borderLeftColor: item.courseType === 'LAB' ? '#2196F3' : '#FB8C00',
+      }
+    };
   };
 
   useEffect(() => {
-    if (scheduleItems && calendarData) {
-      const weekStart = moment(selectedDate).startOf('isoWeek');
+    if (scheduleItems && academicCalendar) {
       const convertedCourses = scheduleItems.map(item =>
-        scheduleItemToCalendarCourse(item, weekStart, calendarData.weekNumber)
+        scheduleItemToCalendarCourse(item)
       );
       setCalendarCourses(convertedCourses);
     }
-  }, [scheduleItems, selectedDate, calendarData]);
+  }, [scheduleItems, selectedDate, academicCalendar]);
 
   if (authLoading) {
     return <LoadingComponent />;

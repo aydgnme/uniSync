@@ -6,6 +6,7 @@ import api from './api.service';
 
 const TOKEN_KEY = 'auth_token';
 const USER_ID_KEY = 'user_id';
+const SESSION_ID_KEY = 'session_id';
 
 function isTokenExpired(token: string): boolean {
   try {
@@ -27,6 +28,7 @@ interface LoginResponse {
     email: string;
     role: string;
   };
+  sessionId?: string;
 }
 
 interface UserProfileResponse {
@@ -138,9 +140,34 @@ export const authService = {
       console.log('Token and userId saved successfully');
       
       return { token, user };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login API Error:', error);
-      throw error;
+      
+      // Handle specific error cases
+      if (error.response) {
+        const { status, data } = error.response;
+        
+        if (status === 500) {
+          if (data?.code === 'DATABASE_ERROR') {
+            throw new Error('Veritabanı bağlantısında bir sorun oluştu. Lütfen daha sonra tekrar deneyin.');
+          }
+          throw new Error('Sunucu hatası: Lütfen daha sonra tekrar deneyin.');
+        }
+        
+        if (status === 401) {
+          throw new Error('Geçersiz e-posta veya şifre.');
+        }
+        
+        if (status === 400) {
+          throw new Error(data?.message || 'Geçersiz istek.');
+        }
+      }
+      
+      if (error.request) {
+        throw new Error('Sunucuya ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin.');
+      }
+      
+      throw new Error('Giriş yapılırken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
     }
   },
 
@@ -251,7 +278,8 @@ export const authService = {
       const response = await api.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
       await Promise.all([
         SecureStore.deleteItemAsync(TOKEN_KEY),
-        SecureStore.deleteItemAsync(USER_ID_KEY)
+        SecureStore.deleteItemAsync(USER_ID_KEY),
+        SecureStore.deleteItemAsync(SESSION_ID_KEY)
       ]);
       console.log('Logout successful');
       return response.data;
@@ -264,7 +292,13 @@ export const authService = {
   refreshToken: async (): Promise<string | null> => {
     try {
       console.log('Refreshing token...');
-      const response = await api.post(API_CONFIG.ENDPOINTS.AUTH.REFRESH_TOKEN);
+      const sessionId = await SecureStore.getItemAsync(SESSION_ID_KEY);
+      
+      if (!sessionId) {
+        throw new Error('No session ID found');
+      }
+
+      const response = await api.post(API_CONFIG.ENDPOINTS.AUTH.REFRESH_TOKEN, { sessionId });
       const { token } = response.data;
 
       if (!token) {
@@ -318,6 +352,19 @@ export const authService = {
       console.log('All sessions logged out successfully');
     } catch (error) {
       console.error('Logout all sessions error:', error);
+      throw error;
+    }
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string, confirmPassword: string) => {
+    try {
+      const response = await api.post(API_CONFIG.ENDPOINTS.AUTH.CHANGE_PASSWORD, {
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+      return response.data;
+    } catch (error) {
       throw error;
     }
   },

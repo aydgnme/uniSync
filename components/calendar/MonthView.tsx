@@ -1,5 +1,7 @@
+import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
 import { styles } from '@/styles/calendar.styles';
 import { Class, Event, MarkedDates } from '@/types/calendar.type';
+import moment from 'moment';
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
@@ -13,6 +15,11 @@ interface MonthViewProps {
     classes: Class[];
 }
 
+interface ClassWithWeekIndicator extends Class {
+    weekIndicator: string;
+    uniqueKey: string;
+}
+
 const MonthView: React.FC<MonthViewProps> = ({ 
     selectedDate, 
     markedDates, 
@@ -20,12 +27,30 @@ const MonthView: React.FC<MonthViewProps> = ({
     events,
     classes = [] 
 }) => {
-    // Filter classes for the selected day
-    const getClassesForDate = (date: string) => {
-        const dayOfWeek = new Date(date).getDay();
-        const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        return classes.filter(cls => cls.day.toLowerCase() === daysOfWeek[dayOfWeek]);
+    const { calendarData } = useAcademicCalendar();
+
+    // Get classes for the selected date
+    const getClassesForDate = (date: string): ClassWithWeekIndicator[] => {
+        const selectedMoment = moment(date);
+        const dayOfWeek = selectedMoment.isoWeekday(); // 1 (Mon) - 7 (Sun)
+
+        // Filter by day only, without week restriction
+        const filteredClasses = classes
+            .filter(cls => parseInt(cls.day) === dayOfWeek)
+            .map(cls => {
+                const classWeeks = cls.weeks || [];
+                return {
+                    ...cls,
+                    weekIndicator: `Academic Weeks ${classWeeks.join(', ')}`,
+                    uniqueKey: `${cls.id}-weeks-${classWeeks.join('-')}`
+                };
+            });
+
+        return filteredClasses;
     };
+
+    const classesForSelectedDate = getClassesForDate(selectedDate);
+    const eventsForSelectedDate = events.filter(event => event.date === selectedDate);
 
     return (
         <View style={styles.monthContainer}>
@@ -48,25 +73,31 @@ const MonthView: React.FC<MonthViewProps> = ({
             />
 
             <ScrollView style={styles.eventList}>
-                {/* Classes */}
-                {getClassesForDate(selectedDate).map(cls => (
-                    <View key={cls.id} style={styles.classCard}>
-                        <Text style={styles.classTitle}>{cls.title}</Text>
-                        <Text style={styles.classTime}>
-                            {cls.startTime} - {cls.endTime}
-                        </Text>
-                        <Text style={styles.classRoom}>Room: {cls.room}</Text>
-                    </View>
+                {classesForSelectedDate.map(cls => (
+                    <EventCard 
+                        key={cls.uniqueKey} 
+                        event={{
+                            id: cls.id,
+                            title: cls.title,
+                            time: `${cls.startTime} - ${cls.endTime}`,
+                            location: cls.room,
+                            date: selectedDate,
+                            type: 'LECTURE',
+                            style: {
+                                backgroundColor: '#FFE0B2',
+                                borderLeftWidth: 3,
+                                borderLeftColor: '#FB8C00'
+                            }
+                        }} 
+                    />
                 ))}
 
-                {/* Events */}
-                {events.filter(event => event.date === selectedDate).map(event => (
+                {eventsForSelectedDate.map(event => (
                     <EventCard key={event.id} event={event} />
                 ))}
 
-                {/* No classes or events */}
-                {getClassesForDate(selectedDate).length === 0 && 
-                 events.filter(event => event.date === selectedDate).length === 0 && (
+                {classesForSelectedDate.length === 0 &&
+                 eventsForSelectedDate.length === 0 && (
                     <Text style={styles.noEventsText}>No classes or events on this date</Text>
                 )}
             </ScrollView>

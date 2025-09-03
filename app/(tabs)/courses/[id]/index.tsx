@@ -2,25 +2,43 @@ import { useCourses } from '@/hooks/useCourses';
 import { useLectureAnnouncements } from '@/hooks/useLectureAnnouncements';
 import { useLectureAssignments } from '@/hooks/useLectureAssignments';
 import { useLecturePeople } from '@/hooks/useLecturePeople';
+import { useProfile } from '@/hooks/useProfile';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
+
+const getBannerByType = (type: 'LECTURE' | 'LAB' | 'SEMINAR') => {
+    // Map course type to banner image
+    switch (type) {
+        case 'LAB':
+            return require('@/assets/images/img_code.jpg');
+        case 'LECTURE':
+            return require('@/assets/images/img_bookclub.jpg');
+        case 'SEMINAR':
+            return require('@/assets/images/img_reachout.jpg');
+        default:
+            return require('@/assets/images/img_bookclub.jpg');
+    }
+};
 
 const CourseDetailScreen = () => {
   const { id } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState<'stream' | 'classwork' | 'people'>('stream');
   const [announcement, setAnnouncement] = useState('');
 
-  const { courses } = useCourses();
+  const { user } = useProfile();
+  const studentId = user?.id;
+
+  const { courses } = useCourses(typeof studentId === 'string' ? studentId : '');
   const course = courses.find((c) => c.id === id);
 
   const { announcements } = useLectureAnnouncements(id as string);
@@ -60,7 +78,7 @@ const CourseDetailScreen = () => {
   }) => (
     <TouchableOpacity key={item.id} style={styles.assignmentCard}>
       <View style={styles.assignmentIcon}>
-        <MaterialIcons name="assignment" size={24} color={course.color} />
+        <MaterialIcons name="assignment" size={24} color={course.color || '#1a73e8'} />
       </View>
       <View style={styles.assignmentContent}>
         <Text style={styles.assignmentTitle}>{item.title}</Text>
@@ -100,10 +118,10 @@ const CourseDetailScreen = () => {
               <Text style={styles.sectionTitle}>Teachers</Text>
               <View style={styles.personCard}>
                 <View style={styles.personAvatar}>
-                  <Text style={styles.avatarText}>{course.instructor[0]}</Text>
+                  <Text style={styles.avatarText}>{course.teacher.full_name[0]}</Text>
                 </View>
                 <View style={styles.personInfo}>
-                  <Text style={styles.personName}>{course.instructor}</Text>
+                  <Text style={styles.personName}>{course.teacher.full_name}</Text>
                   <Text style={styles.personRole}>Course Owner</Text>
                 </View>
               </View>
@@ -133,14 +151,14 @@ const CourseDetailScreen = () => {
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <ImageBackground
-          source={{ uri: course.banner }}
-          style={[styles.banner, { backgroundColor: course.color }]}
+          source={getBannerByType(course.type)}
+          style={[styles.banner, { backgroundColor: course.color || '#1a73e8' }]}
           imageStyle={{ opacity: 0.2 }}
         >
           <View style={styles.bannerContent}>
             <Text style={styles.title}>{course.title}</Text>
             <Text style={styles.subtitle}>{course.code}</Text>
-            <Text style={styles.instructor}>{course.instructor}</Text>
+            <Text style={styles.instructor}>{course.teacher.full_name}</Text>
           </View>
         </ImageBackground>
 

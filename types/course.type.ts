@@ -9,7 +9,7 @@ export interface Course {
     endTime: string;
     duration: number;
     room: string;
-    teacher: string;
+    teacher: { full_name: string };
     weekDay: number;  // 1: Monday, 7: Sunday
     instructor: string;
     time: string;

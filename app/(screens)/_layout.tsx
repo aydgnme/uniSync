@@ -53,6 +53,48 @@ export default function ScreensLayout() {
           ),
         }}
       />
+      <Stack.Screen
+        name="privacy"
+        options={{
+          title: 'Privacy',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="support"
+        options={{
+          title: 'Support',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="about"
+        options={{
+          title: 'About',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="security/changePassword"
+        options={{
+          title: 'Change Password',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="security/sessions"
+        options={{
+          title: 'Session',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="secretary"
+        options={{
+          title: 'Secretary',
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 } 

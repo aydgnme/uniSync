@@ -1,41 +1,55 @@
 import { Message, messageService } from '@/services/message.service';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
 
 export const useMessages = () => {
-  const queryClient = useQueryClient();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const {
-    data: messages,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery<Message[]>({
-    queryKey: ['messages'],
-    queryFn: messageService.getMessages,
-  });
+  const fetchMessages = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      const data = await messageService.getMessages();
+      setMessages(data);
+    } catch (error) {
+      setIsError(true);
+      console.error('Error fetching messages:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const markAsReadMutation = useMutation({
-    mutationFn: messageService.markAsRead,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
-    },
-  });
+  const markAsRead = useCallback(async (messageId: string) => {
+    try {
+      await messageService.markAsRead(messageId);
+      setMessages(prevMessages =>
+        prevMessages.map(msg =>
+          msg.id === messageId ? { ...msg, unread: false } : msg
+        )
+      );
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  }, []);
 
-  const deleteMessageMutation = useMutation({
-    mutationFn: messageService.deleteMessage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
-    },
-  });
+  const deleteMessage = useCallback(async (messageId: string) => {
+    try {
+      await messageService.deleteMessage(messageId);
+      setMessages(prevMessages =>
+        prevMessages.filter(msg => msg.id !== messageId)
+      );
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
+  }, []);
 
   return {
     messages,
     isLoading,
     isError,
-    error,
-    refetch,
-    markAsRead: markAsReadMutation.mutate,
-    deleteMessage: deleteMessageMutation.mutate,
+    refetch: fetchMessages,
+    markAsRead,
+    deleteMessage
   };
 }; 

@@ -1,5 +1,5 @@
+import { Announcement, announcementService } from '@/services/announcement.service';
 import { useCallback, useState } from 'react';
-import { Announcement, announcementService, AnnouncementType, CreateAnnouncementRequest } from '../services/announcement.service';
 
 export const useAnnouncements = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -7,41 +7,13 @@ export const useAnnouncements = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchAnnouncements = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const data = await announcementService.getAllAnnouncements();
+      const data = await announcementService.getAnnouncements();
       setAnnouncements(data);
     } catch (err) {
-      setError('Failed to load announcements');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchAnnouncementsByType = useCallback(async (type: AnnouncementType) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await announcementService.getAnnouncementsByType(type);
-      setAnnouncements(data);
-    } catch (err) {
-      setError('Failed to load announcements');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const createAnnouncement = useCallback(async (data: CreateAnnouncementRequest) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const newAnnouncement = await announcementService.createAnnouncement(data);
-      setAnnouncements(prev => [newAnnouncement, ...prev]);
-      return newAnnouncement;
-    } catch (err) {
-      setError('Failed to create announcement');
-      throw err;
+      setError(err instanceof Error ? err.message : 'Failed to fetch announcements');
     } finally {
       setLoading(false);
     }
@@ -51,8 +23,6 @@ export const useAnnouncements = () => {
     announcements,
     loading,
     error,
-    fetchAnnouncements,
-    fetchAnnouncementsByType,
-    createAnnouncement,
+    fetchAnnouncements
   };
 }; 

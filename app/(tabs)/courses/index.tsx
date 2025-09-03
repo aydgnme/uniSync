@@ -9,13 +9,18 @@ import { ActivityIndicator, FlatList, SafeAreaView, Text, View } from 'react-nat
 const CoursesScreen = () => {
     const router = useRouter();
     const { user, loading } = useProfile();
-    const { courses, loading: coursesLoading, error } = useCourses();
+    const studentId = user?.id || '';
+    const { courses, loading: coursesLoading, error, refetch } = useCourses(studentId);
     
     const groupIndex = user?.academicInfo?.groupName 
       ? user.academicInfo.subgroupIndex 
         ? `${user.academicInfo.groupName}${user.academicInfo.subgroupIndex}`
         : user.academicInfo.groupName
       : 'N/A';
+
+    console.log('CoursesScreen - courses:', courses);
+    console.log('CoursesScreen - loading:', coursesLoading);
+    console.log('CoursesScreen - error:', error);
 
     if (loading) {
         return (

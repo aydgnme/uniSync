@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -15,29 +15,44 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: 'rgb(40, 110, 190)',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#fff',
   },
   errorText: {
+    marginTop: 12,
+    marginBottom: 20,
     fontSize: 16,
     color: '#FF3B30',
     textAlign: 'center',
-    marginBottom: 20,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   retryButton: {
     backgroundColor: 'rgb(40, 110, 190)',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
+    opacity: 1,
+  },
+  retryButtonDisabled: {
+    opacity: 0.5,
   },
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'sans-serif',
   },
   header: {
     alignItems: 'center',

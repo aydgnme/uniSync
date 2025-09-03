@@ -1,42 +1,34 @@
-import { apiService } from './api.service';
-
-export type AnnouncementType = 'Academic' | 'Technical' | 'General';
+import { API_CONFIG } from '@/config/api.config';
+import api from './api.service';
 
 export interface Announcement {
   id: string;
   title: string;
   content: string;
-  type: AnnouncementType;
-  date: string;
-  attachments: string[];
-}
-
-export interface CreateAnnouncementRequest {
-  title: string;
-  content: string;
-  type: AnnouncementType;
-  date?: string;
-  attachments?: string[];
+  category: string;
+  created_at: string;
+  published_by: string;
 }
 
 class AnnouncementService {
-  private readonly BASE_URL = '/announcements';
+  private readonly BASE_URL = API_CONFIG.ENDPOINTS.UNIVERSITY.ANNOUNCEMENTS;
 
-  async createAnnouncement(data: CreateAnnouncementRequest): Promise<Announcement> {
-    return apiService.post<Announcement>(this.BASE_URL, data);
-  }
-
-  async getAllAnnouncements(): Promise<Announcement[]> {
-    return apiService.get<Announcement[]>(this.BASE_URL);
-  }
-
-  async getAnnouncementById(id: string): Promise<Announcement> {
-    return apiService.get<Announcement>(`${this.BASE_URL}/${id}`);
-  }
-
-  async getAnnouncementsByType(type: AnnouncementType): Promise<Announcement[]> {
-    return apiService.get<Announcement[]>(`${this.BASE_URL}/type/${type}`);
+  async getAnnouncements(): Promise<Announcement[]> {
+    try {
+      console.log('Fetching announcements from:', this.BASE_URL);
+      const response = await api.get<Announcement[]>(this.BASE_URL);
+      console.log('Announcements response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching announcements:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        url: this.BASE_URL
+      });
+      throw error;
+    }
   }
 }
 
-export const announcementService = new AnnouncementService(); 
+export const announcementService = new AnnouncementService();

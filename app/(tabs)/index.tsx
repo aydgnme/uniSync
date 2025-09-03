@@ -1,24 +1,30 @@
+import { useAcademicCalendar } from '@/contexts/AcademicCalendarContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useScheduleContext } from "@/contexts/ScheduleContext";
+import { useAnnouncements } from '@/hooks/useAnnouncements';
 import { useProfile } from "@/hooks/useProfile";
-import { useSchedule } from "@/hooks/useSchedule";
+import { useSchedule } from '@/hooks/useSchedule';
 import styles, { colors } from "@/styles/main.styles";
+import { Announcement } from '@/types/announcement.type';
+import { Course as CalendarCourse } from '@/types/calendar.type';
+import { ScheduleItem } from '@/types/schedule.type';
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import moment from 'moment';
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    AppState,
-    AppStateStatus,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  AppState,
+  AppStateStatus,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { useAnnouncements } from '../../hooks/useAnnouncements';
-import { Announcement } from '../../services/announcement.service';
 
 type MainTabParamList = {
   Home: undefined;
@@ -36,13 +42,6 @@ interface QuickActionButtonProps {
   onPress: () => void;
 }
 
-interface ScheduleItem {
-  time: string;
-  subject: string;
-  location: string;
-  professor: string;
-}
-
 const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   icon,
   label,
@@ -56,18 +55,33 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   </TouchableOpacity>
 );
 
-export default function MainScreen() {
+// Temporary loading component for loading states
+function LoadingComponent() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color="#007AFF" />
+    </View>
+  );
+}
+
+const MainScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp>();
   const { user, loading } = useProfile();
-  const { todayCourses, isLoading: scheduleLoading, error: scheduleError, refreshSchedule } = useSchedule();
+  const { schedule, isLoading, error } = useScheduleContext();
   const appState = useRef(AppState.currentState);
   const router = useRouter();
   const { announcements, loading: announcementsLoading, error: announcementsError, fetchAnnouncements } = useAnnouncements();
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
+  const { loading: authLoading } = useAuth();
+  const { academicCalendar, isLoading: calendarLoading, error: calendarError } = useAcademicCalendar();
+  const academicWeek = academicCalendar?.weekNumber || 0;
+  const { data: scheduleItems, loading: scheduleLoading, error: scheduleError, refresh: refreshSchedule } = useSchedule();
+  const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
+  const [calendarCourses, setCalendarCourses] = useState<CalendarCourse[]>([]);
 
   useEffect(() => {
-    console.log("User data:", user);
-    console.log("Loading state:", loading);
+    //("User data:", user);
+    //console.log("Loading state:", loading);
   }, [user, loading]);
 
   useEffect(() => {
@@ -87,7 +101,7 @@ export default function MainScreen() {
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [refreshSchedule]);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -97,6 +111,100 @@ export default function MainScreen() {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
+
+  // Refresh schedule
+  const handleRefresh = () => {
+    refreshSchedule();
+  };
+
+  const getTodayCourses = () => {
+    // Eğer calendarData henüz gelmediyse, boş dizi döndür
+    if (!academicCalendar || !schedule || schedule.length === 0) return [];
+
+    const today = moment();
+    const weekNumber = academicCalendar.weekNumber;
+    const parity = academicCalendar.parity;
+    const todayWeekDay = today.isoWeekday().toString();
+
+    console.log('Today\'s schedule check:', {
+      date: today.format('YYYY-MM-DD'),
+      weekNumber,
+      parity,
+      weekDay: todayWeekDay
+    });
+
+    const filtered = schedule.filter((course: ScheduleItem) => {
+      // Week number check
+      if (!course.weeks || course.weeks.length === 0 || !course.weeks.includes(academicWeek)) {
+        console.log(`Course ${course.courseTitle} not in current week ${academicWeek}`);
+        return false;
+      }
+      // Parity check
+      if (course.parity !== 'all' && course.parity !== parity) {
+        console.log(`Course ${course.courseTitle} parity mismatch: ${course.parity} vs ${parity}`);
+        return false;
+      }
+      // Day check
+      if (course.weekDay !== todayWeekDay) {
+        console.log(`Course ${course.courseTitle} not on current day: ${course.weekDay} vs ${todayWeekDay}`);
+        return false;
+      }
+      console.log(`Course ${course.courseTitle} is valid for today`);
+      return true;
+    });
+
+    return filtered;
+  };
+
+  const scheduleItemToCalendarCourse = (item: ScheduleItem): CalendarCourse => {
+    const today = moment();
+    const currentWeek = today.isoWeek();
+    const itemWeekDay = Number(item.weekDay) || 1;
+    const weeks = Array.isArray(item.weeks) 
+      ? item.weeks.map(w => typeof w === 'string' ? parseInt(w) : w)
+      : [];
+    const startOfWeek = moment().startOf('isoWeek');
+    const courseDate = startOfWeek.add(itemWeekDay - 1, 'days').format('YYYY-MM-DD');
+
+    return {
+      id: item.scheduleId,
+      title: item.courseTitle,
+      type: item.courseType as 'LECTURE' | 'LAB' | 'SEMINAR',
+      startTime: item.startTime,
+      endTime: item.endTime,
+      duration: moment(item.endTime, 'HH:mm').diff(moment(item.startTime, 'HH:mm'), 'minutes'),
+      room: item.room,
+      teacher: { full_name: item.teacherName },
+      weekDay: itemWeekDay,
+      instructor: item.teacherName,
+      time: `${item.startTime} - ${item.endTime}`,
+      color: '#4A90E2',
+      banner: item.courseCode.substring(0, 2),
+      group: item.groupName,
+      location: item.room,
+      weeks: weeks,
+      date: courseDate,
+      code: item.courseCode,
+      style: {
+        backgroundColor: item.courseType === 'LAB' ? '#eaf4fb' : '#FFE0B2',
+        borderLeftWidth: 3,
+        borderLeftColor: item.courseType === 'LAB' ? '#2196F3' : '#FB8C00',
+      }
+    };
+  };
+
+  useEffect(() => {
+    if (scheduleItems && academicCalendar) {
+      const convertedCourses = scheduleItems.map(item =>
+        scheduleItemToCalendarCourse(item)
+      );
+      setCalendarCourses(convertedCourses);
+    }
+  }, [scheduleItems, selectedDate, academicCalendar]);
+
+  if (authLoading) {
+    return <LoadingComponent />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -150,12 +258,12 @@ export default function MainScreen() {
         {/* Today's Schedule */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Today's Schedule</Text>
-          {loading || scheduleLoading ? (
+          {isLoading ? (
             <Text>Loading...</Text>
-          ) : scheduleError ? (
-            <Text>{scheduleError}</Text>
-          ) : todayCourses.length > 0 ? (
-            todayCourses.map((course, index) => (
+          ) : error ? (
+            <Text>{error}</Text>
+          ) : getTodayCourses().length > 0 ? (
+            getTodayCourses().map((course: ScheduleItem, index: number) => (
               <View key={index} style={styles.classCard}>
                 <View style={styles.classTime}>
                   <Ionicons
@@ -163,9 +271,9 @@ export default function MainScreen() {
                     size={20}
                     color="rgb(0, 122, 255)"
                   />
-                  <Text style={styles.classTimeText}>{`${course.startTime} - ${course.endTime}`}</Text>
+                  <Text style={styles.classTimeText}>{`${moment(course.startTime, 'HH:mm:ss').format('HH:mm')} - ${moment(course.endTime, 'HH:mm:ss').format('HH:mm')}`}</Text>
                 </View>
-                <Text style={styles.className}>{course.title}</Text>
+                <Text style={styles.className}>{course.courseTitle}</Text>
                 <View style={styles.classDetails}>
                   <Text style={styles.classLocation}>
                     <Ionicons name="location-outline" size={16} color="#666" />{" "}
@@ -173,7 +281,7 @@ export default function MainScreen() {
                   </Text>
                   <Text style={styles.classProfessor}>
                     <Ionicons name="person-outline" size={16} color="#666" />{" "}
-                    {course.teacher}
+                    {course.groupName}
                   </Text>
                 </View>
               </View>
@@ -189,11 +297,9 @@ export default function MainScreen() {
           {announcementsLoading ? (
             <ActivityIndicator size="small" color="#0000ff" />
           ) : announcementsError ? (
-            <Text style={styles.errorText}>{announcementsError}</Text>
-          ) : announcements.length === 0 ? (
-            <Text style={styles.emptyText}>No announcements available.</Text>
-          ) : (
-            announcements.map((announcement) => (
+            <Text style={styles.errorText}>Error loading announcements</Text>
+          ) : Array.isArray(announcements) && announcements.length > 0 ? (
+            announcements.map((announcement: Announcement) => (
               <TouchableOpacity 
                 key={announcement.id} 
                 style={styles.announcementCard}
@@ -203,14 +309,24 @@ export default function MainScreen() {
                   <Text style={styles.announcementTitle}>
                     {announcement.title}
                   </Text>
-                  <Text style={styles.announcementType}>{announcement.type}</Text>
+                  <Text style={styles.announcementType}>{announcement.category}</Text>
                 </View>
                 <Text style={styles.announcementContent}>
                   {truncateText(announcement.content, 100)}
                 </Text>
-                <Text style={styles.announcementDate}>{announcement.date}</Text>
+                <Text style={styles.announcementDate}>
+                  {new Date(announcement.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Text>
               </TouchableOpacity>
             ))
+          ) : (
+            <Text style={styles.emptyText}>No announcements available.</Text>
           )}
         </View>
 
@@ -235,22 +351,19 @@ export default function MainScreen() {
                     </TouchableOpacity>
                   </View>
                   <View style={styles.modalTypeContainer}>
-                    <Text style={styles.modalType}>{selectedAnnouncement.type}</Text>
-                    <Text style={styles.modalDate}>{selectedAnnouncement.date}</Text>
+                    <Text style={styles.modalType}>{selectedAnnouncement.category}</Text>
+                    <Text style={styles.modalDate}>
+                      {new Date(selectedAnnouncement.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Text>
                   </View>
                   <ScrollView style={styles.modalScrollView}>
                     <Text style={styles.modalContentText}>{selectedAnnouncement.content}</Text>
-                    {selectedAnnouncement.attachments && selectedAnnouncement.attachments.length > 0 && (
-                      <View style={styles.modalAttachments}>
-                        <Text style={styles.modalAttachmentsTitle}>Attachments:</Text>
-                        {selectedAnnouncement.attachments.map((attachment, index) => (
-                          <TouchableOpacity key={index} style={styles.modalAttachmentItem}>
-                            <Ionicons name="document-attach-outline" size={20} color={colors.primary} />
-                            <Text style={styles.modalAttachmentText}>{attachment}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    )}
                   </ScrollView>
                 </>
               )}
@@ -260,4 +373,6 @@ export default function MainScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
+
+export default MainScreen;

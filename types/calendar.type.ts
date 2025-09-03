@@ -1,44 +1,58 @@
 export interface Course {
     id: string;
-    date: string;
+    code: string;
     title: string;
+    type: 'LECTURE' | 'LAB' | 'SEMINAR';
+    startTime: string;
+    endTime: string;
+    duration: number;
+    room: string;
+    teacher: { full_name: string };
+    weekDay: number;
+    instructor: string;
+    time: string;
+    color: string;
+    banner: string;
+    date: string;
+    group: string;
+    location: string;
+    weeks: number[];
+    style: {
+        backgroundColor: string;
+        borderLeftWidth: number;
+        borderLeftColor: string;
+    };
+}
+
+export interface Event {
+    id: string;
+    title: string;
+    date: string;
     time: string;
     location: string;
-    duration: number;
-    type: 'lecture' | 'course' | 'seminar';
-    teacher: string;
-    group: string;
-    weeks?: number[];
+    description?: string;
+    type?: 'LECTURE' | 'LAB' | 'SEMINAR';
     style?: {
         backgroundColor: string;
         borderLeftWidth: number;
         borderLeftColor: string;
     };
 }
-  
-export interface Event {
-    id: string;
-    date: string;
-    title: string;
-    time: string;
-    location: string;
-    description?: string;
-    organizer?: string;
-}
-  
+
 export interface MarkedDates {
     [date: string]: {
-        marked: boolean;
-        dotColor: string;
+        marked?: boolean;
         selected?: boolean;
+        dotColor?: string;
     };
 }
 
 export interface Class {
     id: string;
-    title: string;    // This is required but missing in your data
+    title: string;
     startTime: string;
     endTime: string;
-    day: string;      // Note: Your data uses number, needs to be string
+    day: string;
     room: string;
+    weeks?: number[];
 }
